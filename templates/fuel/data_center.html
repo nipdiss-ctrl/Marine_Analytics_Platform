@@ -1,0 +1,355 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>
+METIS Data Center
+</title>
+
+
+<link rel="stylesheet"
+href="{% static 'css/fuel.css' %}">
+
+</head>
+
+
+<body>
+
+
+
+<div class="sidebar">
+
+
+<h2>
+⚓ NEU
+</h2>
+
+<p>
+Fuel Analytics
+</p>
+
+
+
+<a href="/fuel/">
+🏠 Overview
+</a>
+
+
+<a>
+🚢 Vessels
+</a>
+
+
+<a class="active">
+📂 Data Center
+</a>
+
+
+<a>
+📊 Analytics
+</a>
+
+
+<a>
+🤖 AI Captain
+</a>
+
+
+<a>
+📄 Reports
+</a>
+
+<a href="/fuel/history/">
+📚 Upload History
+</a>
+
+</div>
+
+
+
+
+
+
+<div class="main">
+
+
+<h1>
+📂 METIS Data Center
+</h1>
+
+
+<p>
+Upload vessel measurements for AI analysis
+</p>
+
+
+
+
+
+<div class="upload-panel">
+
+
+<h2>
+⚓ Upload Vessel Data
+</h2>
+
+
+
+<form method="POST"
+enctype="multipart/form-data">
+
+
+{% csrf_token %}
+
+
+
+
+<h3>
+🚢 Select Vessel
+</h3>
+
+
+
+<select name="vessel" required>
+
+
+<option value="">
+Choose vessel
+</option>
+
+
+
+{% for vessel in vessels %}
+
+<option value="{{vessel.id}}">
+
+{{vessel.name}}
+
+</option>
+
+
+{% endfor %}
+
+
+</select>
+
+
+
+
+<br><br>
+
+
+
+
+
+<h3>
+📂 Upload METIS File
+</h3>
+
+
+
+<input
+type="file"
+name="file"
+accept=".csv,.xlsx"
+required
+>
+
+
+
+
+<br><br>
+
+
+
+
+<button type="submit">
+
+Process Data
+
+</button>
+
+
+
+</form>
+
+
+</div>
+
+
+
+
+
+
+
+
+{% if message %}
+
+
+<div class="ai-card">
+
+
+<h2>
+🤖 Processing Result
+</h2>
+
+
+
+<p>
+{{message|safe}}
+</p>
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+{% if summary %}
+
+
+
+<h2>
+📊 Performance Summary
+</h2>
+
+
+
+<div class="cards">
+
+
+
+<div class="metric">
+
+<h3>
+⏱ Operating Hours
+</h3>
+
+<strong>
+{{summary.operating_hours}} h
+</strong>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3>
+⛽ Total Fuel
+</h3>
+
+<strong>
+{{summary.total_fuel_tons}} t
+</strong>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3>
+🔥 Average SFOC
+</h3>
+
+<strong>
+{{summary.sfoc}} g/kWh
+</strong>
+
+</div>
+
+
+
+
+
+<div class="metric">
+
+<h3>
+⚓ Engine Load
+</h3>
+
+<strong>
+{{summary.average_load}} %
+</strong>
+
+</div>
+
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+{% if preview %}
+
+
+
+<div class="table-card">
+
+
+<h2>
+📋 Data Preview
+</h2>
+
+
+
+<p>
+Showing first 10 measurements
+</p>
+
+
+
+<div class="table-container">
+
+{{preview|safe}}
+
+</div>
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+</div>
+
+
+
+</body>
+
+</html>

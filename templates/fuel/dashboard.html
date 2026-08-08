@@ -1,0 +1,424 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+
+<title>
+Fuel Performance Command Center
+</title>
+
+
+<link rel="stylesheet"
+href="{% static 'css/fuel.css' %}">
+
+
+</head>
+
+
+<body>
+
+
+<div class="sidebar">
+
+
+<h2>
+⚓ NEU
+</h2>
+
+<p>
+Fuel Analytics
+</p>
+
+
+<a class="active">
+🏠 Overview
+</a>
+
+
+<a>
+🚢 Vessels
+</a>
+
+
+<a href="/fuel/data/">
+📂 Data Center
+</a>
+
+
+<a>
+📊 Analytics
+</a>
+
+
+<a>
+🤖 AI Captain
+</a>
+
+
+<a>
+📄 Reports
+</a>
+
+
+</div>
+
+
+
+
+<div class="main">
+
+
+
+<div class="main">
+
+
+<!-- TOP NAVIGATION -->
+
+<div class="top-nav">
+
+
+<div>
+
+<h1>
+⚓ Fuel Performance Command Center
+</h1>
+
+<p>
+AI driven vessel efficiency monitoring
+</p>
+
+</div>
+
+
+
+<div class="status-panel">
+
+<div>
+🟢 AI Engine Online
+</div>
+
+<div>
+📡 Data Pipeline Active
+</div>
+
+<div>
+📅 Last Update: 27 July 2026
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- VESSEL CARD -->
+
+<div class="vessel-card">
+
+
+<div>
+
+
+<h2>
+🚢 Daniel N
+</h2>
+
+
+<p>
+METIS Performance Monitoring
+</p>
+
+
+</div>
+
+
+
+<div class="health">
+
+
+<h3>
+AI Health Score
+</h3>
+
+
+<div class="score">
+
+92%
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- KPI CARDS -->
+
+
+<div class="cards">
+
+
+<div class="metric">
+
+<h3>
+Operating Hours
+</h3>
+
+<strong>
+{{operating_hours}}
+</strong>
+
+<span>
+hours
+</span>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+Fuel Consumed
+</h3>
+
+<strong>
+{{fuel_consumption}}
+</strong>
+
+<span>
+tons
+</span>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+Average SFOC
+</h3>
+
+<strong>
+{{sfoc}}
+</strong>
+
+<span>
+g/kWh
+</span>
+
+</div>
+
+
+
+
+<div class="metric">
+
+<h3>
+CO₂ Reduction
+</h3>
+
+<strong>
+{{co2}}
+</strong>
+
+<span>
+%
+</span>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- AI CAPTAIN -->
+
+
+<div class="ai-card">
+
+
+<h2>
+🤖 AI Captain
+</h2>
+
+
+<p>
+Analysis engine ready.
+</p>
+
+
+<div class="recommendation">
+
+
+<h3>
+Current Observation
+</h3>
+
+
+<p>
+Fuel efficiency is stable.
+AI is monitoring engine load,
+SFOC behaviour and operational trends.
+</p>
+
+
+
+<h3>
+Recommendation
+</h3>
+
+
+<p>
+
+Maintain optimal operation range
+between 65-75% engine load
+for improved efficiency.
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div class="cards">
+
+
+<div class="metric">
+
+<h3>
+Vessels
+</h3>
+
+<strong>
+{{vessel_count}}
+</strong>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+Operating Hours
+</h3>
+
+<strong>
+{{operating_hours}}
+</strong>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+Fuel Consumed
+</h3>
+
+<strong>
+{{fuel_consumption}} t
+</strong>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+Average SFOC
+</h3>
+
+<strong>
+{{sfoc}}
+</strong>
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="ai-card">
+
+
+<h2>
+🤖 AI Captain
+</h2>
+
+
+<p>
+
+System ready for METIS data analysis.
+
+Upload vessel measurements to generate:
+
+</p>
+
+
+<ul>
+
+<li>
+Fuel efficiency analysis
+</li>
+
+<li>
+SFOC monitoring
+</li>
+
+<li>
+CO₂ reduction estimation
+</li>
+
+<li>
+AI recommendations
+</li>
+
+</ul>
+
+
+</div>
+
+
+
+</div>
+
+
+</body>
+
+</html>

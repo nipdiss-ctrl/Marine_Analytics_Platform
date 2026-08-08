@@ -1,0 +1,48 @@
+{% if performance %}
+
+<table class="table table-bordered">
+
+<tr>
+<th>Operating Hours</th>
+<td>{{ performance.operating_hours }}</td>
+</tr>
+
+<tr>
+<th>Fuel Consumption Tons</th>
+<td>{{ performance.total_fuel_tons }}</td>
+</tr>
+
+<tr>
+<th>Average SFOC</th>
+<td>{{ performance.average_sfoc }}</td>
+</tr>
+
+<tr>
+<th>Engine Load (%)</th>
+<td>{{ performance.average_load }}</td>
+</tr>
+
+<tr>
+<th>Average Speed</th>
+<td>{{ performance.average_speed }}</td>
+</tr>
+
+<tr>
+<th>CO2 Emission Tons</th>
+<td>{{ performance.co2_tons }}</td>
+</tr>
+
+<tr>
+<th>Risk Level</th>
+<td>{{ performance.risk_level }}</td>
+</tr>
+
+</table>
+
+{% else %}
+
+<div class="alert alert-warning">
+No fuel performance data found.
+</div>
+
+{% endif %}

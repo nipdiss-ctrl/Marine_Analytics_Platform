@@ -1,0 +1,221 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>
+METIS Upload History
+</title>
+
+
+<link rel="stylesheet"
+href="{% static 'css/fuel.css' %}">
+
+
+</head>
+
+
+
+<body>
+
+
+<div class="main">
+
+
+<h1>
+📂 METIS Upload History
+</h1>
+
+
+<p>
+Previous vessel measurement uploads
+</p>
+
+
+
+<div class="table-card">
+
+
+<table>
+
+
+<tr>
+
+<th>
+🚢 Vessel
+</th>
+
+
+<th>
+📂 File
+</th>
+
+
+<th>
+📅 Upload Date
+</th>
+
+
+<th>
+📊 Measurements
+</th>
+
+
+<th>
+Status
+</th>
+
+
+<th>
+Actions
+</th>
+
+</tr>
+
+
+
+
+
+{% for upload in uploads %}
+
+
+
+<tr>
+
+
+<td>
+{{upload.vessel.name}}
+</td>
+
+
+
+<td>
+{{upload.file_name}}
+</td>
+
+
+
+<td>
+{{upload.upload_date}}
+</td>
+
+
+
+<td>
+{{upload.rows_processed}}
+</td>
+
+
+
+<td>
+
+{% if upload.status == "Completed" %}
+
+🟢 {{upload.status}}
+
+{% else %}
+
+🟡 {{upload.status}}
+
+{% endif %}
+
+</td>
+
+
+
+<td>
+
+
+<a href="{% url 'upload_analysis' upload.id %}">
+
+<button>
+
+📊 View Analysis
+
+</button>
+
+</a>
+
+
+
+<a href="{% url 'download_excel' upload.id %}">
+
+<button>
+
+📥 Excel
+
+</button>
+
+</a>
+
+
+
+<a href="{% url 'download_pdf' upload.id %}">
+
+<button>
+
+📄 PDF
+
+</button>
+
+</a>
+
+
+
+<a href="{% url 'delete_upload' upload.id %}">
+
+<button style="background:#d9534f;color:white;">
+
+🗑 Delete
+
+</button>
+
+</a>
+
+
+
+</td>
+
+
+
+</tr>
+
+
+
+{% empty %}
+
+
+
+<tr>
+
+<td colspan="6">
+
+No uploads yet
+
+</td>
+
+</tr>
+
+
+
+{% endfor %}
+
+
+
+</table>
+
+
+</div>
+
+
+
+</div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,342 @@
+body{
+
+margin:0;
+
+font-family:
+"Segoe UI",
+Arial;
+
+background:#f4f8fc;
+
+color:#12263a;
+
+}
+
+
+
+.sidebar{
+
+position:fixed;
+
+height:100vh;
+
+width:250px;
+
+background:#032b45;
+
+color:white;
+
+padding:30px;
+
+}
+
+
+
+.sidebar h2{
+
+font-size:35px;
+
+}
+
+
+.sidebar a{
+
+display:block;
+
+padding:15px;
+
+margin:10px 0;
+
+border-radius:12px;
+
+color:white;
+
+text-decoration:none;
+
+}
+
+
+
+.sidebar a:hover,
+.active{
+
+background:#00c6ff;
+
+color:#002333!important;
+
+}
+
+
+
+
+
+.main{
+
+margin-left:310px;
+
+padding:40px;
+
+}
+
+
+
+header h1{
+
+font-size:38px;
+
+}
+
+
+
+
+
+.cards{
+
+display:grid;
+
+grid-template-columns:
+repeat(4,1fr);
+
+gap:25px;
+
+margin-top:40px;
+
+}
+
+
+
+.metric{
+
+background:white;
+
+padding:30px;
+
+border-radius:20px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.08);
+
+}
+
+
+
+.metric strong{
+
+font-size:40px;
+
+color:#0066ff;
+
+}
+
+
+
+
+.ai-card{
+
+margin-top:40px;
+
+background:
+linear-gradient(
+135deg,
+#032b45,
+#005bea
+);
+
+
+color:white;
+
+padding:35px;
+
+border-radius:25px;
+
+font-size:18px;
+
+}
+
+.top-nav {
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:35px;
+
+}
+
+
+
+.status-panel {
+
+display:flex;
+
+gap:15px;
+
+}
+
+
+
+.status-panel div {
+
+background:white;
+
+padding:12px 18px;
+
+border-radius:20px;
+
+box-shadow:
+0 5px 15px rgba(0,0,0,.08);
+
+font-size:14px;
+
+}
+
+
+
+
+.vessel-card {
+
+
+background:
+linear-gradient(
+135deg,
+#032b45,
+#0066ff
+);
+
+
+color:white;
+
+padding:30px;
+
+border-radius:25px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:35px;
+
+}
+
+
+
+.health {
+
+text-align:center;
+
+}
+
+
+
+.score {
+
+
+font-size:50px;
+
+font-weight:bold;
+
+color:#00e5ff;
+
+}
+
+
+
+
+.metric span {
+
+
+color:#777;
+
+font-size:16px;
+
+}
+
+
+
+.ai-card {
+
+
+background:white;
+
+padding:35px;
+
+border-radius:25px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.1);
+
+margin-top:40px;
+
+}
+
+
+
+.recommendation {
+
+
+background:#f1f8ff;
+
+padding:20px;
+
+border-radius:15px;
+
+}
+
+/* ==========================
+   METIS HISTORY TABLE
+========================== */
+
+
+.table-card table {
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+
+.table-card th {
+
+    text-align:left;
+    padding:14px;
+    background:#0b1f33;
+    color:white;
+    font-size:14px;
+
+}
+
+
+
+.table-card td {
+
+    padding:14px;
+    border-bottom:1px solid #ddd;
+    vertical-align:middle;
+
+}
+
+
+
+.table-card tr:hover {
+
+    background:#f5f8fb;
+
+}
+
+
+
+.table-card button {
+
+    padding:8px 12px;
+    margin:3px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    font-size:13px;
+
+}

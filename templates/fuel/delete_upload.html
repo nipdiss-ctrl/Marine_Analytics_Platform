@@ -1,0 +1,111 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>
+Delete Upload
+</title>
+
+
+<link rel="stylesheet"
+href="{% static 'css/fuel.css' %}">
+
+</head>
+
+
+<body>
+
+
+<div class="main">
+
+
+<div class="ai-card" style="color:#222;">
+
+
+<h1>
+⚠ Confirm Delete
+</h1>
+
+
+<p>
+Are you sure you want to delete this METIS upload?
+</p>
+
+
+<hr>
+
+
+<div style="color:#222; margin-top:20px;">
+
+
+<h3>
+🚢 Vessel
+</h3>
+
+<p>
+{{upload.vessel.name}}
+</p>
+
+
+
+<h3>
+📂 File
+</h3>
+
+<p>
+{{upload.file_name}}
+</p>
+
+
+
+<h3>
+📅 Uploaded
+</h3>
+
+<p>
+{{upload.upload_date}}
+</p>
+
+
+</div>
+
+
+<form method="POST">
+
+{% csrf_token %}
+
+
+<button style="background:red">
+
+🗑 Yes, Delete
+
+</button>
+
+
+<a href="/fuel/history/">
+
+<button type="button">
+
+Cancel
+
+</button>
+
+</a>
+
+
+</form>
+
+
+</div>
+
+
+</div>
+
+
+</body>
+
+</html>
