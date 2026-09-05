@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+
+# Django local database
+
+db.sqlite3
+
+# Uploaded temporary files
+temp_uploads/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
