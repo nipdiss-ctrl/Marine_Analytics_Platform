@@ -1,0 +1,270 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                {{ load_type }} Routes
+            </h2>
+
+            <p class="text-muted mb-0">
+                Average performance for each voyage route
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'scoc_monitoring:import_result' %}"
+            class="btn btn-outline-primary"
+        >
+            ← Overview
+        </a>
+
+    </div>
+
+
+    {% if leg_rows %}
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Route
+                            </th>
+
+                            <th>
+                                Voyage
+                            </th>
+
+                            <th>
+                                Start
+                            </th>
+
+                            <th>
+                                End
+                            </th>
+
+                            <th>
+                                Avg Speed
+                            </th>
+
+                            <th>
+                                Target Speed
+                            </th>
+
+                            <th>
+                                Avg Consumption
+                            </th>
+
+                            <th>
+                                Target Consumption
+                            </th>
+
+                            <th>
+                                Daily Reports
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for row in leg_rows %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'scoc_monitoring:voyage_detail' row.leg.id %}"
+                                    class="fw-semibold text-decoration-none"
+                                >
+
+                                    {{ row.leg.departure|default:"—" }}
+                                    →
+                                    {{ row.leg.destination|default:"—" }}
+
+                                </a>
+
+                            </td>
+
+
+                            <td>
+
+                                {{ row.leg.voyage_name|default:"—" }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{ row.leg.start_date|default:"—" }}
+
+                            </td>
+
+
+                            <td>
+
+                                {{ row.leg.end_date|default:"—" }}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if row.average_speed is not None %}
+
+                                    {{ row.average_speed|floatformat:2 }}
+                                    kn
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if row.target_speed is not None %}
+
+                                    <strong>
+                                        {{ row.target_speed|floatformat:2 }}
+                                    </strong>
+                                    kn
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if row.average_consumption is not None %}
+
+                                    {{ row.average_consumption|floatformat:2 }}
+                                    MT/day
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if row.target_consumption is not None %}
+
+                                    <strong>
+                                        {{ row.target_consumption|floatformat:2 }}
+                                    </strong>
+                                    MT/day
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {{ row.observation_count }}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if row.status == "Achieved" %}
+
+                                    <span class="badge bg-success">
+                                        Achieved
+                                    </span>
+
+                                {% elif row.status == "Not Achieved" %}
+
+                                    <span class="badge bg-danger">
+                                        Not Achieved
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        Target Not Available
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="card shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <h5 class="fw-bold">
+                No routes found for {{ load_type }}.
+            </h5>
+
+            <p class="text-muted mb-0">
+                The database does not currently contain voyage legs
+                matching this loading condition.
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+

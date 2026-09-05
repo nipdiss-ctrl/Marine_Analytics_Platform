@@ -1,0 +1,1263 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+/* ============================================================
+   RIGHTSHIP DASHBOARD
+   ============================================================ */
+
+.rightship-dashboard {
+
+    min-height: calc(100vh - 60px);
+
+    margin: -24px;
+
+    padding: 28px 35px 70px;
+
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            #173b52 0,
+            #0b1823 32%,
+            #071018 72%
+        );
+
+    color: #e8f0f5;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.rightship-header {
+
+    margin-bottom: 25px;
+}
+
+
+.rightship-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px 12px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    color: #82d8e7;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.3px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 12px;
+}
+
+
+.rightship-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #38d3a0;
+
+    box-shadow:
+        0 0 9px
+        rgba(56,211,160,0.75);
+}
+
+
+.rightship-title {
+
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 31px;
+
+    font-weight: 750;
+
+    letter-spacing: -1px;
+}
+
+
+.rightship-subtitle {
+
+    margin: 8px 0 0;
+
+    color: #8da5b4;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* ============================================================
+   KPI CARDS
+   ============================================================ */
+
+.rightship-kpi {
+
+    position: relative;
+
+    overflow: hidden;
+
+    min-height: 120px;
+
+    padding: 20px;
+
+    background:
+        rgba(13, 28, 39, 0.90);
+
+    border:
+        1px solid #213847;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,0.12);
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease;
+}
+
+
+.rightship-kpi:hover {
+
+    transform:
+        translateY(-3px);
+
+    border-color:
+        #3a6071;
+}
+
+
+.rightship-kpi::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    top: 0;
+
+    bottom: 0;
+
+    width: 3px;
+
+    background:
+        linear-gradient(
+            #20c5df,
+            #1769a3
+        );
+}
+
+
+.rightship-kpi-label {
+
+    margin-bottom: 8px;
+
+    color: #78909e;
+
+    font-size: 10px;
+
+    font-weight: 650;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+}
+
+
+.rightship-kpi-value {
+
+    margin: 0;
+
+    color: #e8f0f5;
+
+    font-size: 28px;
+
+    line-height: 1;
+
+    font-weight: 750;
+}
+
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.rightship-card {
+
+    overflow: hidden;
+
+    background:
+        rgba(10, 24, 34, 0.93);
+
+    border:
+        1px solid #213847;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,0.14);
+}
+
+
+.rightship-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 19px 22px;
+
+    border-bottom:
+        1px solid #1d3543;
+}
+
+
+.rightship-card-title {
+
+    margin: 0;
+
+    color: #e3edf2;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+
+.rightship-card-subtitle {
+
+    margin-top: 4px;
+
+    color: #718895;
+
+    font-size: 11px;
+}
+
+
+.rightship-card-body {
+
+    padding: 22px;
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+.rightship-table {
+
+    width: 100%;
+
+    margin: 0;
+
+    color: #dce7ed;
+}
+
+
+.rightship-table thead th {
+
+    padding: 13px 12px;
+
+    background:
+        #142b3a;
+
+    color: #8fa8b6;
+
+    border-bottom:
+        1px solid #294555;
+
+    font-size: 10px;
+
+    letter-spacing: .8px;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rightship-table tbody td {
+
+    padding: 13px 12px;
+
+    border-color:
+        #1d3543;
+
+    vertical-align: middle;
+
+    font-size: 12px;
+}
+
+
+.rightship-table tbody tr:hover {
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+
+.risk-high {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 12px;
+
+    background: rgba(220,53,69,.15);
+
+    color: #ff7d89;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.risk-medium {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 12px;
+
+    background: rgba(255,193,7,.15);
+
+    color: #ffd35a;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.risk-low {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 12px;
+
+    background: rgba(25,135,84,.15);
+
+    color: #63d6a2;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.risk-none {
+
+    display: inline-block;
+
+    padding: 4px 9px;
+
+    border-radius: 12px;
+
+    background: rgba(108,117,125,.15);
+
+    color: #aeb8be;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 992px) {
+
+    .rightship-dashboard {
+
+        margin: -16px;
+
+        padding: 22px 20px 55px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .rightship-dashboard {
+
+        margin: -12px;
+
+        padding: 16px 13px 45px;
+    }
+
+
+    .rightship-title {
+
+        font-size: 25px;
+    }
+
+
+    .rightship-card-body {
+
+        padding: 15px;
+    }
+
+}
+
+</style>
+
+
+<div class="rightship-dashboard">
+
+
+    <!-- ========================================================
+         HEADER
+         ======================================================== -->
+
+    <div class="rightship-header">
+
+        <div class="rightship-badge">
+
+            <span class="rightship-dot"></span>
+
+            RightShip Intelligence
+
+        </div>
+
+
+        <h1 class="rightship-title">
+
+            Inspection Dashboard
+
+        </h1>
+
+
+        <p class="rightship-subtitle">
+
+            Vessel inspection findings, risk intelligence
+            and inspection validity across the fleet.
+
+        </p>
+
+    </div>
+
+
+
+    <!-- ========================================================
+         KPI ROW
+         ======================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- VESSELS -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    Vessels
+
+                </div>
+
+                <h2 class="rightship-kpi-value">
+
+                    {{ total_vessels|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- INSPECTIONS -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    Inspections
+
+                </div>
+
+                <h2 class="rightship-kpi-value">
+
+                    {{ total_inspections|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- FINDINGS -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    Findings
+
+                </div>
+
+                <h2 class="rightship-kpi-value">
+
+                    {{ total_findings|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- HIGH -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    High Risk
+
+                </div>
+
+                <h2 class="rightship-kpi-value text-danger">
+
+                    {{ high_risk|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- MEDIUM -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    Medium Risk
+
+                </div>
+
+                <h2 class="rightship-kpi-value text-warning">
+
+                    {{ medium_risk|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOW -->
+
+        <div class="col-xl-2 col-lg-4 col-md-6">
+
+            <div class="rightship-kpi">
+
+                <div class="rightship-kpi-label">
+
+                    Low Risk
+
+                </div>
+
+                <h2 class="rightship-kpi-value text-success">
+
+                    {{ low_risk|default:"0" }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================================
+         CHARTS
+         ======================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- RISK BY INSPECTION -->
+
+        <div class="col-lg-8">
+
+            <div class="rightship-card">
+
+                <div class="rightship-card-header">
+
+                    <div>
+
+                        <h5 class="rightship-card-title">
+
+                            Risk Findings by Inspection
+
+                        </h5>
+
+                        <div class="rightship-card-subtitle">
+
+                            High, medium and low-risk findings
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rightship-card-body">
+
+                    <div style="height:420px;">
+
+                        <canvas id="riskChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RISK DISTRIBUTION -->
+
+        <div class="col-lg-4">
+
+            <div class="rightship-card">
+
+                <div class="rightship-card-header">
+
+                    <div>
+
+                        <h5 class="rightship-card-title">
+
+                            Overall Risk Distribution
+
+                        </h5>
+
+                        <div class="rightship-card-subtitle">
+
+                            Fleet-wide finding distribution
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rightship-card-body">
+
+                    <div style="height:420px;">
+
+                        <canvas id="riskPieChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================================
+         INSPECTION REGISTER
+         ======================================================== -->
+
+    <div class="rightship-card">
+
+        <div class="rightship-card-header">
+
+            <div>
+
+                <h5 class="rightship-card-title">
+
+                    Inspection Register
+
+                </h5>
+
+                <div class="rightship-card-subtitle">
+
+                    Inspection-level findings and risk status
+
+                </div>
+
+            </div>
+
+
+            <span class="rightship-card-subtitle">
+
+                {{ total_inspections }} inspection(s)
+
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table rightship-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Inspection</th>
+
+                        <th>Vessel</th>
+
+                        <th>Date</th>
+
+                        <th>High</th>
+
+                        <th>Medium</th>
+
+                        <th>Low</th>
+
+                        <th>Total</th>
+
+                        <th>Severity</th>
+
+                        <th>Validity</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for row in inspection_register %}
+
+                    <tr>
+
+
+                        <!-- INSPECTION -->
+
+                        <td>
+
+                            <strong>
+
+                                {{ row.inspection.inspection_no }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <!-- VESSEL -->
+
+                        <td>
+
+                            {{ row.inspection.vessel.vessel_name }}
+
+                        </td>
+
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            {% if row.inspection.inspection_date %}
+
+                                {{ row.inspection.inspection_date|date:"d-M-Y" }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- HIGH -->
+
+                        <td>
+
+                            {% if row.high > 0 %}
+
+                                <span class="risk-high">
+
+                                    {{ row.high }}
+
+                                </span>
+
+                            {% else %}
+
+                                0
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- MEDIUM -->
+
+                        <td>
+
+                            {% if row.medium > 0 %}
+
+                                <span class="risk-medium">
+
+                                    {{ row.medium }}
+
+                                </span>
+
+                            {% else %}
+
+                                0
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- LOW -->
+
+                        <td>
+
+                            {% if row.low > 0 %}
+
+                                <span class="risk-low">
+
+                                    {{ row.low }}
+
+                                </span>
+
+                            {% else %}
+
+                                0
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- TOTAL -->
+
+                        <td>
+
+                            <strong>
+
+                                {{ row.total }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <!-- SEVERITY -->
+
+                        <td>
+
+                            {% if row.severity >= 3 %}
+
+                                <span class="risk-high">
+
+                                    HIGH
+
+                                </span>
+
+                            {% elif row.severity >= 2 %}
+
+                                <span class="risk-medium">
+
+                                    MEDIUM
+
+                                </span>
+
+                            {% elif row.severity >= 1 %}
+
+                                <span class="risk-low">
+
+                                    LOW
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="risk-none">
+
+                                    NONE
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- VALIDITY -->
+
+                        <td>
+
+                            {% if row.validity %}
+
+                                {{ row.validity }} months
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="text-center text-muted py-4"
+                        >
+
+                            No inspections available.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ============================================================
+     CHART DATA
+     ============================================================ -->
+
+{{ chart_labels|json_script:"chart-labels" }}
+
+{{ high_data|json_script:"high-data" }}
+
+{{ medium_data|json_script:"medium-data" }}
+
+{{ low_data|json_script:"low-data" }}
+
+
+
+<!-- ============================================================
+     CHART.JS
+     ============================================================ -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        const labels = JSON.parse(
+            document.getElementById(
+                "chart-labels"
+            ).textContent
+        );
+
+
+        const highData = JSON.parse(
+            document.getElementById(
+                "high-data"
+            ).textContent
+        );
+
+
+        const mediumData = JSON.parse(
+            document.getElementById(
+                "medium-data"
+            ).textContent
+        );
+
+
+        const lowData = JSON.parse(
+            document.getElementById(
+                "low-data"
+            ).textContent
+        );
+
+
+        /* ====================================================
+           BAR CHART
+           ==================================================== */
+
+        const riskCanvas =
+            document.getElementById(
+                "riskChart"
+            );
+
+
+        if (riskCanvas) {
+
+            new Chart(
+                riskCanvas,
+                {
+
+                    type: "bar",
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [
+
+                            {
+                                label: "High",
+
+                                data: highData,
+
+                                backgroundColor:
+                                    "#dc3545"
+                            },
+
+                            {
+                                label: "Medium",
+
+                                data: mediumData,
+
+                                backgroundColor:
+                                    "#ffc107"
+                            },
+
+                            {
+                                label: "Low",
+
+                                data: lowData,
+
+                                backgroundColor:
+                                    "#198754"
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+
+                            mode: "index",
+
+                            intersect: false
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "top"
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                ticks: {
+
+                                    autoSkip: false,
+
+                                    maxRotation: 90,
+
+                                    minRotation: 45
+
+                                }
+
+                            },
+
+                            y: {
+
+                                beginAtZero: true,
+
+                                ticks: {
+
+                                    precision: 0
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        /* ====================================================
+           DOUGHNUT
+           ==================================================== */
+
+        const pieCanvas =
+            document.getElementById(
+                "riskPieChart"
+            );
+
+
+        if (pieCanvas) {
+
+            new Chart(
+                pieCanvas,
+                {
+
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: [
+
+                            "High",
+                            "Medium",
+                            "Low"
+
+                        ],
+
+                        datasets: [
+
+                            {
+
+                                data: [
+
+                                    {{ high_risk }},
+                                    {{ medium_risk }},
+                                    {{ low_risk }}
+
+                                ],
+
+                                backgroundColor: [
+
+                                    "#dc3545",
+                                    "#ffc107",
+                                    "#198754"
+
+                                ],
+
+                                borderWidth: 1
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+
+{% endblock %}

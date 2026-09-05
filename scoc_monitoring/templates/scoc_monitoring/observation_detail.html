@@ -1,0 +1,212 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+
+<a
+    href="{% url 'scoc_monitoring:voyage_detail' leg.id %}"
+    class="back"
+>
+    ← Back to {{ leg.load_type }} Voyage
+</a>
+
+
+<div class="page-title">
+
+    <h1>Daily Performance</h1>
+
+    <p>
+
+        {{ observation.reported_time|date:"d M Y H:i" }}
+
+    </p>
+
+</div>
+
+
+<div class="section">
+
+    <div class="card-header">
+
+        <div>
+
+            <h2>
+                {{ leg.load_type }}
+            </h2>
+
+            <p>
+
+                {{ leg.departure }}
+                →
+                {{ leg.destination }}
+
+            </p>
+
+        </div>
+
+
+        {% if status.achieved %}
+
+            <div class="status status-achieved">
+                ✓ TARGET ACHIEVED
+            </div>
+
+        {% else %}
+
+            <div class="status status-not-achieved">
+                ⚠ TARGET NOT ACHIEVED
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="detail-grid">
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Actual Speed
+            </div>
+
+            <div class="detail-value">
+
+                {{ observation.speed|floatformat:2 }} kn
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Target Speed
+            </div>
+
+            <div class="detail-value">
+
+                {{ target_speed|floatformat:2 }} kn
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Actual Consumption
+            </div>
+
+            <div class="detail-value">
+
+                {{ observation.consumption|floatformat:2 }} MT/day
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Target Consumption
+            </div>
+
+            <div class="detail-value">
+
+                {{ target_consumption|floatformat:2 }} MT/day
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     TARGET ASSESSMENT
+========================================================= -->
+
+<div class="section">
+
+    <h2>
+        Target Assessment
+    </h2>
+
+
+    <table>
+
+        <tbody>
+
+            <tr>
+
+                <td>
+                    Speed Target
+                </td>
+
+                <td>
+                    {{ target_speed|floatformat:2 }} kn
+                </td>
+
+                <td>
+
+                    {% if status.speed_ok %}
+
+                        <span class="status status-achieved">
+                            ✓ ACHIEVED
+                        </span>
+
+                    {% else %}
+
+                        <span class="status status-not-achieved">
+                            ✗ NOT ACHIEVED
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>
+                    Consumption Target
+                </td>
+
+                <td>
+                    {{ target_consumption|floatformat:2 }} MT/day
+                </td>
+
+                <td>
+
+                    {% if status.consumption_ok %}
+
+                        <span class="status status-achieved">
+                            ✓ ACHIEVED
+                        </span>
+
+                    {% else %}
+
+                        <span class="status status-not-achieved">
+                            ✗ NOT ACHIEVED
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

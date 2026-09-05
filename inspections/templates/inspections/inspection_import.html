@@ -1,0 +1,142 @@
+{% extends "base_rightship.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h3 class="mb-1">
+            Import Inspection Workbook
+        </h3>
+
+        <p class="text-muted mb-0">
+            Upload an Excel workbook containing vessel inspections.
+        </p>
+
+    </div>
+
+    <a href="{% url 'inspection_list' %}"
+       class="btn btn-secondary">
+
+        <i class="bi bi-arrow-left"></i>
+
+        Back
+
+    </a>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <form method="post"
+              enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Excel Workbook
+                </label>
+
+                <input
+                    type="file"
+                    name="excel_file"
+                    class="form-control"
+                    accept=".xlsx,.xls"
+                    required>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-success">
+
+                <i class="bi bi-upload"></i>
+
+                Read Workbook
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{% if sheet_data %}
+
+<div class="card mt-4 shadow-sm">
+
+    <div class="card-header">
+
+        <strong>Workbook Summary</strong>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-hover mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Vessel</th>
+
+                        <th>Port</th>
+
+                        <th>Inspection Date</th>
+
+                        <th>Inspector</th>
+
+                        <th>No. of Findings</th>
+
+                        <th>Validity</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for row in sheet_data %}
+
+                    <tr>
+
+                        <td>{{ row.vessel }}</td>
+
+                        <td>{{ row.port }}</td>
+
+                        <td>{{ row.inspection_date }}</td>
+
+                        <td>{{ row.inspector }}</td>
+
+                        <td>{{ row.findings }}</td>
+
+                        <td>{{ row.validity }}</td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

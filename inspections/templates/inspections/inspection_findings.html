@@ -1,0 +1,459 @@
+{% extends "base_rightship.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h3 class="mb-1">
+
+            Inspection Findings
+
+        </h3>
+
+        <p class="text-muted mb-0">
+
+            Inspection No : <strong>{{ inspection.inspection_no }}</strong>
+
+        </p>
+
+    </div>
+
+    <div>
+
+        <a href="{% url 'inspection_list' %}"
+           class="btn btn-secondary">
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back
+
+        </a>
+
+       <button type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#addFindingModal">
+
+    <i class="bi bi-plus-circle"></i>
+
+    Add Finding
+
+</button>
+
+    </div>
+
+</div>
+
+
+<!-- Inspection Header -->
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header bg-primary text-white">
+
+        <h5 class="mb-0">
+
+            Inspection Information
+
+        </h5>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Vessel
+
+                </label>
+
+                <div>
+
+                    {{ inspection.vessel }}
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Port
+
+                </label>
+
+                <div>
+
+                    {{ inspection.port }}
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Inspection Date
+
+                </label>
+
+                <div>
+
+                    {{ inspection.inspection_date }}
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Inspector
+
+                </label>
+
+                <div>
+
+                    {{ inspection.inspector }}
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Validity
+
+                </label>
+
+                <div>
+
+                    {{ inspection.validity_months }} Months
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-3">
+
+                <label class="fw-bold">
+
+                    Status
+
+                </label>
+
+                <div>
+
+                    <span class="badge bg-success">
+
+                        {{ inspection.status }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Findings -->
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-light">
+
+        <h5 class="mb-0">
+
+            Findings
+
+        </h5>
+
+    </div>
+
+    <div class="card-body">
+
+        <table id="findingTable"
+               class="table table-bordered table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th width="70">#</th>
+
+                    <th width="120">Ref No</th>
+
+                    <th>Inspected Item</th>
+
+                    <th>Finding Description</th>
+
+                    <th width="120">Risk</th>
+
+                    <th width="140">Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for finding in findings %}
+
+                <tr>
+
+                    <td>
+
+                        {{ forloop.counter }}
+
+                    </td>
+
+                    <td>
+
+                        {{ finding.checklist_item.ref_no }}
+
+                    </td>
+
+                    <td>
+
+                        {{ finding.checklist_item.inspected_item }}
+
+                    </td>
+
+                    <td>
+
+                        {{ finding.finding_description }}
+
+                    </td>
+
+                    <td>
+
+                        {% if finding.risk_level == "HIGH" %}
+
+                            <span class="badge bg-danger">
+
+                                High
+
+                            </span>
+
+                        {% elif finding.risk_level == "MEDIUM" %}
+
+                            <span class="badge bg-warning text-dark">
+
+                                Medium
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-success">
+
+                                Low
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'finding_edit_risk' finding.id %}"
+                            class="btn btn-warning btn-sm"
+                            title="Edit Risk"
+                        >
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{% url 'finding_delete' finding.id %}"
+                            class="d-inline"
+                            onsubmit="return confirm('Are you sure you want to delete this finding?');"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger btn-sm"
+                                title="Delete Finding"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+
+                    <td colspan="6"
+                        class="text-center text-muted">
+
+                        No findings have been added.
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- Summary -->
+
+<div class="row mt-4">
+
+    <div class="col-md-3">
+
+        <div class="card border-danger">
+
+            <div class="card-body text-center">
+
+                <h3 class="text-danger">
+
+                    {{ total_findings }}
+
+                </h3>
+
+                <small>
+
+                    Total Findings
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-success">
+
+            <div class="card-body text-center">
+
+                <h3>
+
+                    <h3 class="text-danger">
+                        {{ high_risk }}
+                    </h3>
+
+                </h3>
+
+                <small>
+
+                    High Risk
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-warning">
+
+            <div class="card-body text-center">
+
+                <h3>
+
+                    <h3 class="text-warning">
+                        {{ medium_risk }}
+                    </h3>
+
+                </h3>
+
+                <small>
+
+                    Medium Risk
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-primary">
+
+            <div class="card-body text-center">
+
+                <h3>
+
+                    <h3 class="text-success">
+                        {{ low_risk }}
+                    </h3>
+
+                </h3>
+
+                <small>
+
+                    Low Risk
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+$(document).ready(function(){
+
+    $('#findingTable').DataTable({
+
+        pageLength:25,
+
+        responsive:true
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,3607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chemical Analytics | Marine Performance</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 90% 0%,
+                    #173b52 0,
+                    #0b1823 32%,
+                    #071018 72%
+                );
+
+            color: #e8f0f5;
+
+            min-height: 100vh;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1550px;
+
+            margin: 0 auto;
+
+            padding:
+                28px
+                35px
+                70px;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 52px;
+            height: 52px;
+
+            border-radius: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 24px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #19bfdc,
+                    #1769a3
+                );
+
+            box-shadow:
+                0 10px 35px
+                rgba(24, 178, 211, 0.22);
+        }
+
+        .brand h1 {
+            margin: 0;
+
+            font-size: 23px;
+
+            font-weight: 750;
+
+            letter-spacing: -0.5px;
+        }
+
+        .brand p {
+            margin: 4px 0 0;
+
+            color: #7893a3;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
+
+        .main-nav {
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            padding: 5px;
+
+            background:
+                rgba(10, 24, 34, 0.75);
+
+            border:
+                1px solid #213847;
+
+            border-radius: 13px;
+
+            flex-shrink: 0;
+        }
+
+        .nav-link {
+            display: block;
+
+            text-decoration: none;
+
+            padding:
+                9px 14px;
+
+            border-radius: 9px;
+
+            color: #8198a6;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+            transition:
+                background 0.2s,
+                color 0.2s,
+                transform 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #e8f0f5;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #18b9d6,
+                    #1767a2
+                );
+
+            box-shadow:
+                0 5px 15px
+                rgba(24, 184, 214, 0.18);
+        }
+
+
+        /* =====================================================
+           HEADER ACTIONS
+        ===================================================== */
+
+        .header-actions {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-shrink: 0;
+        }
+
+        .header-actions form {
+            margin: 0;
+        }
+
+        .vessel-select {
+            min-width: 125px;
+
+            background: #101f2c;
+
+            color: #e8f0f5;
+
+            border:
+                1px solid #294252;
+
+            padding:
+                11px 16px;
+
+            border-radius: 11px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            outline: none;
+        }
+
+        .vessel-select:focus {
+            border-color: #299bb8;
+        }
+
+        .upload-btn {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            text-decoration: none;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #18b9d6,
+                    #1767a2
+                );
+
+            padding:
+                11px 18px;
+
+            border-radius: 11px;
+
+            font-size: 13px;
+
+            font-weight: 650;
+
+            white-space: nowrap;
+
+            transition:
+                transform 0.2s,
+                box-shadow 0.2s;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 9px 25px
+                rgba(24, 184, 214, 0.25);
+        }
+
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+            position: relative;
+
+            overflow: hidden;
+
+            border-radius: 22px;
+
+            padding: 30px;
+
+            margin-bottom: 20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(19, 55, 75, 0.96),
+                    rgba(10, 24, 35, 0.96)
+                );
+
+            border:
+                1px solid #244456;
+
+            box-shadow:
+                0 20px 60px
+                rgba(0, 0, 0, 0.22);
+        }
+
+        .hero::after {
+            content: "";
+
+            position: absolute;
+
+            width: 320px;
+            height: 320px;
+
+            right: -110px;
+            top: -140px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(24, 190, 218, 0.08);
+
+            box-shadow:
+                0 0 100px
+                rgba(24, 190, 218, 0.08);
+
+            pointer-events: none;
+        }
+
+        .hero-label {
+            color: #58c8df;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+            font-weight: 750;
+        }
+
+        .hero h2 {
+            margin:
+                7px 0 8px;
+
+            font-size: 31px;
+
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            color: #8da5b4;
+
+            max-width: 760px;
+
+            font-size: 13px;
+
+            line-height: 1.65;
+
+            margin: 0;
+        }
+
+
+        /* =====================================================
+           KPI GRID
+        ===================================================== */
+
+        .kpi-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(6, 1fr);
+
+            gap: 13px;
+
+            margin-bottom: 28px;
+        }
+
+        .kpi {
+            position: relative;
+
+            overflow: hidden;
+
+            padding: 19px;
+
+            min-height: 105px;
+
+            background:
+                rgba(13, 28, 39, 0.88);
+
+            border:
+                1px solid #213847;
+
+            border-radius: 16px;
+
+            transition:
+                transform 0.2s,
+                border-color 0.2s;
+        }
+
+        .kpi:hover {
+            transform: translateY(-3px);
+
+            border-color: #3a6071;
+        }
+
+        .kpi::before {
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: 3px;
+
+            background:
+                linear-gradient(
+                    #20c5df,
+                    #1769a3
+                );
+        }
+
+        .kpi-label {
+            color: #78909e;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+        }
+
+        .kpi-value {
+            margin-top: 9px;
+
+            font-size: 23px;
+
+            font-weight: 750;
+
+            letter-spacing: -0.6px;
+
+            white-space: nowrap;
+        }
+
+        .kpi-unit {
+            color: #718895;
+
+            font-size: 10px;
+
+            margin-left: 2px;
+        }
+
+
+        /* =====================================================
+           SECTION HEADER
+        ===================================================== */
+
+        .section-title {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-end;
+
+            gap: 15px;
+
+            margin:
+                28px 0 12px;
+        }
+
+        .section-title h3 {
+            margin: 0;
+
+            font-size: 17px;
+
+            font-weight: 700;
+        }
+
+        .section-title span {
+            color: #718896;
+
+            font-size: 11px;
+
+            text-align: right;
+        }
+
+
+        /* =====================================================
+           LEGEND
+        ===================================================== */
+
+        .chart-legend {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 18px;
+
+            margin-bottom: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #8da3af;
+
+            font-size: 11px;
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            flex-shrink: 0;
+        }
+
+        .legend-dosing {
+            background: #38d3a0;
+        }
+
+        .legend-no-dosing {
+            background: #5f7482;
+        }
+
+
+        /* =====================================================
+           CHART GRID
+        ===================================================== */
+
+        .chart-grid {
+            display: grid;
+
+            grid-template-columns:
+                1.5fr 1fr;
+
+            gap: 17px;
+
+            margin-bottom: 17px;
+        }
+
+        .chart-card {
+            position: relative;
+
+            min-width: 0;
+
+            background:
+                rgba(10, 24, 34, 0.93);
+
+            border:
+                1px solid #213847;
+
+            border-radius: 18px;
+
+            padding: 20px;
+
+            min-height: 370px;
+
+            box-shadow:
+                0 15px 45px
+                rgba(0, 0, 0, 0.14);
+        }
+
+        .chart-card h3 {
+            margin:
+                0 0 4px;
+
+            font-size: 15px;
+        }
+
+        .chart-card p {
+            margin:
+                0 0 15px;
+
+            color: #718895;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+
+            max-width: 650px;
+        }
+
+        .chart-container {
+            height: 285px;
+
+            position: relative;
+
+            width: 100%;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+        }
+
+
+        /* =====================================================
+           CHART STATUS
+        ===================================================== */
+
+        .chart-status {
+            position: absolute;
+
+            top: 18px;
+            right: 18px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding:
+                6px 9px;
+
+            border-radius: 8px;
+
+            background:
+                rgba(56, 211, 160, 0.08);
+
+            border:
+                1px solid
+                rgba(56, 211, 160, 0.20);
+
+            color: #5dd9ae;
+
+            font-size: 10px;
+
+            font-weight: 650;
+
+            white-space: nowrap;
+        }
+
+        .chart-status-dot {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: #38d3a0;
+
+            box-shadow:
+                0 0 8px
+                rgba(56, 211, 160, 0.7);
+
+            flex-shrink: 0;
+        }
+
+
+        /* =====================================================
+           EFFECT BANNER
+        ===================================================== */
+
+        .effect-banner {
+            display: grid;
+
+            grid-template-columns:
+                1fr auto;
+
+            align-items: center;
+
+            gap: 25px;
+
+            padding:
+                20px 23px;
+
+            margin-bottom: 17px;
+
+            border-radius: 17px;
+
+            background:
+                linear-gradient(
+                    100deg,
+                    rgba(20, 75, 78, 0.42),
+                    rgba(10, 30, 40, 0.75)
+                );
+
+            border:
+                1px solid
+                rgba(62, 203, 168, 0.25);
+        }
+
+        .effect-title {
+            font-size: 13px;
+
+            font-weight: 700;
+
+            margin-bottom: 4px;
+        }
+
+        .effect-description {
+            color: #8199a6;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+        }
+
+        .effect-number {
+            font-size: 30px;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+        }
+
+        .effect-number.positive {
+            color: #4bd5a4;
+        }
+
+        .effect-number.negative {
+            color: #f08b8b;
+        }
+
+        .effect-number.neutral {
+            color: #9db0bb;
+        }
+
+
+        /* =====================================================
+           NORMALIZED DETAILS
+        ===================================================== */
+
+        .normalized-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 12px;
+
+            margin:
+                0 0 28px;
+        }
+
+        .normalized-card {
+            padding: 16px 17px;
+
+            background:
+                rgba(10, 25, 35, 0.88);
+
+            border:
+                1px solid #203b49;
+
+            border-radius: 14px;
+        }
+
+        .normalized-card-label {
+            color: #718895;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.8px;
+
+            margin-bottom: 7px;
+        }
+
+        .normalized-card-value {
+            color: #dbe7ec;
+
+            font-size: 18px;
+
+            font-weight: 750;
+
+            white-space: nowrap;
+        }
+
+        .normalized-card-sub {
+            color: #617985;
+
+            font-size: 9px;
+
+            margin-top: 4px;
+
+            line-height: 1.4;
+        }
+
+        .match-good {
+            color: #4bd5a4;
+        }
+
+        .match-warning {
+            color: #e2b56d;
+        }
+
+        .match-poor {
+            color: #f08b8b;
+        }
+
+
+        /* =====================================================
+           COMPARISON
+        ===================================================== */
+
+        .comparison-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 28px;
+        }
+
+        .comparison {
+            position: relative;
+
+            overflow: hidden;
+
+            min-width: 0;
+
+            padding: 21px;
+
+            border-radius: 17px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #102936,
+                    #0b1923
+                );
+
+            border:
+                1px solid #244251;
+        }
+
+        .comparison::after {
+            content: "";
+
+            position: absolute;
+
+            width: 100px;
+            height: 100px;
+
+            right: -35px;
+            bottom: -45px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(46, 198, 164, 0.06);
+
+            pointer-events: none;
+        }
+
+        .comparison-label {
+            color: #78909d;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+        }
+
+        .comparison-values {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 20px;
+
+            margin-top: 16px;
+        }
+
+        .comparison-value {
+            min-width: 0;
+        }
+
+        .comparison-value strong {
+            display: block;
+
+            font-size: 23px;
+
+            white-space: nowrap;
+        }
+
+        .comparison-value span {
+            color: #6f8794;
+
+            font-size: 10px;
+
+            line-height: 1.4;
+        }
+
+        .positive {
+            color: #48d3a0;
+        }
+
+        .negative {
+            color: #f08b8b;
+        }
+
+        .neutral {
+            color: #9db0bb;
+        }
+
+
+        /* =====================================================
+           VOYAGE / MATCH INFORMATION
+        ===================================================== */
+
+        .analysis-info {
+            display: grid;
+
+            grid-template-columns:
+                1.5fr 1fr 1fr;
+
+            gap: 12px;
+
+            margin-bottom: 28px;
+        }
+
+        .analysis-info-card {
+            padding: 16px 18px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(12, 27, 38, 0.85);
+
+            border:
+                1px solid #203947;
+        }
+
+        .analysis-info-label {
+            color: #718895;
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.9px;
+
+            margin-bottom: 6px;
+        }
+
+        .analysis-info-value {
+            color: #dce8ed;
+
+            font-size: 14px;
+
+            font-weight: 650;
+        }
+
+        .analysis-info-description {
+            color: #617985;
+
+            font-size: 9px;
+
+            margin-top: 4px;
+
+            line-height: 1.4;
+        }
+
+
+        /* =====================================================
+           EVENTS
+        ===================================================== */
+
+        .events {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            margin-bottom: 30px;
+        }
+
+        .event {
+            display: flex;
+
+            gap: 14px;
+
+            align-items: flex-start;
+
+            padding:
+                13px 15px;
+
+            background:
+                rgba(13, 29, 40, 0.86);
+
+            border:
+                1px solid #1d3543;
+
+            border-radius: 12px;
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            margin-top: 5px;
+
+            background: #25bdd8;
+
+            flex-shrink: 0;
+
+            box-shadow:
+                0 0 8px
+                rgba(37, 189, 216, 0.4);
+        }
+
+        .event-date {
+            color: #5dbed4;
+
+            font-size: 10px;
+
+            font-weight: 650;
+        }
+
+        .event-text {
+            color: #9badb8;
+
+            font-size: 12px;
+
+            margin-top: 2px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           EMPTY
+        ===================================================== */
+
+        .empty {
+            padding: 60px;
+
+            text-align: center;
+
+            color: #728896;
+
+            background: #0d1c27;
+
+            border:
+                1px solid #203442;
+
+            border-radius: 18px;
+        }
+
+
+        /* =====================================================
+           TABLET
+        ===================================================== */
+
+        @media (max-width: 1250px) {
+
+            .header {
+                flex-wrap: wrap;
+            }
+
+            .main-nav {
+                order: 3;
+
+                width: 100%;
+
+                justify-content: center;
+            }
+
+            .kpi-grid {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .chart-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .normalized-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+
+        /* =====================================================
+           SMALL TABLET
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .page {
+                padding:
+                    22px
+                    24px
+                    55px;
+            }
+
+            .comparison-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .analysis-info {
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+            .analysis-info-card:first-child {
+                grid-column: span 2;
+            }
+
+            .effect-banner {
+                grid-template-columns:
+                    1fr auto;
+            }
+
+            .chart-card {
+                min-height: 350px;
+            }
+
+            .chart-container {
+                height: 275px;
+            }
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .page {
+                padding:
+                    16px
+                    14px
+                    45px;
+            }
+
+
+            /* HEADER */
+
+            .header {
+                flex-direction: column;
+
+                align-items: stretch;
+
+                gap: 13px;
+
+                margin-bottom: 15px;
+            }
+
+            .brand {
+                width: 100%;
+            }
+
+            .brand-icon {
+                width: 46px;
+                height: 46px;
+
+                border-radius: 14px;
+
+                font-size: 21px;
+            }
+
+            .brand h1 {
+                font-size: 20px;
+            }
+
+            .brand p {
+                font-size: 11px;
+            }
+
+
+            /* NAV */
+
+            .main-nav {
+                order: unset;
+
+                width: 100%;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+
+                gap: 4px;
+
+                padding: 4px;
+            }
+
+            .nav-link {
+                text-align: center;
+
+                padding:
+                    10px 5px;
+
+                font-size: 11px;
+            }
+
+
+            /* HEADER ACTIONS */
+
+            .header-actions {
+                width: 100%;
+
+                display: grid;
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 8px;
+            }
+
+            .header-actions form {
+                width: 100%;
+            }
+
+            .vessel-select {
+                width: 100%;
+
+                min-width: 0;
+
+                padding:
+                    11px 10px;
+            }
+
+            .upload-btn {
+                width: 100%;
+
+                padding:
+                    11px 10px;
+
+                font-size: 12px;
+            }
+
+
+            /* HERO */
+
+            .hero {
+                padding: 22px 20px;
+
+                border-radius: 18px;
+            }
+
+            .hero h2 {
+                font-size: 26px;
+            }
+
+            .hero-description {
+                font-size: 12px;
+
+                line-height: 1.6;
+            }
+
+
+            /* KPI */
+
+            .kpi-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                gap: 9px;
+
+                margin-bottom: 22px;
+            }
+
+            .kpi {
+                padding:
+                    15px 14px;
+
+                min-height: 94px;
+
+                border-radius: 14px;
+            }
+
+            .kpi-label {
+                font-size: 9px;
+            }
+
+            .kpi-value {
+                font-size: 19px;
+
+                margin-top: 8px;
+            }
+
+            .kpi-unit {
+                font-size: 9px;
+            }
+
+
+            /* SECTION */
+
+            .section-title {
+                align-items: flex-start;
+
+                flex-direction: column;
+
+                gap: 4px;
+
+                margin:
+                    23px 0 10px;
+            }
+
+            .section-title h3 {
+                font-size: 16px;
+            }
+
+            .section-title span {
+                text-align: left;
+
+                font-size: 10px;
+            }
+
+
+            /* LEGEND */
+
+            .chart-legend {
+                gap: 10px 15px;
+
+                margin-bottom: 10px;
+            }
+
+            .legend-item {
+                font-size: 10px;
+            }
+
+
+            /* CHARTS */
+
+            .chart-grid {
+                grid-template-columns:
+                    1fr;
+
+                gap: 12px;
+
+                margin-bottom: 12px;
+            }
+
+            .chart-card {
+                padding:
+                    17px 14px;
+
+                min-height: 330px;
+
+                border-radius: 16px;
+            }
+
+            .chart-card h3 {
+                font-size: 14px;
+
+                padding-right: 105px;
+            }
+
+            .chart-card p {
+                font-size: 10px;
+
+                margin-bottom: 12px;
+            }
+
+            .chart-container {
+                height: 245px;
+            }
+
+            .chart-status {
+                top: 15px;
+                right: 13px;
+
+                padding:
+                    5px 7px;
+
+                font-size: 9px;
+            }
+
+
+            /* EFFECT */
+
+            .effect-banner {
+                grid-template-columns:
+                    1fr;
+
+                gap: 12px;
+
+                padding:
+                    17px;
+
+                margin-bottom: 12px;
+
+                border-radius: 15px;
+            }
+
+            .effect-description {
+                font-size: 10px;
+            }
+
+            .effect-number {
+                font-size: 27px;
+
+                justify-self: start;
+            }
+
+
+            /* NORMALIZED DETAILS */
+
+            .normalized-grid {
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 8px;
+
+                margin-bottom: 22px;
+            }
+
+            .normalized-card {
+                padding:
+                    13px 12px;
+            }
+
+            .normalized-card-label {
+                font-size: 8px;
+            }
+
+            .normalized-card-value {
+                font-size: 16px;
+            }
+
+            .normalized-card-sub {
+                font-size: 8px;
+            }
+
+
+            /* ANALYSIS INFO */
+
+            .analysis-info {
+                grid-template-columns:
+                    1fr;
+
+                gap: 8px;
+
+                margin-bottom: 22px;
+            }
+
+            .analysis-info-card:first-child {
+                grid-column: auto;
+            }
+
+
+            /* COMPARISON */
+
+            .comparison-grid {
+                grid-template-columns:
+                    1fr;
+
+                gap: 10px;
+
+                margin-bottom: 22px;
+            }
+
+            .comparison {
+                padding: 17px;
+
+                border-radius: 15px;
+            }
+
+            .comparison-values {
+                gap: 12px;
+
+                margin-top: 13px;
+            }
+
+            .comparison-value strong {
+                font-size: 21px;
+            }
+
+            .comparison-value span {
+                font-size: 9px;
+            }
+
+
+            /* EVENTS */
+
+            .event {
+                gap: 10px;
+
+                padding:
+                    12px;
+            }
+
+            .event-text {
+                font-size: 11px;
+            }
+
+            .event-date {
+                font-size: 9px;
+            }
+
+
+            /* EMPTY */
+
+            .empty {
+                padding: 40px 20px;
+            }
+        }
+
+
+        /* =====================================================
+           VERY SMALL PHONES
+        ===================================================== */
+
+        @media (max-width: 400px) {
+
+            .page {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .kpi-grid {
+                gap: 7px;
+            }
+
+            .kpi {
+                padding:
+                    13px 11px;
+            }
+
+            .kpi-value {
+                font-size: 17px;
+            }
+
+            .nav-link {
+                font-size: 10px;
+            }
+
+            .chart-card {
+                padding:
+                    15px 11px;
+            }
+
+            .chart-container {
+                height: 225px;
+            }
+
+            .normalized-grid {
+                grid-template-columns:
+                    1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ⚓
+            </div>
+
+            <div>
+
+                <h1>
+                    Chemical Analytics
+                </h1>
+
+                <p>
+                    Marine Fuel Performance Intelligence
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <nav class="main-nav">
+
+    <a
+        href="{% url 'chemical_analysis:dashboard' %}?vessel={{ vessel }}"
+        class="nav-link active"
+    >
+        Dashboard
+    </a>
+
+    <a
+        href="{% url 'chemical_analysis:performance_analysis' %}?vessel={{ vessel }}"
+        class="nav-link"
+    >
+        Performance Analysis
+    </a>
+
+    <a
+        href="{% url 'chemical_analysis:history' %}?vessel={{ vessel }}"
+        class="nav-link"
+    >
+        History
+    </a>
+
+    <a
+        href="{% url 'chemical_analysis:upload' %}"
+        class="nav-link"
+    >
+        Data Import
+    </a>
+
+</nav>
+
+
+        <div class="header-actions">
+
+            <form method="GET">
+
+                <select
+                    class="vessel-select"
+                    name="vessel"
+                    onchange="this.form.submit()"
+                >
+
+                    <option
+                        value="DANIEL N"
+                        {% if vessel == "DANIEL N" %}
+                            selected
+                        {% endif %}
+                    >
+                        Daniel N
+                    </option>
+
+                    <option
+                        value="HELEN N"
+                        {% if vessel == "HELEN N" %}
+                            selected
+                        {% endif %}
+                    >
+                        Helen N
+                    </option>
+
+                </select>
+
+            </form>
+
+
+            <a
+                class="upload-btn"
+                href="{% url 'chemical_analysis:upload' %}"
+            >
+                + Upload Data
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         ERROR / CONTENT
+    ===================================================== -->
+
+    {% if error %}
+
+        <div class="empty">
+
+            <h2>
+                No analysis available
+            </h2>
+
+            <p>
+                {{ error }}
+            </p>
+
+        </div>
+
+    {% else %}
+
+
+    <!-- =====================================================
+         HERO
+    ===================================================== -->
+
+    <section class="hero">
+
+        <div class="hero-label">
+            Vessel Performance
+        </div>
+
+        <h2>
+            {{ vessel }}
+        </h2>
+
+        <p class="hero-description">
+
+            Monitoring fuel efficiency, engine performance
+            and additive dosing behaviour using live METIS
+            measurements and dosing records.
+
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         KPI CARDS
+    ===================================================== -->
+
+    <section class="kpi-grid">
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Average SFOC
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.average_sfoc|floatformat:1 }}
+
+                <span class="kpi-unit">
+                    g/kWh
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Total Fuel
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.total_fuel_kg|floatformat:0 }}
+
+                <span class="kpi-unit">
+                    kg
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Average Speed
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.average_speed|floatformat:1 }}
+
+                <span class="kpi-unit">
+                    kn
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Average Power
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.average_power|floatformat:0 }}
+
+                <span class="kpi-unit">
+                    kW
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Additive Used
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.total_additive|floatformat:1 }}
+
+                <span class="kpi-unit">
+                    L
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+            <div class="kpi-label">
+                Dosing Days
+            </div>
+
+            <div class="kpi-value">
+
+                {{ kpis.dosing_days }}
+
+                <span class="kpi-unit">
+                    days
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PERFORMANCE TRENDS
+    ===================================================== -->
+
+    <div class="section-title">
+
+        <h3>
+            Performance Trends
+        </h3>
+
+        <span>
+
+            {{ kpis.start_date|date:"d M Y" }}
+
+            —
+
+            {{ kpis.end_date|date:"d M Y" }}
+
+        </span>
+
+    </div>
+
+
+    <div class="chart-legend">
+
+        <div class="legend-item">
+
+            <div class="legend-dot legend-dosing"></div>
+
+            Chemical dosing period
+
+        </div>
+
+        <div class="legend-item">
+
+            <div class="legend-dot legend-no-dosing"></div>
+
+            No dosing period
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SFOC + DOSING
+    ===================================================== -->
+
+    <section class="chart-grid">
+
+        <div class="chart-card">
+
+            <div class="chart-status">
+
+                <div class="chart-status-dot"></div>
+
+                Dosing overlay
+
+            </div>
+
+            <h3>
+                SFOC Performance
+            </h3>
+
+            <p>
+                Daily SFOC with chemical dosing periods
+                highlighted for direct before/after comparison.
+            </p>
+
+            <div class="chart-container">
+
+                <canvas id="sfocChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="chart-card">
+
+            <div class="chart-status">
+
+                <div class="chart-status-dot"></div>
+
+                Dosing activity
+
+            </div>
+
+            <h3>
+                Chemical Dosing
+            </h3>
+
+            <p>
+                Daily additive quantity and dosing status.
+            </p>
+
+            <div class="chart-container">
+
+                <canvas id="dosingChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FUEL + POWER
+    ===================================================== -->
+
+    <section class="chart-grid">
+
+        <div class="chart-card">
+
+            <div class="chart-status">
+
+                <div class="chart-status-dot"></div>
+
+                Dosing overlay
+
+            </div>
+
+            <h3>
+                Daily Fuel Consumption
+            </h3>
+
+            <p>
+                Daily integrated fuel usage with chemical
+                dosing periods highlighted.
+            </p>
+
+            <div class="chart-container">
+
+                <canvas id="fuelChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="chart-card">
+
+            <div class="chart-status">
+
+                <div class="chart-status-dot"></div>
+
+                Operating condition
+
+            </div>
+
+            <h3>
+                Engine Operating Profile
+            </h3>
+
+            <p>
+                Daily average engine power with dosing
+                activity shown for operating-context comparison.
+            </p>
+
+            <div class="chart-container">
+
+                <canvas id="powerChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         UNADJUSTED EFFECT
+    ===================================================== -->
+
+    <div class="section-title">
+
+        <h3>
+            Chemical Effect
+        </h3>
+
+        <span>
+            Unadjusted comparison
+        </span>
+
+    </div>
+
+
+    <div class="effect-banner">
+
+        <div>
+
+            <div class="effect-title">
+                Unadjusted Chemical Performance Signal
+            </div>
+
+            <div class="effect-description">
+
+                Dosing-period SFOC is compared with
+                non-dosing periods. Lower SFOC indicates
+                better fuel efficiency.
+
+                This is an unadjusted comparison and should
+                not be interpreted as confirmed additive fuel
+                saving without accounting for engine load,
+                speed, voyage and operating conditions.
+
+            </div>
+
+        </div>
+
+
+        {% if comparison.sfoc_improvement is not None %}
+
+            {% if comparison.sfoc_improvement > 0.5 %}
+
+                <div class="effect-number positive">
+
+                    {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% elif comparison.sfoc_improvement < -0.5 %}
+
+                <div class="effect-number negative">
+
+                    {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% else %}
+
+                <div class="effect-number neutral">
+
+                    {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="effect-number neutral">
+                —
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         NORMALIZED EFFECT
+    ===================================================== -->
+
+    <div class="effect-banner">
+
+        <div>
+
+            <div class="effect-title">
+                Operating-Condition Normalized Effect
+            </div>
+
+            <div class="effect-description">
+
+                Dosing observations are compared with
+                non-dosing observations having similar
+                operating conditions.
+
+                The purpose of this comparison is to reduce
+                the influence of engine loading and other
+                operating differences.
+
+            </div>
+
+        </div>
+
+
+        {% if normalized_comparison.sfoc_improvement is not None %}
+
+            {% if normalized_comparison.sfoc_improvement > 0.5 %}
+
+                <div class="effect-number positive">
+
+                    {{ normalized_comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% elif normalized_comparison.sfoc_improvement < -0.5 %}
+
+                <div class="effect-number negative">
+
+                    {{ normalized_comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% else %}
+
+                <div class="effect-number neutral">
+
+                    {{ normalized_comparison.sfoc_improvement|floatformat:1 }}%
+
+                </div>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="effect-number neutral">
+                —
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         NORMALIZED ANALYSIS DETAILS
+    ===================================================== -->
+
+    <div class="normalized-grid">
+
+
+        <!-- NORMALIZED DOSING SFOC -->
+
+        <div class="normalized-card">
+
+            <div class="normalized-card-label">
+                Dosing SFOC
+            </div>
+
+            <div class="normalized-card-value">
+
+                {% if normalized_comparison.dosing_sfoc is not None %}
+                    {{ normalized_comparison.dosing_sfoc|floatformat:1 }}
+                    <span class="kpi-unit">g/kWh</span>
+                {% else %}
+                    —
+                {% endif %}
+
+            </div>
+
+            <div class="normalized-card-sub">
+                Observed during chemical dosing
+            </div>
+
+        </div>
+
+
+        <!-- MATCHED BASELINE -->
+
+        <div class="normalized-card">
+
+            <div class="normalized-card-label">
+                Matched Baseline SFOC
+            </div>
+
+            <div class="normalized-card-value">
+
+                {% if normalized_comparison.matched_baseline_sfoc is not None %}
+
+                    {{ normalized_comparison.matched_baseline_sfoc|floatformat:1 }}
+
+                    <span class="kpi-unit">
+                        g/kWh
+                    </span>
+
+                {% elif normalized_comparison.matched_non_dosing_sfoc is not None %}
+
+                    {{ normalized_comparison.matched_non_dosing_sfoc|floatformat:1 }}
+
+                    <span class="kpi-unit">
+                        g/kWh
+                    </span>
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </div>
+
+            <div class="normalized-card-sub">
+                Expected SFOC from matched non-dosing observations
+            </div>
+
+        </div>
+
+
+        <!-- MATCHED OBSERVATIONS -->
+
+        <div class="normalized-card">
+
+            <div class="normalized-card-label">
+                Matched Observations
+            </div>
+
+            <div class="normalized-card-value">
+
+                {% if normalized_comparison.matched_observations is not None %}
+
+                    {{ normalized_comparison.matched_observations }}
+
+                {% elif normalized_comparison.matched_days is not None %}
+
+                    {{ normalized_comparison.matched_days }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </div>
+
+            <div class="normalized-card-sub">
+                Dosing observations with comparable operating conditions
+            </div>
+
+        </div>
+
+
+        <!-- MATCH QUALITY -->
+
+        <div class="normalized-card">
+
+            <div class="normalized-card-label">
+                Match Quality
+            </div>
+
+            <div class="normalized-card-value">
+
+                {% if normalized_comparison.match_quality %}
+
+                    {{ normalized_comparison.match_quality }}
+
+                {% elif normalized_comparison.matched_observations %}
+                    
+                    <span class="match-good">
+                        Available
+                    </span>
+
+                {% else %}
+
+                    <span class="match-warning">
+                        Insufficient
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+            <div class="normalized-card-sub">
+                Quality of operating-condition matching
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         VOYAGE / MATCH INFORMATION
+    ===================================================== -->
+
+    <div class="analysis-info">
+
+
+        <!-- VOYAGE -->
+
+        <div class="analysis-info-card">
+
+            <div class="analysis-info-label">
+                Analysis / Voyage
+            </div>
+
+            <div class="analysis-info-value">
+
+                {% if normalized_comparison.voyage %}
+
+                    {{ normalized_comparison.voyage }}
+
+                {% else %}
+
+                    Voyage information not available
+
+                {% endif %}
+
+            </div>
+
+            <div class="analysis-info-description">
+
+                Voyage information used or associated with
+                the normalized operating-condition comparison.
+
+            </div>
+
+        </div>
+
+
+        <!-- REJECTED MATCHES -->
+
+        <div class="analysis-info-card">
+
+            <div class="analysis-info-label">
+                Rejected Matches
+            </div>
+
+            <div class="analysis-info-value">
+
+                {% if normalized_comparison.rejected_matches is not None %}
+
+                    {{ normalized_comparison.rejected_matches }}
+
+                {% elif normalized_comparison.rejected_observations is not None %}
+
+                    {{ normalized_comparison.rejected_observations }}
+
+                {% else %}
+
+                    —
+
+                {% endif %}
+
+            </div>
+
+            <div class="analysis-info-description">
+                Observations excluded because no suitable comparison was found.
+            </div>
+
+        </div>
+
+
+        <!-- MATCHED DAYS -->
+
+        <div class="analysis-info-card">
+
+            <div class="analysis-info-label">
+                Matching Basis
+            </div>
+
+            <div class="analysis-info-value">
+
+                Operating conditions
+
+            </div>
+
+            <div class="analysis-info-description">
+                Matching prioritizes comparable engine operating conditions.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DOSING EFFECT
+    ===================================================== -->
+
+    <div class="section-title">
+
+        <h3>
+            Dosing Effect
+        </h3>
+
+        <span>
+            Dosing vs non-dosing periods
+        </span>
+
+    </div>
+
+
+    <section class="comparison-grid">
+
+
+        <!-- SFOC -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                SFOC
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ comparison.dosing_sfoc|floatformat:1 }}
+
+                    </strong>
+
+                    <span>
+                        Dosing g/kWh
+                    </span>
+
+                </div>
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ comparison.non_dosing_sfoc|floatformat:1 }}
+
+                    </strong>
+
+                    <span>
+                        No dosing g/kWh
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SFOC EFFECT -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                SFOC Effect
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    {% if comparison.sfoc_improvement is not None %}
+
+                        {% if comparison.sfoc_improvement > 0.5 %}
+
+                            <strong class="positive">
+
+                                {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                            </strong>
+
+                            <span>
+                                Improvement
+                            </span>
+
+                        {% elif comparison.sfoc_improvement < -0.5 %}
+
+                            <strong class="negative">
+
+                                {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                            </strong>
+
+                            <span>
+                                Higher SFOC during dosing
+                            </span>
+
+                        {% else %}
+
+                            <strong class="neutral">
+
+                                {{ comparison.sfoc_improvement|floatformat:1 }}%
+
+                            </strong>
+
+                            <span>
+                                No meaningful difference
+                            </span>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <strong class="neutral">
+                            —
+                        </strong>
+
+                        <span>
+                            Insufficient data
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FUEL -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                Fuel Consumption
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ comparison.dosing_fuel|floatformat:0 }}
+
+                    </strong>
+
+                    <span>
+                        Dosing kg/h
+                    </span>
+
+                </div>
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ comparison.non_dosing_fuel|floatformat:0 }}
+
+                    </strong>
+
+                    <span>
+                        No dosing kg/h
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NORMALIZED SFOC -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                Normalized SFOC
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ normalized_comparison.dosing_sfoc|floatformat:1 }}
+
+                    </strong>
+
+                    <span>
+                        Dosing g/kWh
+                    </span>
+
+                </div>
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {% if normalized_comparison.matched_baseline_sfoc is not None %}
+
+                            {{ normalized_comparison.matched_baseline_sfoc|floatformat:1 }}
+
+                        {% else %}
+
+                            {{ normalized_comparison.matched_non_dosing_sfoc|floatformat:1 }}
+
+                        {% endif %}
+
+                    </strong>
+
+                    <span>
+                        Matched baseline g/kWh
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOAD MATCHING -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                Load Matching
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ normalized_comparison.average_dosing_power|floatformat:0 }}
+
+                    </strong>
+
+                    <span>
+                        Dosing kW
+                    </span>
+
+                </div>
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {{ normalized_comparison.average_matched_non_dosing_power|floatformat:0 }}
+
+                    </strong>
+
+                    <span>
+                        Matched no dosing kW
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MATCHED OBSERVATIONS -->
+
+        <div class="comparison">
+
+            <div class="comparison-label">
+                Matched Observations
+            </div>
+
+            <div class="comparison-values">
+
+                <div class="comparison-value">
+
+                    <strong>
+
+                        {% if normalized_comparison.matched_observations is not None %}
+
+                            {{ normalized_comparison.matched_observations }}
+
+                        {% else %}
+
+                            {{ normalized_comparison.matched_days|default:"—" }}
+
+                        {% endif %}
+
+                    </strong>
+
+                    <span>
+                        Matched observations
+                    </span>
+
+                </div>
+
+                <div class="comparison-value">
+
+                    {% if normalized_comparison.sfoc_improvement is not None %}
+
+                        <strong
+                            class="
+                                {% if normalized_comparison.sfoc_improvement > 0.5 %}
+                                    positive
+                                {% elif normalized_comparison.sfoc_improvement < -0.5 %}
+                                    negative
+                                {% else %}
+                                    neutral
+                                {% endif %}
+                            "
+                        >
+
+                            {{ normalized_comparison.sfoc_improvement|floatformat:1 }}%
+
+                        </strong>
+
+                        <span>
+                            Adjusted SFOC effect
+                        </span>
+
+                    {% else %}
+
+                        <strong class="neutral">
+                            —
+                        </strong>
+
+                        <span>
+                            Adjusted effect
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         OPERATIONAL NOTES
+    ===================================================== -->
+
+    <div class="section-title">
+
+        <h3>
+            Operational Notes
+        </h3>
+
+        <span>
+            Dosing log events
+        </span>
+
+    </div>
+
+
+    <section class="events">
+
+        {% for day in daily_data %}
+
+            {% if day.remarks %}
+
+                <div class="event">
+
+                    <div class="event-dot"></div>
+
+                    <div>
+
+                        <div class="event-date">
+
+                            {{ day.full_date }}
+
+                        </div>
+
+                        <div class="event-text">
+
+                            {{ day.remarks }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        {% empty %}
+
+            <div class="empty">
+                No operational remarks recorded.
+            </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     DJANGO DATA
+========================================================= -->
+
+{{ daily_data|json_script:"daily-data" }}
+
+
+<script>
+
+    /* =========================================================
+       DATA
+    ========================================================= */
+
+    const dailyData =
+        JSON.parse(
+            document.getElementById(
+                "daily-data"
+            ).textContent
+        );
+
+
+    const labels =
+        dailyData.map(
+            row => row.date
+        );
+
+
+    const sfoc =
+        dailyData.map(
+            row => row.sfoc
+        );
+
+
+    const fuel =
+        dailyData.map(
+            row => row.fuel
+        );
+
+
+    const additive =
+        dailyData.map(
+            row => row.additive
+        );
+
+
+    const power =
+        dailyData.map(
+            row => row.power
+        );
+
+
+    /* =========================================================
+       DOSING BACKGROUND
+    ========================================================= */
+
+    const dosingBackground = {
+
+        id: "dosingBackground",
+
+        beforeDraw(chart) {
+
+            const {
+                ctx,
+                chartArea,
+                scales
+            } = chart;
+
+
+            if (
+                !chartArea ||
+                !scales.x
+            ) {
+                return;
+            }
+
+
+            const xScale = scales.x;
+
+
+            ctx.save();
+
+
+            for (
+                let i = 0;
+                i < dailyData.length;
+                i++
+            ) {
+
+                if (
+                    dailyData[i].status !== "Dosing"
+                ) {
+                    continue;
+                }
+
+
+                const currentX =
+                    xScale.getPixelForValue(i);
+
+
+                let nextX;
+
+
+                if (
+                    i < dailyData.length - 1
+                ) {
+
+                    nextX =
+                        xScale.getPixelForValue(
+                            i + 1
+                        );
+
+                } else {
+
+                    nextX =
+                        currentX +
+                        (
+                            currentX -
+                            xScale.getPixelForValue(
+                                Math.max(
+                                    0,
+                                    i - 1
+                                )
+                            )
+                        );
+                }
+
+
+                const width =
+                    Math.max(
+                        2,
+                        nextX - currentX
+                    );
+
+
+                ctx.fillStyle =
+                    "rgba(56, 211, 160, 0.075)";
+
+
+                ctx.fillRect(
+                    currentX - width / 2,
+                    chartArea.top,
+                    width,
+                    chartArea.bottom -
+                    chartArea.top
+                );
+
+            }
+
+
+            ctx.restore();
+
+        }
+
+    };
+
+
+    /* =========================================================
+       GLOBAL CHART SETTINGS
+    ========================================================= */
+
+    Chart.defaults.color =
+        "#718895";
+
+
+    Chart.defaults.borderColor =
+        "rgba(255,255,255,0.06)";
+
+
+    Chart.defaults.font.family =
+        "Inter, Segoe UI, sans-serif";
+
+
+    /* =========================================================
+       COMMON OPTIONS
+    ========================================================= */
+
+    const commonOptions = {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        interaction: {
+            intersect: false,
+            mode: "index"
+        },
+
+        plugins: {
+
+            legend: {
+                display: false
+            },
+
+            tooltip: {
+
+                backgroundColor:
+                    "#091720",
+
+                borderColor:
+                    "#294755",
+
+                borderWidth: 1,
+
+                padding: 12,
+
+                displayColors: true
+            }
+
+        },
+
+        scales: {
+
+            x: {
+
+                grid: {
+                    display: false
+                },
+
+                ticks: {
+
+                    maxTicksLimit: 10,
+
+                    color: "#718895",
+
+                    maxRotation: 0,
+
+                    minRotation: 0
+
+                }
+
+            },
+
+            y: {
+
+                grid: {
+
+                    color:
+                        "rgba(255,255,255,0.045)"
+
+                },
+
+                ticks: {
+                    color: "#718895"
+                }
+
+            }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       HELPER
+    ========================================================= */
+
+    function getFullDate(index) {
+
+        if (
+            dailyData[index] &&
+            dailyData[index].full_date
+        ) {
+
+            return dailyData[index].full_date;
+
+        }
+
+        return "";
+
+    }
+
+
+    /* =========================================================
+       SFOC CHART
+    ========================================================= */
+
+    new Chart(
+
+        document.getElementById("sfocChart"),
+
+        {
+
+            type: "line",
+
+            plugins: [
+                dosingBackground
+            ],
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+
+                    {
+
+                        label: "SFOC",
+
+                        data: sfoc,
+
+                        borderColor: "#42c5dc",
+
+                        backgroundColor:
+                            "rgba(66,197,220,0.08)",
+
+                        borderWidth: 2.5,
+
+                        pointRadius: 0,
+
+                        pointHoverRadius: 5,
+
+                        pointHoverBackgroundColor:
+                            "#42c5dc",
+
+                        fill: true,
+
+                        tension: 0.35
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                ...commonOptions,
+
+                plugins: {
+
+                    ...commonOptions.plugins,
+
+                    tooltip: {
+
+                        ...commonOptions.plugins.tooltip,
+
+                        callbacks: {
+
+                            title(context) {
+
+                                return getFullDate(
+                                    context[0].dataIndex
+                                );
+
+                            },
+
+                            label(context) {
+
+                                return (
+                                    " SFOC: " +
+                                    Number(
+                                        context.parsed.y
+                                    ).toFixed(1) +
+                                    " g/kWh"
+                                );
+
+                            },
+
+                            afterLabel(context) {
+
+                                const index =
+                                    context.dataIndex;
+
+                                return (
+                                    " Status: " +
+                                    dailyData[index].status
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    ...commonOptions.scales,
+
+                    y: {
+
+                        ...commonOptions.scales.y,
+
+                        title: {
+
+                            display: true,
+
+                            text:
+                                "SFOC (g/kWh)"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+    /* =========================================================
+       DOSING CHART
+    ========================================================= */
+
+    new Chart(
+
+        document.getElementById("dosingChart"),
+
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+
+                    {
+
+                        label: "Additive",
+
+                        data: additive,
+
+                        backgroundColor:
+
+                            additive.map(
+
+                                value =>
+                                    Number(value) > 0
+                                        ? "#38d3a0"
+                                        : "#263d48"
+
+                            ),
+
+                        borderRadius: 5,
+
+                        borderSkipped: false
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                ...commonOptions,
+
+                plugins: {
+
+                    ...commonOptions.plugins,
+
+                    tooltip: {
+
+                        ...commonOptions.plugins.tooltip,
+
+                        callbacks: {
+
+                            title(context) {
+
+                                return getFullDate(
+                                    context[0].dataIndex
+                                );
+
+                            },
+
+                            label(context) {
+
+                                return (
+                                    " Additive: " +
+                                    Number(
+                                        context.parsed.y
+                                    ).toFixed(2) +
+                                    " L"
+                                );
+
+                            },
+
+                            afterLabel(context) {
+
+                                const index =
+                                    context.dataIndex;
+
+                                return (
+                                    " Status: " +
+                                    dailyData[index].status
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    ...commonOptions.scales,
+
+                    y: {
+
+                        ...commonOptions.scales.y,
+
+                        title: {
+
+                            display: true,
+
+                            text:
+                                "Additive (L)"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+    /* =========================================================
+       FUEL CHART
+    ========================================================= */
+
+    new Chart(
+
+        document.getElementById("fuelChart"),
+
+        {
+
+            type: "line",
+
+            plugins: [
+                dosingBackground
+            ],
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+
+                    {
+
+                        label: "Fuel Used",
+
+                        data: fuel,
+
+                        borderColor: "#e0a15c",
+
+                        backgroundColor:
+                            "rgba(224,161,92,0.08)",
+
+                        borderWidth: 2.5,
+
+                        pointRadius: 0,
+
+                        pointHoverRadius: 5,
+
+                        fill: true,
+
+                        tension: 0.3
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                ...commonOptions,
+
+                plugins: {
+
+                    ...commonOptions.plugins,
+
+                    tooltip: {
+
+                        ...commonOptions.plugins.tooltip,
+
+                        callbacks: {
+
+                            title(context) {
+
+                                return getFullDate(
+                                    context[0].dataIndex
+                                );
+
+                            },
+
+                            label(context) {
+
+                                return (
+                                    " Fuel: " +
+                                    Number(
+                                        context.parsed.y
+                                    ).toFixed(0) +
+                                    " kg"
+                                );
+
+                            },
+
+                            afterLabel(context) {
+
+                                const index =
+                                    context.dataIndex;
+
+                                return (
+                                    " Status: " +
+                                    dailyData[index].status
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    ...commonOptions.scales,
+
+                    y: {
+
+                        ...commonOptions.scales.y,
+
+                        title: {
+
+                            display: true,
+
+                            text:
+                                "Fuel Used (kg)"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+    /* =========================================================
+       POWER CHART
+    ========================================================= */
+
+    new Chart(
+
+        document.getElementById("powerChart"),
+
+        {
+
+            type: "line",
+
+            plugins: [
+                dosingBackground
+            ],
+
+            data: {
+
+                labels: labels,
+
+                datasets: [
+
+                    {
+
+                        label: "Power",
+
+                        data: power,
+
+                        borderColor: "#9b7ed8",
+
+                        backgroundColor:
+                            "rgba(155,126,216,0.07)",
+
+                        borderWidth: 2.5,
+
+                        pointRadius: 0,
+
+                        pointHoverRadius: 5,
+
+                        fill: true,
+
+                        tension: 0.3
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                ...commonOptions,
+
+                plugins: {
+
+                    ...commonOptions.plugins,
+
+                    tooltip: {
+
+                        ...commonOptions.plugins.tooltip,
+
+                        callbacks: {
+
+                            title(context) {
+
+                                return getFullDate(
+                                    context[0].dataIndex
+                                );
+
+                            },
+
+                            label(context) {
+
+                                return (
+                                    " Power: " +
+                                    Number(
+                                        context.parsed.y
+                                    ).toFixed(0) +
+                                    " kW"
+                                );
+
+                            },
+
+                            afterLabel(context) {
+
+                                const index =
+                                    context.dataIndex;
+
+                                return (
+                                    " Status: " +
+                                    dailyData[index].status
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    ...commonOptions.scales,
+
+                    y: {
+
+                        ...commonOptions.scales.y,
+
+                        title: {
+
+                            display: true,
+
+                            text:
+                                "Power (kW)"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+</script>
+
+</body>
+
+</html>

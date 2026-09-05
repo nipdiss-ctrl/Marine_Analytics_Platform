@@ -1,0 +1,158 @@
+{% extends "base_rightship.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h3 class="mb-1">
+
+            New Inspection
+
+        </h3>
+
+        <p class="text-muted mb-0">
+
+            Create a new vessel inspection.
+
+        </p>
+
+    </div>
+
+    <a href="{% url 'inspection_list' %}" class="btn btn-secondary">
+
+        <i class="bi bi-arrow-left"></i>
+
+        Back
+
+    </a>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        {{ form.vessel.label }}
+                    </label>
+
+                    {{ form.vessel }}
+
+                    {% if form.vessel.errors %}
+                        <div class="text-danger small">
+                            {{ form.vessel.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        {{ form.port.label }}
+                    </label>
+
+                    {{ form.port }}
+
+                    {% if form.port.errors %}
+                        <div class="text-danger small">
+                            {{ form.port.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        {{ form.inspection_date.label }}
+                    </label>
+
+                    {{ form.inspection_date }}
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        {{ form.inspector.label }}
+                    </label>
+
+                    {{ form.inspector }}
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        {{ form.validity_months.label }}
+                    </label>
+
+                    {{ form.validity_months }}
+
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        {{ form.status.label }}
+                    </label>
+
+                    {{ form.status }}
+
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    {{ form.remarks.label }}
+                </label>
+
+                {{ form.remarks }}
+
+            </div>
+
+            <hr>
+
+            <button type="submit" class="btn btn-primary">
+
+                <i class="bi bi-save"></i>
+
+                Save Inspection
+
+            </button>
+
+            <a href="{% url 'inspection_list' %}" class="btn btn-outline-secondary">
+
+                Cancel
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

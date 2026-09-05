@@ -1,0 +1,772 @@
+{% extends "base_scoc.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ===================================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                SCoC Voyage Overview
+            </h2>
+
+            <p class="text-muted mb-0">
+                Overall performance by loading condition
+            </p>
+        </div>
+
+
+        <a
+            href="{% url 'scoc_monitoring:upload_excel' %}"
+            class="btn btn-primary"
+        >
+            Import Noon Report
+        </a>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- IMPORT RESULT -->
+    <!-- ===================================================== -->
+
+    {% if result.rows_read %}
+
+    <div class="alert alert-success mb-4">
+
+        Import completed.
+
+        <strong>
+            {{ result.observations_created }}
+        </strong>
+        daily observation(s) created.
+
+        {% if result.observations_updated %}
+
+            {{ result.observations_updated }}
+            observation(s) updated.
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- BALLAST -->
+    <!-- ===================================================== -->
+
+    {% for summary in summaries %}
+
+        {% if summary.load_type == "Ballast" %}
+
+
+        <!-- ------------------------------------------------- -->
+        <!-- BALLAST SECTION HEADER -->
+        <!-- ------------------------------------------------- -->
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h4 class="fw-bold mb-1">
+                    Ballast
+                </h4>
+
+                <div class="text-muted">
+                    {{ summary.route_count }} route(s)
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ------------------------------------------------- -->
+        <!-- BALLAST CARDS -->
+        <!-- ------------------------------------------------- -->
+
+        <div class="row g-4 mb-5">
+
+
+            <!-- ================================================= -->
+            <!-- BALLAST SPEED CARD -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <a
+                   href="{% url 'scoc_monitoring:voyage_legs' 'ballast' 'speed' %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+
+                            <!-- HEADER -->
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        Average Speed
+                                    </h5>
+
+                                    <div class="text-muted">
+                                        Ballast performance
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge bg-primary">
+                                    View Routes →
+                                </span>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <!-- PERFORMANCE -->
+
+                            <div class="row g-3">
+
+
+                                <!-- AVERAGE SPEED -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Average Speed
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.average_speed is not None %}
+
+                                            {{ summary.average_speed|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                kn
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+
+
+                                <!-- TARGET SPEED -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Target Speed
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.target_speed is not None %}
+
+                                            {{ summary.target_speed|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                kn
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- STATUS -->
+
+                            <div class="mt-4">
+
+                                <span
+                                    class="
+                                        badge
+                                        {% if summary.status == 'Achieved' %}
+                                            bg-success
+                                        {% elif summary.status == 'Not Achieved' %}
+                                            bg-danger
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {{ summary.status }}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- BALLAST CONSUMPTION CARD -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <a
+                    href="{% url 'scoc_monitoring:voyage_legs' 'ballast' 'consumption' %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+
+                            <!-- HEADER -->
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        Average Consumption
+                                    </h5>
+
+                                    <div class="text-muted">
+                                        Ballast performance
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge bg-primary">
+                                    View Routes →
+                                </span>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <!-- PERFORMANCE -->
+
+                            <div class="row g-3">
+
+
+                                <!-- AVERAGE CONSUMPTION -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Average Consumption
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.average_consumption is not None %}
+
+                                            {{ summary.average_consumption|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                MT/day
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+
+
+                                <!-- TARGET CONSUMPTION -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Target Consumption
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.target_consumption is not None %}
+
+                                            {{ summary.target_consumption|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                MT/day
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- STATUS -->
+
+                            <div class="mt-4">
+
+                                <span
+                                    class="
+                                        badge
+                                        {% if summary.status == 'Achieved' %}
+                                            bg-success
+                                        {% elif summary.status == 'Not Achieved' %}
+                                            bg-danger
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {{ summary.status }}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+        {% endif %}
+
+    {% endfor %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- LADEN -->
+    <!-- ===================================================== -->
+
+    {% for summary in summaries %}
+
+        {% if summary.load_type == "Laden" %}
+
+
+        <!-- ------------------------------------------------- -->
+        <!-- LADEN SECTION HEADER -->
+        <!-- ------------------------------------------------- -->
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h4 class="fw-bold mb-1">
+                    Laden
+                </h4>
+
+                <div class="text-muted">
+                    {{ summary.route_count }} route(s)
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ------------------------------------------------- -->
+        <!-- LADEN CARDS -->
+        <!-- ------------------------------------------------- -->
+
+        <div class="row g-4 mb-5">
+
+
+            <!-- ================================================= -->
+            <!-- LADEN SPEED CARD -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <a
+                  href="{% url 'scoc_monitoring:voyage_legs' 'laden' 'speed' %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+
+                            <!-- HEADER -->
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        Average Speed
+                                    </h5>
+
+                                    <div class="text-muted">
+                                        Laden performance
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge bg-primary">
+                                    View Routes →
+                                </span>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <!-- PERFORMANCE -->
+
+                            <div class="row g-3">
+
+
+                                <!-- AVERAGE SPEED -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Average Speed
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.average_speed is not None %}
+
+                                            {{ summary.average_speed|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                kn
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+
+
+                                <!-- TARGET SPEED -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Target Speed
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.target_speed is not None %}
+
+                                            {{ summary.target_speed|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                kn
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- STATUS -->
+
+                            <div class="mt-4">
+
+                                <span
+                                    class="
+                                        badge
+                                        {% if summary.status == 'Achieved' %}
+                                            bg-success
+                                        {% elif summary.status == 'Not Achieved' %}
+                                            bg-danger
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {{ summary.status }}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- LADEN CONSUMPTION CARD -->
+            <!-- ================================================= -->
+
+            <div class="col-md-6">
+
+                <a
+                  href="{% url 'scoc_monitoring:voyage_legs' 'laden' 'consumption' %}"
+                    class="text-decoration-none"
+                >
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+
+                            <!-- HEADER -->
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        Average Consumption
+                                    </h5>
+
+                                    <div class="text-muted">
+                                        Laden performance
+                                    </div>
+
+                                </div>
+
+
+                                <span class="badge bg-primary">
+                                    View Routes →
+                                </span>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <!-- PERFORMANCE -->
+
+                            <div class="row g-3">
+
+
+                                <!-- AVERAGE CONSUMPTION -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Average Consumption
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.average_consumption is not None %}
+
+                                            {{ summary.average_consumption|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                MT/day
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+
+
+                                <!-- TARGET CONSUMPTION -->
+
+                                <div class="col-6">
+
+                                    <small class="text-muted d-block">
+                                        Target Consumption
+                                    </small>
+
+                                    <h3 class="fw-bold mb-0">
+
+                                        {% if summary.target_consumption is not None %}
+
+                                            {{ summary.target_consumption|floatformat:2 }}
+
+                                            <small class="fw-normal">
+                                                MT/day
+                                            </small>
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </h3>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- STATUS -->
+
+                            <div class="mt-4">
+
+                                <span
+                                    class="
+                                        badge
+                                        {% if summary.status == 'Achieved' %}
+                                            bg-success
+                                        {% elif summary.status == 'Not Achieved' %}
+                                            bg-danger
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {{ summary.status }}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+        {% endif %}
+
+    {% endfor %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- NO DATA -->
+    <!-- ===================================================== -->
+
+    {% if not summaries %}
+
+    <div class="row">
+
+        <div class="col-12">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center py-5">
+
+                    <h5 class="fw-bold">
+                        No voyage data available
+                    </h5>
+
+                    <p class="text-muted">
+                        Import a Noon Report Excel file to begin.
+                    </p>
+
+                    <a
+                        href="{% url 'scoc_monitoring:upload_excel' %}"
+                        class="btn btn-primary"
+                    >
+                        Import Excel
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+</div>
+
+{% endblock %}

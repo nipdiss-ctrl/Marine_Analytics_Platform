@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>RightShip Intelligence</title>
+
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+          rel="stylesheet">
+
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+          rel="stylesheet">
+
+    <!-- DataTables -->
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.css">
+
+    {% block extra_css %}{% endblock %}
+
+
+<style>
+
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    background: #f4f7fb;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    color: #1b2b3d;
+}
+
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.sidebar {
+
+    width: 250px;
+
+    height: 100vh;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0f2747 0%,
+            #132f52 55%,
+            #102944 100%
+        );
+
+    color: white;
+
+    z-index: 1050;
+
+    overflow-y: auto;
+
+    transition:
+        transform .3s ease;
+
+    box-shadow:
+        4px 0 18px rgba(15,39,71,.12);
+}
+
+
+/* Scrollbar */
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,.15);
+
+    border-radius: 10px;
+}
+
+
+/* ============================================================
+   BRAND
+   ============================================================ */
+
+.sidebar-brand {
+
+    padding: 22px 18px 24px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.08);
+
+    margin-bottom: 18px;
+}
+
+
+.sidebar-logo {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 11px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(255,255,255,.12);
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    font-size: 19px;
+
+    flex-shrink: 0;
+}
+
+
+.sidebar-brand-title {
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: white;
+
+    line-height: 1.2;
+}
+
+
+.sidebar-brand-subtitle {
+
+    color:
+        rgba(255,255,255,.55);
+
+    font-size: 10px;
+
+    margin-top: 3px;
+
+    letter-spacing: .3px;
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.sidebar-nav {
+
+    padding:
+        0 13px 25px;
+}
+
+
+/* Section label */
+
+.nav-section-title {
+
+    color:
+        rgba(255,255,255,.38);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    padding:
+        14px 10px 7px;
+
+    margin-top: 5px;
+}
+
+
+/* Main links */
+
+.sidebar .nav-link {
+
+    color:
+        rgba(255,255,255,.68);
+
+    border-radius: 9px;
+
+    padding:
+        10px 11px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    margin-bottom: 3px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    transition:
+        background .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+
+.sidebar .nav-link i {
+
+    width: 19px;
+
+    text-align: center;
+
+    font-size: 16px;
+
+    flex-shrink: 0;
+}
+
+
+.sidebar .nav-link:hover {
+
+    background:
+        rgba(255,255,255,.08);
+
+    color: white;
+
+    transform: translateX(2px);
+}
+
+
+/* Active link */
+
+.sidebar .nav-link.active {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(62,151,207,.28),
+            rgba(62,151,207,.10)
+        );
+
+    color: white;
+
+    box-shadow:
+        inset 3px 0 0 #4ba6d8;
+}
+
+
+/* ============================================================
+   COLLAPSE / SUBMENU
+   ============================================================ */
+
+.submenu {
+
+    margin:
+        2px 0 6px 0;
+
+    padding-left: 12px;
+
+    border-left:
+        1px solid rgba(255,255,255,.10);
+}
+
+
+.submenu .nav-link {
+
+    padding:
+        8px 10px 8px 13px;
+
+    font-size: 12px;
+
+    color:
+        rgba(255,255,255,.55);
+}
+
+
+.submenu .nav-link i {
+
+    font-size: 13px;
+}
+
+
+.submenu .nav-link:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.06);
+}
+
+
+/* Chevron */
+
+.sidebar .bi-chevron-down {
+
+    margin-left: auto;
+
+    width: auto;
+
+    font-size: 11px;
+
+    transition:
+        transform .2s ease;
+}
+
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+
+.content {
+
+    margin-left: 250px;
+
+    width:
+        calc(100% - 250px);
+
+    min-height: 100vh;
+}
+
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+
+.topbar {
+
+    height: 64px;
+
+    background: white;
+
+    border-bottom:
+        1px solid #e7ebf1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 25px;
+
+    box-shadow:
+        0 2px 8px rgba(15,39,71,.025);
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1000;
+}
+
+
+.topbar-title {
+
+    font-size: 14px;
+
+    font-weight: 650;
+
+    color: #26384d;
+
+    margin: 0;
+}
+
+
+.topbar-subtitle {
+
+    font-size: 11px;
+
+    color: #8a96a6;
+
+    margin-top: 2px;
+}
+
+
+/* User */
+
+.topbar-user {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #536174;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.user-avatar {
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    background:
+        #eaf3fb;
+
+    color:
+        #216794;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+}
+
+
+.logout-btn {
+
+    color: #8994a3;
+
+    text-decoration: none;
+
+    margin-left: 7px;
+
+    transition: color .2s ease;
+}
+
+
+.logout-btn:hover {
+
+    color: #d9534f;
+}
+
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+
+.page-wrapper {
+
+    padding: 24px;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+.overlay {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(15,39,71,.38);
+
+    z-index: 1040;
+}
+
+
+@media(max-width: 992px) {
+
+    .sidebar {
+
+        transform:
+            translateX(-100%);
+    }
+
+    .sidebar.active {
+
+        transform:
+            translateX(0);
+    }
+
+    .content {
+
+        margin-left: 0;
+
+        width: 100%;
+    }
+
+    .overlay.active {
+
+        display: block;
+    }
+
+    .topbar {
+
+        padding:
+            0 18px;
+    }
+
+}
+
+
+@media(max-width: 576px) {
+
+    .page-wrapper {
+
+        padding: 15px;
+    }
+
+    .topbar-title {
+
+        font-size: 13px;
+    }
+
+    .topbar-subtitle {
+
+        display: none;
+    }
+
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.btn-primary {
+
+    background:
+        #1d6599;
+
+    border-color:
+        #1d6599;
+}
+
+
+.btn-primary:hover {
+
+    background:
+        #174f78;
+
+    border-color:
+        #174f78;
+}
+
+
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
+
+.form-control,
+.form-select {
+
+    border-color:
+        #dfe5ec;
+
+    border-radius:
+        8px;
+}
+
+
+.form-control:focus,
+.form-select:focus {
+
+    border-color:
+        #7eafd0;
+
+    box-shadow:
+        0 0 0 .18rem rgba(29,101,153,.10);
+}
+
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card {
+
+    border:
+        1px solid #e7ebf1;
+
+    border-radius:
+        15px;
+
+    box-shadow:
+        0 4px 14px rgba(15,39,71,.05);
+}
+
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+.table thead th {
+
+    background:
+        #f7f9fc;
+
+    color:
+        #657386;
+
+    border-bottom:
+        1px solid #e5e9ef;
+
+    font-size:
+        11px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .4px;
+}
+
+
+.table tbody td {
+
+    color:
+        #445266;
+
+    border-color:
+        #edf0f4;
+}
+
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+
+.alert {
+
+    border-radius:
+        10px;
+
+    border: 0;
+}
+
+
+/* ============================================================
+   DATA TABLES
+   ============================================================ */
+
+.dataTables_wrapper {
+
+    padding:
+        14px 0;
+}
+
+
+.dataTables_wrapper .dataTables_filter input {
+
+    border:
+        1px solid #dfe5ec;
+
+    border-radius:
+        8px;
+
+    padding:
+        6px 10px;
+
+    margin-left:
+        6px;
+
+    outline:
+        none;
+}
+
+
+.dataTables_wrapper .dataTables_length select {
+
+    border:
+        1px solid #dfe5ec;
+
+    border-radius:
+        7px;
+
+    padding:
+        4px 8px;
+
+    outline:
+        none;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ============================================================
+     MOBILE OVERLAY
+     ============================================================ -->
+
+<div class="overlay"
+     onclick="toggleSidebar()">
+</div>
+
+
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+
+<div class="sidebar">
+
+
+    <!-- BRAND -->
+
+    <div class="sidebar-brand">
+
+        <div class="d-flex align-items-center gap-2">
+
+            <div class="sidebar-logo">
+
+                <i class="bi bi-shield-check"></i>
+
+            </div>
+
+            <div>
+
+                <div class="sidebar-brand-title">
+
+                    RSIMS
+
+                </div>
+
+                <div class="sidebar-brand-subtitle">
+
+                    RIGHTSHIP INTELLIGENCE
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="sidebar-nav">
+
+
+        <!-- OVERVIEW -->
+
+        <div class="nav-section-title">
+
+            Overview
+
+        </div>
+
+
+        <a href="{% url 'dashboard' %}"
+           class="nav-link">
+
+            <i class="bi bi-grid-1x2-fill"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+
+
+        <!-- MASTER DATA -->
+
+        <div class="nav-section-title">
+
+            Data Management
+
+        </div>
+
+
+        <a class="nav-link d-flex justify-content-between align-items-center"
+           data-bs-toggle="collapse"
+           href="#masterMenu">
+
+            <span class="d-flex align-items-center gap-2">
+
+                <i class="bi bi-database"></i>
+
+                <span>Master Data</span>
+
+            </span>
+
+            <i class="bi bi-chevron-down"></i>
+
+        </a>
+
+
+        <div class="collapse submenu"
+             id="masterMenu">
+
+
+            <a href="{% url 'vessel_list' %}"
+               class="nav-link">
+
+                <i class="bi bi-ship"></i>
+
+                <span>Vessels</span>
+
+            </a>
+
+
+            <a href="{% url 'checklistitem_list' %}"
+               class="nav-link">
+
+                <i class="bi bi-shield-exclamation"></i>
+
+                <span>Risk</span>
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- INSPECTION -->
+
+        <div class="nav-section-title">
+
+            Inspection
+
+        </div>
+
+
+        <a class="nav-link d-flex justify-content-between align-items-center"
+           data-bs-toggle="collapse"
+           href="#inspectionMenu">
+
+            <span class="d-flex align-items-center gap-2">
+
+                <i class="bi bi-clipboard-check"></i>
+
+                <span>Inspection Management</span>
+
+            </span>
+
+            <i class="bi bi-chevron-down"></i>
+
+        </a>
+
+
+        <div class="collapse submenu"
+             id="inspectionMenu">
+
+
+            <a href="{% url 'inspection_list' %}"
+               class="nav-link">
+
+                <i class="bi bi-list-ul"></i>
+
+                <span>Inspection List</span>
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- REPORTS -->
+
+        <div class="nav-section-title">
+
+            Analytics
+
+        </div>
+
+
+        <a class="nav-link d-flex justify-content-between align-items-center"
+           data-bs-toggle="collapse"
+           href="#reportMenu">
+
+            <span class="d-flex align-items-center gap-2">
+
+                <i class="bi bi-bar-chart-fill"></i>
+
+                <span>Reports</span>
+
+            </span>
+
+            <i class="bi bi-chevron-down"></i>
+
+        </a>
+
+
+        <div class="collapse submenu"
+             id="reportMenu">
+
+
+            <a href="#"
+               class="nav-link">
+
+                <i class="bi bi-speedometer"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="#"
+               class="nav-link">
+
+                <i class="bi bi-table"></i>
+
+                <span>Inspection Register</span>
+
+            </a>
+
+
+            <a href="#"
+               class="nav-link">
+
+                <i class="bi bi-clock-history"></i>
+
+                <span>Vessel History</span>
+
+            </a>
+
+
+            <a href="#"
+               class="nav-link">
+
+                <i class="bi bi-exclamation-diamond"></i>
+
+                <span>High Risk Findings</span>
+
+            </a>
+
+
+            <a href="#"
+               class="nav-link">
+
+                <i class="bi bi-geo-alt"></i>
+
+                <span>Port Analysis</span>
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- SETTINGS -->
+
+        <div class="nav-section-title">
+
+            System
+
+        </div>
+
+
+        <a href="#"
+           class="nav-link">
+
+            <i class="bi bi-gear"></i>
+
+            <span>Settings</span>
+
+        </a>
+
+
+    </nav>
+
+</div>
+
+
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+
+<div class="content">
+
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+
+        <div class="d-flex align-items-center gap-3">
+
+
+            <!-- Mobile button -->
+
+            <button class="btn d-lg-none p-0"
+                    onclick="toggleSidebar()">
+
+                <i class="bi bi-list fs-4"></i>
+
+            </button>
+
+
+            <div>
+
+                <h5 class="topbar-title">
+
+                    RightShip Inspection Management System
+
+                </h5>
+
+                <div class="topbar-subtitle">
+
+                    Vessel inspection & risk intelligence
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- USER -->
+
+        <div class="topbar-user">
+
+
+            <div class="user-avatar">
+
+                <i class="bi bi-person"></i>
+
+            </div>
+
+
+            <span>
+
+                {{ request.user.username }}
+
+            </span>
+
+
+            <a href="#"
+               class="logout-btn"
+               title="Logout">
+
+                <i class="bi bi-box-arrow-right fs-5"></i>
+
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- PAGE -->
+
+    <div class="page-wrapper">
+
+
+        <!-- Django messages -->
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert alert-{{ message.tags }}
+                            alert-dismissible fade show">
+
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+
+        <!-- PAGE CONTENT -->
+
+        {% block content %}
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h3>
+                    Welcome to RightShip Inspection Management System
+                </h3>
+
+                <p class="text-muted mb-0">
+
+                    Manage vessels, inspections, findings and reports
+                    from one place.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        {% endblock %}
+
+
+    </div>
+
+</div>
+
+
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<script>
+
+function toggleSidebar() {
+
+    document
+        .querySelector(".sidebar")
+        .classList.toggle("active");
+
+    document
+        .querySelector(".overlay")
+        .classList.toggle("active");
+
+}
+
+</script>
+
+
+{% block extra_js %}
+{% endblock %}
+
+
+</body>
+
+</html>

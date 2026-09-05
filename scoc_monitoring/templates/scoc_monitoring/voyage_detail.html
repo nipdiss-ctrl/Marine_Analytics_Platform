@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+```
+<!-- ================================================= -->
+<!-- HEADER -->
+<!-- ================================================= -->
+
+<div class="mb-4">
+
+    <a
+        href="{% url 'scoc_monitoring:voyage_legs' leg.load_type|lower performance_type %}"
+        class="text-decoration-none"
+    >
+        ← Back to Routes
+    </a>
+
+    <h2 class="fw-bold mt-2 mb-1">
+
+        {% if leg.departure %}
+            {{ leg.departure }}
+        {% else %}
+            Unknown
+        {% endif %}
+
+        →
+
+        {% if leg.destination %}
+            {{ leg.destination }}
+        {% else %}
+            Unknown
+        {% endif %}
+
+    </h2>
+
+    <p class="text-muted mb-0">
+
+        {% if leg.voyage_reference %}
+            Voyage {{ leg.voyage_reference }}
+        {% endif %}
+
+        {% if leg.load_type %}
+            · {{ leg.load_type|title }}
+        {% endif %}
+
+    </p>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- SUMMARY -->
+<!-- ================================================= -->
+
+<div class="row g-3 mb-4">
+
+    <!-- Route Average Speed -->
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Route Average Speed
+                </small>
+
+                <h3 class="fw-bold">
+
+                    {% if leg.average_speed is not None %}
+                        {{ leg.average_speed|floatformat:2 }}
+                        <small>kn</small>
+                    {% else %}
+                        —
+                    {% endif %}
+
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Route Average Consumption -->
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Route Average Consumption
+                </small>
+
+                <h3 class="fw-bold">
+
+                    {% if leg.average_consumption is not None %}
+                        {{ leg.average_consumption|floatformat:2 }}
+                        <small>MT/day</small>
+                    {% else %}
+                        —
+                    {% endif %}
+
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Daily Reports -->
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Daily Reports
+                </small>
+
+                <h3 class="fw-bold">
+                    {{ observation_count }}
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Status -->
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Status
+                </small>
+
+                <h5 class="mt-2">
+
+                    <span
+                        class="
+                            badge
+                            {% if voyage_status == 'Achieved' %}
+                                bg-success
+                            {% elif voyage_status == 'Not Achieved' %}
+                                bg-danger
+                            {% else %}
+                                bg-secondary
+                            {% endif %}
+                        "
+                    >
+                        {{ voyage_status }}
+                    </span>
+
+                </h5>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- DAILY PERFORMANCE TABLE -->
+<!-- ================================================= -->
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-white">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <h5 class="fw-bold mb-0">
+
+                {% if performance_type == "consumption" %}
+                    Daily Noon Report Consumption
+                {% else %}
+                    Daily Noon Report Speed
+                {% endif %}
+
+            </h5>
+
+            <small class="text-muted">
+                Use Edit to change a value
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover table-sm align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>
+                            Date
+                        </th>
+
+                        {% if performance_type == "consumption" %}
+
+                            <th>
+                                Consumption
+                            </th>
+
+                        {% else %}
+
+                            <th>
+                                Speed
+                            </th>
+
+                        {% endif %}
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for row in daily_rows %}
+
+                    <tr>
+
+                        <!-- ================================= -->
+                        <!-- DATE -->
+                        <!-- ================================= -->
+
+                        <td>
+
+                            {% if row.report_date %}
+
+                                {% if row.report_date|date:"H:i" == "00:00" %}
+
+                                    {{ row.report_date|date:"d M Y" }}
+
+                                {% else %}
+
+                                    {{ row.report_date|date:"d M Y H:i" }}
+
+                                {% endif %}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ================================= -->
+                        <!-- VALUE / EDIT -->
+                        <!-- ================================= -->
+
+                        <td>
+
+                            <!-- ================================= -->
+                            <!-- NORMAL DISPLAY MODE -->
+                            <!-- ================================= -->
+
+                            <div
+                                id="display-{{ row.observation.id }}"
+                                class="d-flex align-items-center gap-2"
+                            >
+
+                                <!--
+                                    IMPORTANT:
+                                    The value itself is NOT clickable.
+                                -->
+
+                                {% if performance_type == "consumption" %}
+
+                                    {% if row.consumption is not None %}
+
+                                        <span>
+                                            {{ row.consumption|floatformat:2 }}
+                                            MT/day
+                                        </span>
+
+                                    {% else %}
+
+                                        <span>
+                                            —
+                                        </span>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    {% if row.speed is not None %}
+
+                                        <span>
+                                            {{ row.speed|floatformat:2 }}
+                                            kn
+                                        </span>
+
+                                    {% else %}
+
+                                        <span>
+                                            —
+                                        </span>
+
+                                    {% endif %}
+
+                                {% endif %}
+
+
+                                <!-- ================================= -->
+                                <!-- EDIT BUTTON -->
+                                <!-- ================================= -->
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    onclick="enableEdit('{{ row.observation.id }}')"
+                                >
+                                    Edit
+                                </button>
+
+                            </div>
+
+
+                            <!-- ================================= -->
+                            <!-- EDIT MODE -->
+                            <!-- ================================= -->
+
+                            <form
+                                method="post"
+                                id="edit-{{ row.observation.id }}"
+                                class="d-none align-items-center gap-2"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="observation_id"
+                                    value="{{ row.observation.id }}"
+                                >
+
+
+                                {% if performance_type == "consumption" %}
+
+                                    <input
+                                        type="number"
+                                        name="value"
+                                        value="{% if row.consumption is not None %}{{ row.consumption }}{% endif %}"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control form-control-sm"
+                                        style="max-width: 130px;"
+                                        required
+                                    >
+
+                                    <span>
+                                        MT/day
+                                    </span>
+
+                                {% else %}
+
+                                    <input
+                                        type="number"
+                                        name="value"
+                                        value="{% if row.speed is not None %}{{ row.speed }}{% endif %}"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control form-control-sm"
+                                        style="max-width: 130px;"
+                                        required
+                                    >
+
+                                    <span>
+                                        kn
+                                    </span>
+
+                                {% endif %}
+
+
+                                <!-- ================================= -->
+                                <!-- SAVE -->
+                                <!-- ================================= -->
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-primary"
+                                >
+                                    Save
+                                </button>
+
+
+                                <!-- ================================= -->
+                                <!-- CANCEL -->
+                                <!-- ================================= -->
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    onclick="cancelEdit('{{ row.observation.id }}')"
+                                >
+                                    Cancel
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="2"
+                            class="text-center py-5 text-muted"
+                        >
+
+                            No daily observations have been
+                            imported for this route yet.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- ===================================================== -->
+
+<!-- EDIT JAVASCRIPT -->
+
+<!-- ===================================================== -->
+
+<script>
+
+function enableEdit(observationId) {
+
+    const displayElement =
+        document.getElementById(
+            "display-" + observationId
+        );
+
+    const editForm =
+        document.getElementById(
+            "edit-" + observationId
+        );
+
+    if (!displayElement || !editForm) {
+        return;
+    }
+
+    /*
+     * Hide the normal value + Edit button.
+     */
+
+    displayElement.classList.add("d-none");
+
+
+    /*
+     * Show the edit form.
+     */
+
+    editForm.classList.remove("d-none");
+
+    editForm.classList.add("d-flex");
+
+
+    /*
+     * Automatically place the cursor
+     * inside the input field.
+     */
+
+    const input =
+        editForm.querySelector(
+            'input[name="value"]'
+        );
+
+    if (input) {
+
+        input.focus();
+
+        /*
+         * Select the existing value so the user
+         * can immediately type the replacement.
+         */
+
+        input.select();
+
+    }
+
+}
+
+
+function cancelEdit(observationId) {
+
+    const displayElement =
+        document.getElementById(
+            "display-" + observationId
+        );
+
+    const editForm =
+        document.getElementById(
+            "edit-" + observationId
+        );
+
+    if (!displayElement || !editForm) {
+        return;
+    }
+
+    /*
+     * Hide edit form.
+     */
+
+    editForm.classList.add("d-none");
+
+    editForm.classList.remove("d-flex");
+
+
+    /*
+     * Show original value again.
+     */
+
+    displayElement.classList.remove("d-none");
+
+}
+
+</script>
+
+{% endblock %}

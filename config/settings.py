@@ -43,7 +43,10 @@ INSTALLED_APPS = [
     "core",
     "accounts",
     "fuel",
-
+    'inspections',
+    'dashboard',
+    "chemical_analysis",
+    "scoc_monitoring",
 ]
 
 MIDDLEWARE = [
@@ -111,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
@@ -164,3 +167,6 @@ JAZZMIN_SETTINGS = {
 
 
 }
+
+LOGIN_REDIRECT_URL = "launcher"
+LOGOUT_REDIRECT_URL = "login"

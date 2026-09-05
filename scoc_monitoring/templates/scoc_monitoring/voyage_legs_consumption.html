@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+
+    <!-- ===================================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                {{ load_type }} Routes
+            </h2>
+
+            <p class="text-muted mb-0">
+                Consumption performance for each voyage route
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'scoc_monitoring:import_result' %}"
+            class="btn btn-outline-primary"
+        >
+            ← Overview
+        </a>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- ROUTE TABLE -->
+    <!-- ===================================================== -->
+
+    {% if leg_rows %}
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+
+                    <!-- ================================================= -->
+                    <!-- TABLE HEADER -->
+                    <!-- ================================================= -->
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Route
+                            </th>
+
+                            <th>
+                                Voyage
+                            </th>
+
+                            <th>
+                                Start
+                            </th>
+
+                            <th>
+                                End
+                            </th>
+
+                            <th>
+                                Avg Consumption
+                            </th>
+
+                            <th>
+                                Target Consumption
+                            </th>
+
+                            <th>
+                                Daily Reports
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+
+                    <!-- ================================================= -->
+                    <!-- TABLE BODY -->
+                    <!-- ================================================= -->
+
+                    <tbody>
+
+                    {% for row in leg_rows %}
+
+                        <tr>
+
+
+                            <!-- ========================================= -->
+                            <!-- ROUTE -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                <a href="{% url 'scoc_monitoring:voyage_detail' row.leg.id 'consumption' %}">
+
+                                    {{ row.leg.departure|default:"—" }}
+
+                                    →
+
+                                    {{ row.leg.destination|default:"—" }}
+
+                                </a>
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- VOYAGE -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {{ row.leg.voyage_name|default:"—" }}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- START -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {{ row.leg.start_date|default:"—" }}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- END -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {{ row.leg.end_date|default:"—" }}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- AVERAGE CONSUMPTION -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {% if row.average_consumption is not None %}
+
+                                    {{ row.average_consumption|floatformat:2 }}
+
+                                    MT/day
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- TARGET CONSUMPTION -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {% if row.target_consumption is not None %}
+
+                                    <strong>
+                                        {{ row.target_consumption|floatformat:2 }}
+                                    </strong>
+
+                                    MT/day
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- DAILY REPORTS -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {{ row.observation_count }}
+
+                            </td>
+
+
+
+                            <!-- ========================================= -->
+                            <!-- STATUS -->
+                            <!-- ========================================= -->
+
+                            <td>
+
+                                {% if row.status == "Achieved" %}
+
+                                    <span class="badge bg-success">
+                                        Achieved
+                                    </span>
+
+                                {% elif row.status == "Not Achieved" %}
+
+                                    <span class="badge bg-danger">
+                                        Not Achieved
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        Target Not Available
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- ===================================================== -->
+    <!-- NO ROUTES -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <h5 class="fw-bold">
+                No routes found for {{ load_type }}.
+            </h5>
+
+            <p class="text-muted mb-0">
+                The database does not currently contain voyage
+                legs matching this loading condition.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+
+{% endblock %}

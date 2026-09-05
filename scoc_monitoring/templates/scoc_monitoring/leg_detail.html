@@ -1,0 +1,215 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+
+<a
+    href="{% url 'scoc_monitoring:home' %}"
+    class="back"
+>
+    ← Back to Performance
+</a>
+
+
+<div class="page-title">
+
+    <h1>{{ leg.load_type }} Voyage</h1>
+
+    <p>
+        {{ leg.departure }}
+        →
+        {{ leg.destination }}
+    </p>
+
+</div>
+
+
+<div class="section">
+
+    <div class="card-header">
+
+        <div>
+
+            <h2>
+                Voyage Performance
+            </h2>
+
+            <p>
+                {{ leg.start_date|date:"d M Y" }}
+
+                {% if leg.end_date %}
+                    → {{ leg.end_date|date:"d M Y" }}
+                {% endif %}
+            </p>
+
+        </div>
+
+
+        {% if status.achieved %}
+
+            <div class="status status-achieved">
+                TARGET ACHIEVED
+            </div>
+
+        {% else %}
+
+            <div class="status status-not-achieved">
+                TARGET NOT ACHIEVED
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="detail-grid">
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Average Speed
+            </div>
+
+            <div class="detail-value">
+                {{ leg.average_speed|floatformat:2 }}
+                kn
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Target Speed
+            </div>
+
+            <div class="detail-value">
+                {{ leg.target_speed|floatformat:2 }}
+                kn
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Average Consumption
+            </div>
+
+            <div class="detail-value">
+                {{ leg.average_consumption|floatformat:2 }}
+                MT/day
+            </div>
+
+        </div>
+
+
+        <div class="detail-box">
+
+            <div class="detail-label">
+                Target Consumption
+            </div>
+
+            <div class="detail-value">
+                {{ leg.target_consumption|floatformat:2 }}
+                MT/day
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="section">
+
+    <h2>
+        Daily Performance
+    </h2>
+
+    <p>
+        Click an observation to view its individual performance.
+    </p>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Date / Time
+                </th>
+
+                <th>
+                    Speed
+                </th>
+
+                <th>
+                    Consumption
+                </th>
+
+                <th>
+                    Details
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        {% for observation in observations %}
+
+            <tr class="clickable">
+
+                <td>
+                    {{ observation.reported_time|date:"d M Y H:i" }}
+                </td>
+
+                <td>
+                    {{ observation.speed|floatformat:2 }}
+                    kn
+                </td>
+
+                <td>
+                    {{ observation.consumption|floatformat:2 }}
+                    MT/day
+                </td>
+
+                <td>
+
+                    <a
+                        class="table-link"
+                        href="{% url 'scoc_monitoring:observation_detail' observation.id %}"
+                    >
+                        View
+                    </a>
+
+                </td>
+
+            </tr>
+
+        {% empty %}
+
+            <tr>
+
+                <td colspan="4">
+                    No observations available.
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

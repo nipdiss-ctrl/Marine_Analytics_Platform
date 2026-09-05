@@ -1,0 +1,333 @@
+{% extends "base_shipment.html" %}
+
+{% block content %}
+
+<h2>⚓ Future Fuel Analysis</h2>
+
+<p class="text-muted">
+    Calculate cumulative future average speed and consumption
+    from historical daily vessel data.
+</p>
+
+<hr>
+
+
+<!-- ========================================================= -->
+<!-- UPLOAD -->
+<!-- ========================================================= -->
+
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <h5>Upload Vessel Excel</h5>
+
+        <form method="post"
+              enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Excel file
+                </label>
+
+                <input
+                    type="file"
+                    name="file"
+                    class="form-control"
+                    accept=".xlsx,.xls"
+                    required
+                >
+
+            </div>
+
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Vessel sheet name
+                </label>
+
+                <input
+                    type="text"
+                    name="vessel_name"
+                    class="form-control"
+                    placeholder="Example: Daniel"
+                >
+
+                <small class="text-muted">
+                    Enter the vessel sheet name exactly
+                    as it appears in Excel.
+                </small>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                Generate Analysis
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- ERROR -->
+<!-- ========================================================= -->
+
+{% if error %}
+
+    <div class="alert alert-danger">
+
+        {{ error }}
+
+    </div>
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- RESULTS -->
+<!-- ========================================================= -->
+
+{% if table_html %}
+
+    <!-- Vessel information -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h4>
+                ⚓ {{ vessel_name }}
+            </h4>
+
+            <p class="text-muted mb-0">
+                Future average speed and consumption are
+                calculated as cumulative averages from the
+                available historical daily data.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- FULL EXCEL DATA -->
+    <!-- ===================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5>
+                Future Analysis — Full Excel Data
+            </h5>
+
+            <p class="text-muted">
+                All original Excel columns are preserved.
+                The calculated analysis columns are added at
+                the end of the table.
+            </p>
+
+
+            <!-- Horizontal scrolling -->
+
+            <div class="future-analysis-container">
+
+                {{ table_html|safe }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ACTIONS -->
+    <!-- ===================================================== -->
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'future_analysis_excel' %}"
+            class="btn btn-success me-2">
+
+            📊 Download Full Excel
+
+        </a>
+
+
+        <a
+            href="{% url 'future_analysis_graph' %}"
+            class="btn btn-primary">
+
+            📈 Download Graph
+
+        </a>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- GRAPH -->
+    <!-- ===================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5>
+                📈 Performance Graph
+            </h5>
+
+            <div class="future-analysis-graph">
+
+                <img
+                    src="{% url 'future_analysis_graph' %}"
+                    class="img-fluid"
+                    alt="Future Analysis Graph">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- TABLE STYLE -->
+<!-- ========================================================= -->
+
+<style>
+
+    /*
+     * The Excel has many columns.
+     *
+     * Therefore the table should NOT shrink everything
+     * into the screen.
+     *
+     * Instead, allow horizontal scrolling.
+     */
+
+    .future-analysis-container {
+
+        width: 100%;
+
+        overflow-x: auto;
+        overflow-y: auto;
+
+        max-height: 700px;
+
+        border: 1px solid #dee2e6;
+
+        border-radius: 6px;
+
+        background: white;
+
+    }
+
+
+    /*
+     * Keep the table wide enough for all columns.
+     */
+
+    .future-analysis-container table {
+
+        width: max-content;
+
+        min-width: 100%;
+
+        margin-bottom: 0;
+
+        font-size: 12px;
+
+        white-space: nowrap;
+
+    }
+
+
+    /*
+     * Cell formatting
+     */
+
+    .future-analysis-container th,
+    .future-analysis-container td {
+
+        padding: 6px 8px;
+
+        vertical-align: middle;
+
+        white-space: nowrap;
+
+    }
+
+
+    /*
+     * Keep header visible when scrolling vertically.
+     */
+
+    .future-analysis-container thead th {
+
+        position: sticky;
+
+        top: 0;
+
+        z-index: 2;
+
+        background: #f8f9fa;
+
+    }
+
+
+    /*
+     * Slightly emphasize calculated columns.
+     *
+     * These are the four columns added by Python.
+     */
+
+    .future-analysis-container th:nth-last-child(-n+4) {
+
+        background: #e8f4ff;
+
+    }
+
+
+    /*
+     * Graph container
+     */
+
+    .future-analysis-graph {
+
+        width: 100%;
+
+        overflow-x: auto;
+
+    }
+
+
+    .future-analysis-graph img {
+
+        max-width: 100%;
+
+        height: auto;
+
+    }
+
+</style>
+
+{% endblock %}

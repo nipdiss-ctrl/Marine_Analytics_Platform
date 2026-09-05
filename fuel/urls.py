@@ -4,7 +4,10 @@ from . import views
 
 urlpatterns = [
 
-    # Main fuel page
+    # =====================================================
+    # MAIN FUEL PAGE / DATA CENTER
+    # =====================================================
+
     path(
         "",
         views.data_center,
@@ -12,7 +15,10 @@ urlpatterns = [
     ),
 
 
-    # Upload history
+    # =====================================================
+    # UPLOAD HISTORY
+    # =====================================================
+
     path(
         "history/",
         views.upload_history,
@@ -20,7 +26,10 @@ urlpatterns = [
     ),
 
 
-    # Delete upload
+    # =====================================================
+    # DELETE UPLOAD
+    # =====================================================
+
     path(
         "delete/<int:id>/",
         views.delete_upload,
@@ -28,7 +37,10 @@ urlpatterns = [
     ),
 
 
-    # Analysis page
+    # =====================================================
+    # ANALYSIS PAGE
+    # =====================================================
+
     path(
         "analysis/<int:id>/",
         views.upload_analysis,
@@ -36,7 +48,10 @@ urlpatterns = [
     ),
 
 
-    # Excel download
+    # =====================================================
+    # EXCEL DOWNLOAD
+    # =====================================================
+
     path(
         "excel/<int:id>/",
         views.download_excel,
@@ -44,11 +59,47 @@ urlpatterns = [
     ),
 
 
-    # PDF download
+    # =====================================================
+    # PDF DOWNLOAD
+    # =====================================================
+
     path(
         "pdf/<int:id>/",
         views.download_pdf,
         name="download_pdf"
+    ),
+
+
+    # =====================================================
+    # FUTURE ANALYSIS
+    # =====================================================
+
+    path(
+        "future-analysis/",
+        views.future_analysis,
+        name="future_analysis"
+    ),
+
+
+    # =====================================================
+    # FUTURE ANALYSIS EXCEL
+    # =====================================================
+
+    path(
+        "future-analysis/excel/",
+        views.future_analysis_excel,
+        name="future_analysis_excel"
+    ),
+
+
+    # =====================================================
+    # FUTURE ANALYSIS GRAPH
+    # =====================================================
+
+    path(
+        "future-analysis/graph/",
+        views.future_analysis_graph,
+        name="future_analysis_graph"
     ),
 
 ]

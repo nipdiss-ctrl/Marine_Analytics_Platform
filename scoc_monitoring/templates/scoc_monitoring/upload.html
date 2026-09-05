@@ -1,0 +1,287 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <h1>
+        SCoC Monitoring
+    </h1>
+
+    <p>
+        Import vessel performance data from the Excel noon report.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Upload Performance Excel
+    </h2>
+
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+
+        <div style="margin-bottom:20px;">
+
+            <label
+                for="noon_report_message"
+                style="
+                    display:block;
+                    font-weight:600;
+                    margin-bottom:8px;
+                "
+            >
+                Noon Report Message
+            </label>
+
+
+            <textarea
+                id="noon_report_message"
+                name="noon_report_message"
+                rows="14"
+                style="
+                    width:100%;
+                    box-sizing:border-box;
+                    padding:12px;
+                    border:1px solid #cbd5e1;
+                    border-radius:8px;
+                    font-family:monospace;
+                    font-size:13px;
+                    resize:vertical;
+                "
+                placeholder="Paste the noon report message here if required...
+
+Example:
+
+DATE: 27-Aug-2026
+FROM: Singapore
+TO: Rotterdam
+LOAD TYPE: LADEN
+VOYAGE: V123
+AVERAGE SPEED: 10.5
+ME CONSUMPTION: 58.4
+DISTANCE SAILED: 252
+DISTANCE TO GO: 4850
+ME RUNNING HOURS: 24
+HSFO ROB: 1250
+LSFO ROB: 80
+MGO ROB: 45
+ME POWER: 9000
+RPM: 52.7
+ENGINE LOAD: 39.6%
+SCoC: 1.076
+CYLINDER OIL CONSUMPTION: 250
+TARGET SPEED: 10.5
+TARGET CONSUMPTION: 58.0"
+            ></textarea>
+
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+                line-height:1.6;
+                margin-top:8px;
+            ">
+                The Excel file is the primary source.
+                The noon report message is supplementary and
+                is used only to fill information missing from
+                the Excel data for the same report date.
+            </p>
+
+        </div>
+
+
+        <div class="upload-box">
+
+            <p>
+                Select the vessel performance Excel file.
+            </p>
+
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+                line-height:1.6;
+            ">
+
+                The importer can read, when available:
+
+                Reported Time,
+                Voyage / Leg,
+                Load Condition,
+                Departure,
+                Destination,
+                Speed,
+                ME Consumption,
+                Distance,
+                Distance To Go,
+                Running Hours,
+                HSFO ROB,
+                LSFO ROB,
+                MGO ROB,
+                ME Power,
+                RPM,
+                Engine Load,
+                SCoC,
+                Cylinder Oil,
+                and target values.
+
+            </p>
+
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+                line-height:1.6;
+            ">
+
+                No fuel quantity, target, voyage, load condition,
+                speed or consumption value is invented when it
+                is unavailable in the source data.
+
+            </p>
+
+
+            <!--
+                IMPORTANT:
+                The name MUST be "file" because views.py uses:
+
+                    request.FILES.get("file")
+            -->
+
+            <input
+                type="file"
+                name="file"
+                accept=".xlsx,.xls"
+                required
+            >
+
+
+            <br><br>
+
+
+            <button
+                type="submit"
+                class="button"
+            >
+                Upload & Import
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <h3 class="mb-4">
+                SCoC Report Import
+            </h3>
+
+            {% if error %}
+
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                {% csrf_token %}
+
+                <!-- ================================================= -->
+                <!-- EXCEL -->
+                <!-- ================================================= -->
+
+                <div class="mb-4">
+
+                    <label class="form-label fw-bold">
+                        SCoC Excel File
+                    </label>
+
+                    <input
+                        type="file"
+                        name="file"
+                        class="form-control"
+                        accept=".xlsx,.xls"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- NOON REPORT -->
+                <!-- ================================================= -->
+
+                <div class="mb-4">
+
+                    <label class="form-label fw-bold">
+                        Noon Report Message
+                    </label>
+
+                    <p class="text-muted small">
+
+                        Paste the complete noon report email here.
+                        The system will automatically extract the
+                        report date, route, destination, ETA,
+                        speed, consumption, ROB and other values.
+
+                    </p>
+
+                    <textarea
+                        name="noon_report_message"
+                        class="form-control"
+                        rows="18"
+                        placeholder="Paste the complete noon report here..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- SUBMIT -->
+                <!-- ================================================= -->
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Import SCoC Data
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

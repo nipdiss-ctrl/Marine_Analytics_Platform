@@ -1,0 +1,57 @@
+{% extends "base_rightship.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="card-header">
+            Update Risk Level
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Reference:</strong>
+                {{ finding.checklist_item.ref_no }}
+            </p>
+
+            <p>
+                <strong>Inspection Item:</strong><br>
+                {{ finding.checklist_item.inspected_item }}
+            </p>
+
+            <p>
+                <strong>Finding:</strong><br>
+                {{ finding.finding_description }}
+            </p>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Risk Level</label>
+                    {{ form.risk_level }}
+                </div>
+
+                <button class="btn btn-primary">
+                    <i class="bi bi-save"></i>
+                    Update
+                </button>
+
+                <a href="{% url 'inspection_findings' finding.inspection.id %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

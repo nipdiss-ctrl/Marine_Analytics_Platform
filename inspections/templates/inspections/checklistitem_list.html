@@ -1,0 +1,59 @@
+{% extends "base_rightship.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between">
+
+            <h4 class="mb-0">
+                Checklist Items
+            </h4>
+
+            <a href="{% url 'checklistitem_create' %}"
+               class="btn btn-light btn-sm">
+                <i class="fas fa-plus"></i>
+                New
+            </a>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-light">
+                    <tr>
+                        <th width="120">Ref No</th>
+                        <th>Inspected Item</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.ref_no }}</td>
+                        <td>{{ item.inspected_item }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">
+                            No records found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

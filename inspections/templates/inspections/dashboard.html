@@ -1,0 +1,792 @@
+{% extends "base_rightship.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="fw-bold mb-1">
+                RightShip Intelligence Dashboard
+            </h1>
+
+            <p class="text-muted mb-0">
+                Vessel inspection, findings and risk intelligence
+            </p>
+        </div>
+
+        <div>
+
+            <a
+                href="{% url 'inspection_import' %}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-upload"></i>
+                Import Inspection Data
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- KPI CARDS -->
+    <!-- ========================================================= -->
+
+    <div class="row g-3">
+
+        <!-- VESSELS -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Vessels
+                    </div>
+
+                    <div class="fs-2 fw-bold">
+                        {{ total_vessels }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INSPECTIONS -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Inspections
+                    </div>
+
+                    <div class="fs-2 fw-bold">
+                        {{ total_inspections }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FINDINGS -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Findings
+                    </div>
+
+                    <div class="fs-2 fw-bold">
+                        {{ total_findings }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HIGH -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        High Risk
+                    </div>
+
+                    <div class="fs-2 fw-bold text-danger">
+                        {{ high_risk }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MEDIUM -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Medium Risk
+                    </div>
+
+                    <div class="fs-2 fw-bold text-warning">
+                        {{ medium_risk }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOW -->
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Low Risk
+                    </div>
+
+                    <div class="fs-2 fw-bold text-success">
+                        {{ low_risk }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- CHARTS -->
+    <!-- ========================================================= -->
+
+    <div class="row g-4 mt-2">
+
+
+        <!-- ===================================================== -->
+        <!-- RISK FINDINGS BY INSPECTION -->
+        <!-- ===================================================== -->
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-1">
+                        Risk Findings by Inspection
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        High, medium and low risk findings per inspection
+                    </p>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div style="height: 430px;">
+
+                        <canvas id="riskChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- RISK DISTRIBUTION -->
+        <!-- ===================================================== -->
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-1">
+                        Overall Risk Distribution
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Distribution of all findings
+                    </p>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div style="height: 430px;">
+
+                        <canvas id="riskPieChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- INSPECTION REGISTER -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Inspection Register
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Inspection history and risk summary
+                    </p>
+
+                </div>
+
+                <span class="badge bg-secondary">
+
+                    {{ total_inspections }} inspection(s)
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body px-4 pb-4">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>
+                                Inspection
+                            </th>
+
+                            <th>
+                                Vessel
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                High
+                            </th>
+
+                            <th>
+                                Medium
+                            </th>
+
+                            <th>
+                                Low
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                            <th>
+                                Severity
+                            </th>
+
+                            <th>
+                                Validity
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for row in inspection_register %}
+
+                        <tr>
+
+                            <!-- INSPECTION -->
+
+                            <td>
+
+                                <strong>
+                                    {{ row.inspection.inspection_no }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- VESSEL -->
+
+                            <td>
+
+                                {{ row.vessel }}
+
+                            </td>
+
+
+                            <!-- DATE -->
+
+                            <td>
+
+                                {% if row.date %}
+
+                                    {{ row.date|date:"d-M-Y" }}
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- HIGH -->
+
+                            <td>
+
+                                {% if row.high > 0 %}
+
+                                    <span class="badge bg-danger">
+                                        {{ row.high }}
+                                    </span>
+
+                                {% else %}
+
+                                    0
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- MEDIUM -->
+
+                            <td>
+
+                                {% if row.medium > 0 %}
+
+                                    <span class="badge bg-warning text-dark">
+                                        {{ row.medium }}
+                                    </span>
+
+                                {% else %}
+
+                                    0
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- LOW -->
+
+                            <td>
+
+                                {% if row.low > 0 %}
+
+                                    <span class="badge bg-success">
+                                        {{ row.low }}
+                                    </span>
+
+                                {% else %}
+
+                                    0
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- TOTAL -->
+
+                            <td>
+
+                                <strong>
+                                    {{ row.total }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- SEVERITY -->
+
+                            <td>
+
+                                {% if row.severity >= 3 %}
+
+                                    <span class="badge bg-danger">
+                                        HIGH
+                                    </span>
+
+                                {% elif row.severity == 2 %}
+
+                                    <span class="badge bg-warning text-dark">
+                                        MEDIUM
+                                    </span>
+
+                                {% elif row.severity == 1 %}
+
+                                    <span class="badge bg-success">
+                                        LOW
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        NONE
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- VALIDITY -->
+
+                            <td>
+
+                                {% if row.validity %}
+
+                                    {{ row.validity }} months
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                class="text-center text-muted py-5"
+                            >
+
+                                No inspections available.
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================= -->
+<!-- CHART DATA -->
+<!-- ============================================================= -->
+
+<script>
+
+const chartLabels =
+    {{ chart_labels|safe }};
+
+const highData =
+    {{ high_data|safe }};
+
+const mediumData =
+    {{ medium_data|safe }};
+
+const lowData =
+    {{ low_data|safe }};
+
+</script>
+
+
+<!-- ============================================================= -->
+<!-- CHART.JS -->
+<!-- ============================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /* ===================================================== */
+        /* RISK BAR CHART */
+        /* ===================================================== */
+
+        const riskCanvas =
+            document.getElementById(
+                "riskChart"
+            );
+
+
+        if (riskCanvas) {
+
+            new Chart(
+                riskCanvas,
+                {
+
+                    type: "bar",
+
+                    data: {
+
+                        labels: chartLabels,
+
+                        datasets: [
+
+                            {
+                                label: "High",
+                                data: highData,
+                                backgroundColor: "#dc3545"
+                            },
+
+                            {
+                                label: "Medium",
+                                data: mediumData,
+                                backgroundColor: "#ffc107"
+                            },
+
+                            {
+                                label: "Low",
+                                data: lowData,
+                                backgroundColor: "#198754"
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+
+                            mode: "index",
+
+                            intersect: false
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "top"
+
+                            },
+
+                            tooltip: {
+
+                                callbacks: {
+
+                                    title: function(context) {
+
+                                        return context[0].label;
+
+                                    },
+
+                                    label: function(context) {
+
+                                        return (
+                                            context.dataset.label
+                                            + ": "
+                                            + context.parsed.y
+                                        );
+
+                                    }
+
+                                }
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                ticks: {
+
+                                    autoSkip: false,
+
+                                    maxRotation: 90,
+
+                                    minRotation: 45
+
+                                }
+
+                            },
+
+                            y: {
+
+                                beginAtZero: true,
+
+                                ticks: {
+
+                                    precision: 0
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* ===================================================== */
+        /* RISK DISTRIBUTION */
+        /* ===================================================== */
+
+        const pieCanvas =
+            document.getElementById(
+                "riskPieChart"
+            );
+
+
+        if (pieCanvas) {
+
+            new Chart(
+                pieCanvas,
+                {
+
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: [
+
+                            "High",
+                            "Medium",
+                            "Low"
+
+                        ],
+
+                        datasets: [
+
+                            {
+
+                                data: [
+
+                                    {{ high_risk }},
+                                    {{ medium_risk }},
+                                    {{ low_risk }}
+
+                                ],
+
+                                backgroundColor: [
+
+                                    "#dc3545",
+                                    "#ffc107",
+                                    "#198754"
+
+                                ],
+
+                                borderWidth: 1
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

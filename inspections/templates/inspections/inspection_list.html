@@ -1,0 +1,390 @@
+```html
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================= -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <div class="page-title">
+            RightShip Inspections
+        </div>
+
+        <p class="page-subtitle">
+            Inspection overview and vessel compliance management
+        </p>
+
+    </div>
+
+
+    <div>
+
+        <a
+            href="{% url 'inspection_import' %}"
+            class="btn btn-success"
+        >
+
+            <i class="bi bi-upload me-1"></i>
+
+            Import Excel
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     KPI CARDS
+========================================================= -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- Total inspections -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card kpi-card">
+
+            <div class="kpi-label">
+                Total Inspections
+            </div>
+
+            <div class="kpi-value">
+                {{ total_inspections }}
+            </div>
+
+            <i class="bi bi-clipboard-check kpi-icon"></i>
+
+        </div>
+
+    </div>
+
+
+    <!-- Open -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card kpi-card">
+
+            <div class="kpi-label">
+                Open Inspections
+            </div>
+
+            <div class="kpi-value text-warning">
+
+                {{ open_inspections }}
+            </div>
+
+            <i class="bi bi-clock-history kpi-icon"></i>
+
+        </div>
+
+    </div>
+
+
+    <!-- Completed -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card kpi-card">
+
+            <div class="kpi-label">
+                Completed
+            </div>
+
+            <div class="kpi-value text-success">
+
+                {{ completed_inspections }}
+
+            </div>
+
+            <i class="bi bi-check-circle kpi-icon"></i>
+
+        </div>
+
+    </div>
+
+
+    <!-- Vessels -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="card kpi-card">
+
+            <div class="kpi-label">
+                Vessels
+            </div>
+
+            <div class="kpi-value">
+
+                {{ total_vessels }}
+
+            </div>
+
+            <i class="bi bi-ship kpi-icon"></i>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     INSPECTION TABLE
+========================================================= -->
+
+<div class="card">
+
+    <div class="card-header bg-white py-3">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <h5 class="mb-1">
+                    Inspection Register
+                </h5>
+
+                <small class="text-muted">
+                    All recorded RightShip inspections
+                </small>
+
+            </div>
+
+
+            <span class="badge bg-light text-dark">
+
+                {{ total_inspections }} records
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body p-0">
+
+
+        <div class="table-responsive">
+
+            <table
+                id="inspectionTable"
+                class="table table-hover align-middle mb-0"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Inspection
+                        </th>
+
+                        <th>
+                            Vessel
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Port
+                        </th>
+
+                        <th>
+                            Inspector
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th class="text-end">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for inspection in inspections %}
+
+                    <tr>
+
+
+                        <td>
+
+                            <strong>
+                                {{ inspection.inspection_no }}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <i class="bi bi-ship text-muted me-1"></i>
+
+                            {{ inspection.vessel }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ inspection.inspection_date|date:"d M Y" }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ inspection.port }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ inspection.inspector }}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if inspection.status == "COMPLETED" %}
+
+                                <span class="badge bg-success">
+
+                                    <i class="bi bi-check-circle me-1"></i>
+
+                                    Completed
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    <i class="bi bi-clock me-1"></i>
+
+                                    Open
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <a
+                                href="{% url 'finding_create' inspection.id %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+
+                                <i class="bi bi-list-check me-1"></i>
+
+                                Findings
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5"
+                        >
+
+                            <i
+                                class="bi bi-clipboard-x fs-2 text-muted">
+                            </i>
+
+                            <div class="mt-2 text-muted">
+
+                                No inspections found.
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+$(document).ready(function () {
+
+    $('#inspectionTable').DataTable({
+
+        pageLength: 25,
+
+        responsive: true,
+
+        order: [[2, 'desc']],
+
+        language: {
+
+            search: "",
+
+            searchPlaceholder: "Search inspections..."
+
+        }
+
+    });
+
+});
+
+</script>
+
+{% endblock %}
+```
