@@ -814,8 +814,10 @@ def import_result(request, vessel_id):
 
 def voyage_legs(
     request,
+    vessel_id,
     load_type,
     performance_type="speed",
+    
 ):
     """
     Display voyage legs for Ballast/Laden.
@@ -891,13 +893,15 @@ def voyage_legs(
     # ========================================================
 
     all_legs = (
-        VoyageLeg.objects
-        .all()
-        .order_by(
-            "-start_date",
-            "-id",
-        )
+    VoyageLeg.objects
+    .filter(
+        vessel_id=vessel_id,
     )
+    .order_by(
+        "-start_date",
+        "-id",
+    )
+)
 
     legs = []
 
@@ -1006,6 +1010,9 @@ def voyage_legs(
         request,
         template_name,
         {
+
+             "vessel_id":
+                vessel_id,
             "load_type":
                 display_load_type,
 

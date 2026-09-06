@@ -42,19 +42,19 @@ urlpatterns = [
     # --------------------------------------------------------
     # Routes by load condition
     # --------------------------------------------------------
-
     path(
-        "routes/<str:load_type>/",
+        "routes/<int:vessel_id>/<str:load_type>/",
         views.voyage_legs,
         name="voyage_legs",
     ),
 
-
     path(
-        "routes/<str:load_type>/<str:performance_type>/",
+        "routes/<int:vessel_id>/<str:load_type>/<str:performance_type>/",
         views.voyage_legs,
         name="voyage_legs",
     ),
+   
+
     # --------------------------------------------------------
     # One route → daily observations
     # --------------------------------------------------------
