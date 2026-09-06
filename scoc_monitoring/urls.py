@@ -22,14 +22,19 @@ urlpatterns = [
     # Overview
     # --------------------------------------------------------
 
-    path(
+     path(
         "",
-        views.import_result,
+        views.dashboard,
         name="home",
     ),
 
+    #(
+       # "",
+      #  views.import_result,
+       # name="home",
+    #),
     path(
-        "overview/",
+        "overview/<int:vessel_id>/",
         views.import_result,
         name="import_result",
     ),
@@ -44,18 +49,18 @@ urlpatterns = [
         name="voyage_legs",
     ),
 
+
     path(
         "routes/<str:load_type>/<str:performance_type>/",
         views.voyage_legs,
         name="voyage_legs",
     ),
-
     # --------------------------------------------------------
     # One route → daily observations
     # --------------------------------------------------------
 
     path(
-        "voyage/<int:leg_id>/<str:performance_type>/",
+        "route/<int:leg_id>/",
         views.voyage_detail,
         name="voyage_detail",
     ),

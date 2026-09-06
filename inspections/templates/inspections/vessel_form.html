@@ -69,6 +69,20 @@
 
             </div>
 
+            <div>
+    <label for="{{ form.scoc_active.id_for_label }}">
+        SCoC Monitoring Active
+    </label>
+
+    {{ form.scoc_active }}
+
+    {% if form.scoc_active.errors %}
+        {{ form.scoc_active.errors }}
+    {% endif %}
+</div>
+
+
+
             <hr>
 
             <button type="submit" class="btn btn-primary">

@@ -12,9 +12,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h2 class="fw-bold mb-1">
-                SCoC Voyage Overview
-            </h2>
+                      <h2 class="fw-bold mb-1">
+    SCoC Voyage Overview
+    {% if vessel %}
+        - {{ vessel.vessel_name }}
+    {% endif %}
+</h2>
+
 
             <p class="text-muted mb-0">
                 Overall performance by loading condition

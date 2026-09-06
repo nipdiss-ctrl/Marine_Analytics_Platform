@@ -9,6 +9,7 @@ class VesselForm(forms.ModelForm):
         fields = [
         "vessel_name",
         "active",
+        "scoc_active",
 ]
 
         widgets = {
@@ -33,6 +34,7 @@ class VesselForm(forms.ModelForm):
         labels = {           
             'vessel_name': 'Vessel Name',
             'active': 'Active',
+            "scoc_active": "SCoC Monitoring Active",
         }
 
 
