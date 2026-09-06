@@ -1,25 +1,21 @@
-
 from django.shortcuts import (
     render,
     redirect,
     get_object_or_404,
 )
+from inspections.models import Vessel
 
-from django.db import transaction
 from scoc_monitoring.models import (
     VoyageLeg,
     VoyageObservation,
+    
 )
-
 from pathlib import Path
 from django.conf import settings
-
 from scoc_monitoring.services.excel_importer import (
     import_excel,
 )
-from scoc_monitoring.services.noon_report_parser import (
-    parse_noon_report,
-)
+
 
 # ============================================================
 # HELPERS
@@ -31,6 +27,7 @@ def safe_float(value):
     """
 
     try:
+
         if value is None:
             return None
 
@@ -41,7 +38,10 @@ def safe_float(value):
 
         return value
 
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError,
+    ):
         return None
 
 
@@ -53,6 +53,7 @@ def normalize_load_type(value):
     Examples:
         ballast -> Ballast
         BALLAST -> Ballast
+        Ballast -> Ballast
         laden -> Laden
         LADEN -> Laden
     """
@@ -82,9 +83,6 @@ def calculate_status(
 ):
     """
     Calculate overall voyage status.
-
-    Both speed and consumption targets must be available
-    before an overall status can be calculated.
     """
 
     if (
@@ -161,1037 +159,365 @@ def format_value(
     return f"{value:.{decimals}f}"
 
 
-
 # ============================================================
 # UPLOAD
 # ============================================================
 
 def upload_excel(request):
 
+
     # ========================================================
-    # AVAILABLE VESSELS
+    # LOAD ACTIVE VESSELS
     # ========================================================
 
-    vessel_names = (
-        VoyageObservation.objects
-        .exclude(vessel_name="")
-        .exclude(vessel_name__isnull=True)
-        .values_list("vessel_name", flat=True)
-        .distinct()
+    vessels = (
+        Vessel.objects
+        .filter(active=True)
         .order_by("vessel_name")
     )
 
-    vessel_names = list(vessel_names)
+    if request.method == "POST":
 
-    # Also include vessels stored on VoyageLeg
-    leg_vessels = (
-        VoyageLeg.objects
-        .exclude(vessel_name="")
-        .exclude(vessel_name__isnull=True)
-        .values_list("vessel_name", flat=True)
-        .distinct()
-        .order_by("vessel_name")
-    )
+        print("\n" + "=" * 70)
+        print("SCOC EXCEL UPLOAD STARTED")
+        print("=" * 70, flush=True)
 
-    for vessel in leg_vessels:
-        if vessel and vessel not in vessel_names:
-            vessel_names.append(vessel)
+        uploaded_file = request.FILES.get("file")
 
-    vessel_names = sorted(
-        set(
-            str(v).strip()
-            for v in vessel_names
-            if v
-        )
-    )
-
-    # ========================================================
-    # GET
-    # ========================================================
-
-    if request.method != "POST":
-
-        return render(
-            request,
-            "scoc_monitoring/upload.html",
-            {
-                "vessels": vessel_names,
-            },
+        noon_report_message = (
+            request.POST.get(
+                "noon_report_message",
+                "",
+            ).strip()
         )
 
-    print("\n" + "=" * 70)
-    print("SCOC IMPORT STARTED")
-    print("=" * 70, flush=True)
-
-    # ========================================================
-    # FILE
-    # ========================================================
-
-    uploaded_file = request.FILES.get("file")
-
-    # ========================================================
-    # NOON REPORT MESSAGE
-    # ========================================================
-
-    noon_report_message = (
-        request.POST.get(
-            "noon_report_message",
-            "",
-        ).strip()
-    )
-
-    if not uploaded_file:
-
-        return render(
-            request,
-            "scoc_monitoring/upload.html",
-            {
-                "error": "Please select an Excel file.",
-                "vessels": vessel_names,
-            },
-        )
-
-    if not noon_report_message:
-
-        return render(
-            request,
-            "scoc_monitoring/upload.html",
-            {
-                "error": (
-                    "Please paste the noon report message."
-                ),
-                "vessels": vessel_names,
-            },
-        )
-
-    temp_file = None
-
-    try:
+        vessel_id = request.POST.get("vessel")
 
         # ====================================================
-        # TEMP FILE
+        # VALIDATE VESSEL
         # ====================================================
 
-        temp_dir = (
-            Path(settings.BASE_DIR)
-            / "temp_uploads"
-        )
+        if not vessel_id:
 
-        temp_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+            return render(
+                request,
+                "scoc_monitoring/upload.html",
+                {
+                    "error": "Please select a vessel.",
+                    "vessels": vessels,
+                },
+            )
 
-        temp_file = (
-            temp_dir
-            / uploaded_file.name
-        )
-
-        with open(
-            temp_file,
-            "wb+",
-        ) as destination:
-
-            for chunk in uploaded_file.chunks():
-                destination.write(chunk)
-
-        # ====================================================
-        # PARSE NOON REPORT
-        # ====================================================
-
-        print(
-            "Parsing noon report...",
-            flush=True,
-        )
-
-        noon_data = parse_noon_report(
-            noon_report_message
+        vessel = get_object_or_404(
+            Vessel,
+            id=vessel_id,
+            active=True,
         )
 
         print(
-            "NOON REPORT DATA:",
-            noon_data,
+            "Selected vessel:",
+            vessel.vessel_name,
             flush=True,
         )
-
-        # ====================================================
-        # BASIC DATA
-        # ====================================================
-
-        reported_time = noon_data.get(
-            "reported_time"
-        )
-
-        vessel_name = (
-            noon_data.get(
-                "vessel_name"
-            )
-            or ""
-        ).strip()
-
-        destination = (
-            noon_data.get(
-                "destination"
-            )
-            or ""
-        ).strip()
-
-        voyage_route = (
-            noon_data.get(
-                "voyage_route"
-            )
-            or destination
-            or ""
-        ).strip()
-
-        if not reported_time:
-
-            raise ValueError(
-                "Could not determine the noon report date/time."
-            )
-
-        if not vessel_name:
-
-            raise ValueError(
-                "Could not determine the vessel name "
-                "from the noon report."
-            )
-
-        # ====================================================
-        # NORMALIZE VESSEL
-        # ====================================================
-
-        vessel_name = " ".join(
-            vessel_name.split()
-        ).upper()
-
-        print(
-            "VESSEL:",
-            vessel_name,
-            flush=True,
-        )
-
-        print(
-            "DESTINATION:",
-            destination,
-            flush=True,
-        )
-
-        # ====================================================
-        # IMPORT
-        # ====================================================
-
-        with transaction.atomic():
-
-            result = import_excel(
-                temp_file,
-                source_message=noon_report_message,
-            )
-
-            if not isinstance(result, dict):
-
-                result = {
-                    "rows_read": 0,
-                    "observations_created": 0,
-                    "observations_updated": 0,
-                    "legs_created": 0,
-                    "legs_reused": 0,
-                    "rows_skipped": 0,
-                    "errors": [
-                        "Excel importer returned invalid result."
-                    ],
-                }
-
-            # ==================================================
-            # FIND CORRECT VOYAGE LEG
-            # ==================================================
-
-            leg = None
-
-            # --------------------------------------------------
-            # 1. SAME VESSEL + SAME REPORT TIME
-            # --------------------------------------------------
-
-            existing_observation = (
-                VoyageObservation.objects
-                .filter(
-                    reported_time=reported_time,
-                    vessel_name__iexact=vessel_name,
-                )
-                .select_related("leg")
-                .first()
-            )
-
-            if existing_observation:
-
-                leg = existing_observation.leg
-
-                print(
-                    "FOUND LEG FROM EXISTING OBSERVATION:",
-                    leg.id,
-                    flush=True,
-                )
-
-            # --------------------------------------------------
-            # 2. SAME VESSEL + SAME DESTINATION
-            # --------------------------------------------------
-
-            if leg is None and destination:
-
-                candidate_legs = (
-                    VoyageLeg.objects
-                    .filter(
-                        vessel_name__iexact=vessel_name,
-                        destination__icontains=destination,
-                    )
-                    .order_by(
-                        "-start_date",
-                        "-id",
-                    )
-                )
-
-                if candidate_legs.exists():
-
-                    leg = candidate_legs.first()
-
-                    print(
-                        "FOUND LEG FROM VESSEL + DESTINATION:",
-                        leg.id,
-                        flush=True,
-                    )
-
-            # --------------------------------------------------
-            # 3. SAME VESSEL + ROUTE
-            # --------------------------------------------------
-
-            if leg is None and voyage_route:
-
-                candidate_legs = (
-                    VoyageLeg.objects
-                    .filter(
-                        vessel_name__iexact=vessel_name,
-                        voyage_route__icontains=voyage_route,
-                    )
-                    .order_by(
-                        "-start_date",
-                        "-id",
-                    )
-                )
-
-                if candidate_legs.exists():
-
-                    leg = candidate_legs.first()
-
-                    print(
-                        "FOUND LEG FROM VESSEL + ROUTE:",
-                        leg.id,
-                        flush=True,
-                    )
-
-            # --------------------------------------------------
-            # 4. SAME VESSEL FROM SOURCE MESSAGE
-            # --------------------------------------------------
-
-            if leg is None:
-
-                candidate_legs = (
-                    VoyageLeg.objects
-                    .filter(
-                        vessel_name__iexact=vessel_name,
-                    )
-                    .order_by(
-                        "-start_date",
-                        "-id",
-                    )
-                )
-
-                if candidate_legs.exists():
-
-                    leg = candidate_legs.first()
-
-                    print(
-                        "FOUND LEG FROM VESSEL:",
-                        leg.id,
-                        flush=True,
-                    )
-
-            # ==================================================
-            # CREATE NEW LEG
-            # ==================================================
-
-            if leg is None:
-
-                leg = VoyageLeg.objects.create(
-
-                    # IMPORTANT:
-                    # Save vessel on the VoyageLeg itself.
-                    vessel_name=vessel_name,
-
-                    load_type="UNKNOWN",
-
-                    departure="",
-
-                    destination=destination,
-
-                    voyage_route=(
-                        voyage_route
-                        or destination
-                    ),
-
-                    start_date=reported_time,
-
-                    source_message=(
-                        noon_report_message
-                    ),
-                )
-
-                print(
-                    "CREATED NEW VOYAGE LEG:",
-                    {
-                        "id": leg.id,
-                        "vessel": leg.vessel_name,
-                        "destination": leg.destination,
-                        "route": leg.voyage_route,
-                    },
-                    flush=True,
-                )
-
-            # ==================================================
-            # UPDATE EXISTING LEG
-            # ==================================================
-
-            else:
-
-                print(
-                    "USING EXISTING VOYAGE LEG:",
-                    {
-                        "id": leg.id,
-                        "old_vessel": leg.vessel_name,
-                        "new_vessel": vessel_name,
-                    },
-                    flush=True,
-                )
-
-                # IMPORTANT:
-                # Always ensure the leg has the correct vessel.
-                leg.vessel_name = vessel_name
-
-                if destination:
-                    leg.destination = destination
-
-                if voyage_route:
-                    leg.voyage_route = voyage_route
-
-                if not leg.start_date:
-                    leg.start_date = reported_time
-
-                leg.source_message = noon_report_message
-
-            # ==================================================
-            # CREATE / UPDATE OBSERVATION
-            # ==================================================
-
-            observation, created = (
-                VoyageObservation.objects
-                .update_or_create(
-
-                    leg=leg,
-
-                    reported_time=reported_time,
-
-                    defaults={
-
-                        # --------------------------------------
-                        # Identification
-                        # --------------------------------------
-
-                        "vessel_name":
-                            vessel_name,
-
-                        "position":
-                            noon_data.get(
-                                "position"
-                            ) or "",
-
-                        # --------------------------------------
-                        # Navigation
-                        # --------------------------------------
-
-                        "course":
-                            safe_float(
-                                noon_data.get(
-                                    "course"
-                                )
-                            ),
-
-                        "speed":
-                            safe_float(
-                                noon_data.get(
-                                    "speed"
-                                )
-                            ),
-
-                        "distance_run":
-                            safe_float(
-                                noon_data.get(
-                                    "distance_run"
-                                )
-                            ),
-
-                        "distance":
-                            safe_float(
-                                noon_data.get(
-                                    "distance_run"
-                                )
-                            ),
-
-                        "distance_to_go":
-                            safe_float(
-                                noon_data.get(
-                                    "distance_to_go"
-                                )
-                            ),
-
-                        "eta":
-                            noon_data.get(
-                                "eta"
-                            ) or "",
-
-                        # --------------------------------------
-                        # Engine
-                        # --------------------------------------
-
-                        "rpm":
-                            safe_float(
-                                noon_data.get(
-                                    "rpm"
-                                )
-                            ),
-
-                        "slip":
-                            safe_float(
-                                noon_data.get(
-                                    "slip"
-                                )
-                            ),
-
-                        "shaft_power_kw":
-                            safe_float(
-                                noon_data.get(
-                                    "shaft_power_kw"
-                                )
-                            ),
-
-                        "engine_power_kw":
-                            safe_float(
-                                noon_data.get(
-                                    "engine_power_kw"
-                                )
-                            ),
-
-                        "power_kw":
-                            safe_float(
-                                noon_data.get(
-                                    "power_kw"
-                                )
-                            ),
-
-                        "engine_load_percent":
-                            safe_float(
-                                noon_data.get(
-                                    "engine_load_percent"
-                                )
-                            ),
-
-                        "load_percent":
-                            safe_float(
-                                noon_data.get(
-                                    "engine_load_percent"
-                                )
-                            ),
-
-                        # --------------------------------------
-                        # Fuel
-                        # --------------------------------------
-
-                        "hsfo_consumption_mt":
-                            safe_float(
-                                noon_data.get(
-                                    "hsfo_consumption_mt"
-                                )
-                            ),
-
-                        "consumption":
-                            safe_float(
-                                noon_data.get(
-                                    "hsfo_consumption_mt"
-                                )
-                            ),
-
-                        "hsfo_rob_mt":
-                            safe_float(
-                                noon_data.get(
-                                    "hsfo_rob_mt"
-                                )
-                            ),
-
-                        "hsfo_rob":
-                            safe_float(
-                                noon_data.get(
-                                    "hsfo_rob_mt"
-                                )
-                            ),
-
-                        "lsfo_consumption_mt":
-                            safe_float(
-                                noon_data.get(
-                                    "lsfo_consumption_mt"
-                                )
-                            ),
-
-                        "lsfo_rob":
-                            safe_float(
-                                noon_data.get(
-                                    "lsfo_rob"
-                                )
-                            ),
-
-                        "lsmgo_consumption_mt":
-                            safe_float(
-                                noon_data.get(
-                                    "lsmgo_consumption_mt"
-                                )
-                            ),
-
-                        "lsmgo_rob_mt":
-                            safe_float(
-                                noon_data.get(
-                                    "lsmgo_rob_mt"
-                                )
-                            ),
-
-                        "lsmgo_rob":
-                            safe_float(
-                                noon_data.get(
-                                    "lsmgo_rob_mt"
-                                )
-                            ),
-
-                        # --------------------------------------
-                        # Cylinder oil
-                        # --------------------------------------
-
-                        "cylinder_oil_consumption_l":
-                            safe_float(
-                                noon_data.get(
-                                    "cylinder_oil_consumption_l"
-                                )
-                            ),
-
-                        # --------------------------------------
-                        # SCoC
-                        # --------------------------------------
-
-                        "scoc":
-                            safe_float(
-                                noon_data.get(
-                                    "scoc"
-                                )
-                            ),
-
-                        # --------------------------------------
-                        # Running
-                        # --------------------------------------
-
-                        "running_hours":
-                            safe_float(
-                                noon_data.get(
-                                    "running_hours"
-                                )
-                            ),
-
-                        "duration_days":
-                            safe_float(
-                                noon_data.get(
-                                    "duration_days"
-                                )
-                            ),
-
-                        # --------------------------------------
-                        # Weather
-                        # --------------------------------------
-
-                        "wind":
-                            noon_data.get(
-                                "wind"
-                            ) or "",
-
-                        "swell":
-                            noon_data.get(
-                                "swell"
-                            ) or "",
-
-                        "current":
-                            noon_data.get(
-                                "current"
-                            ) or "",
-
-                        # --------------------------------------
-                        # Remarks
-                        # --------------------------------------
-
-                        "remarks":
-                            noon_data.get(
-                                "remarks"
-                            ) or "",
-
-                        # --------------------------------------
-                        # Source
-                        # --------------------------------------
-
-                        "source_message":
-                            noon_report_message,
-
-                        "source_file":
-                            uploaded_file.name,
-                    },
-                )
-            )
-
-            # ==================================================
-            # MAKE SURE LEG VESSEL IS CORRECT
-            # ==================================================
-
-            leg.vessel_name = vessel_name
-
-            # ==================================================
-            # RECALCULATE LEG
-            # ==================================================
-
-            observations = (
-                VoyageObservation.objects
-                .filter(
-                    leg=leg
-                )
-                .order_by(
-                    "reported_time",
-                    "id",
-                )
-            )
-
-            # --------------------------------------------------
-            # SPEED
-            # --------------------------------------------------
-
-            speeds = []
-
-            for observation_item in observations:
-
-                value = safe_float(
-                    observation_item.speed
-                )
-
-                if (
-                    value is not None
-                    and value >= 0
-                ):
-
-                    speeds.append(value)
-
-            # --------------------------------------------------
-            # CONSUMPTION
-            # --------------------------------------------------
-
-            consumptions = []
-
-            for observation_item in observations:
-
-                value = safe_float(
-                    observation_item.consumption
-                )
-
-                if value is None:
-                    continue
-
-                duration_days = safe_float(
-                    observation_item.duration_days
-                )
-
-                if (
-                    duration_days is not None
-                    and duration_days > 0
-                ):
-
-                    daily_consumption = (
-                        value / duration_days
-                    )
-
-                else:
-
-                    daily_consumption = value
-
-                if daily_consumption >= 0:
-
-                    consumptions.append(
-                        daily_consumption
-                    )
-
-            # --------------------------------------------------
-            # AVERAGES
-            # --------------------------------------------------
-
-            if speeds:
-
-                leg.average_speed = (
-                    sum(speeds)
-                    / len(speeds)
-                )
-
-            else:
-
-                leg.average_speed = None
-
-            if consumptions:
-
-                leg.average_consumption = (
-                    sum(consumptions)
-                    / len(consumptions)
-                )
-
-            else:
-
-                leg.average_consumption = None
-
-            # --------------------------------------------------
-            # LATEST
-            # --------------------------------------------------
-
-            latest = observations.last()
-
-            if latest:
-
-                leg.distance_to_go = (
-                    latest.distance_to_go
-                )
-
-                leg.end_date = (
-                    latest.reported_time
-                )
-
-            # --------------------------------------------------
-            # COUNT
-            # --------------------------------------------------
-
-            leg.observation_count = (
-                observations.count()
-            )
-
-            # --------------------------------------------------
-            # SAVE
-            # --------------------------------------------------
-
-            leg.save()
+        
+        if not uploaded_file:
 
             print(
-                "VOYAGE LEG UPDATED:",
-                {
-                    "leg_id": leg.id,
-                    "vessel": leg.vessel_name,
-                    "average_speed":
-                        leg.average_speed,
-                    "average_consumption":
-                        leg.average_consumption,
-                    "observation_count":
-                        leg.observation_count,
-                },
+                "ERROR: No file received",
                 flush=True,
             )
 
-        # ====================================================
-        # CLEANUP
-        # ====================================================
+            return render(
+                request,
+                "scoc_monitoring/upload.html",
+                {
+                    "error": (
+                        "Please select an Excel file."
+                    )
+                },
+            )
+
+        print(
+            "Uploaded file:",
+            uploaded_file.name,
+            flush=True,
+        )
+
+        print(
+            "File size:",
+            uploaded_file.size,
+            flush=True,
+        )
 
         try:
 
-            if temp_file:
+            # ==================================================
+            # SAVE UPLOADED FILE TEMPORARILY
+            # ==================================================
+
+            temp_dir = Path(
+                settings.BASE_DIR
+            ) / "temp_uploads"
+
+            temp_dir.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            temp_file = (
+                temp_dir
+                / uploaded_file.name
+            )
+
+            print(
+                "Saving temporary file:",
+                temp_file,
+                flush=True,
+            )
+
+            with open(
+                temp_file,
+                "wb+",
+            ) as destination:
+
+                for chunk in uploaded_file.chunks():
+
+                    destination.write(chunk)
+
+            print(
+                "Temporary file saved.",
+                flush=True,
+            )
+
+            # ==================================================
+            # CALL IMPORTER WITH PATH
+            # ==================================================
+
+            print(
+                ">>> CALLING import_excel() <<<",
+                flush=True,
+            )
+
+            # ==================================================
+            # REPLACE OLD SCoC DATA
+            # ==================================================
+            # This upload is treated as a full replacement import.
+            # Delete the old observations first, then the old legs.
+            # If the import fails, the transaction rolls back.
+            # ==================================================
+            from django.db import transaction
+
+            with transaction.atomic():
+
+                ####VoyageObservation.objects.all().delete()
+                ####VoyageLeg.objects.all().delete()
+
+                result = import_excel(
+                    temp_file,
+                    source_message=noon_report_message,
+                    vessel=vessel,
+                )
+
+            print(
+                ">>> IMPORT FINISHED <<<",
+                flush=True,
+            )
+
+            print(
+                "IMPORT RESULT:",
+                result,
+                flush=True,
+            )
+
+            # ==================================================
+            # DELETE TEMPORARY FILE
+            # ==================================================
+
+            try:
+
                 temp_file.unlink()
 
-        except Exception:
-            pass
+                print(
+                    "Temporary file deleted.",
+                    flush=True,
+                )
 
-        # ====================================================
-        # SESSION RESULT
-        # ====================================================
+            except Exception as cleanup_error:
 
-        request.session[
-            "scoc_import_result"
-        ] = {
+                print(
+                    "Temporary file cleanup error:",
+                    cleanup_error,
+                    flush=True,
+                )
 
-            "rows_read":
-                int(
+            # ==================================================
+            # STORE RESULT
+            # ==================================================
+
+            request.session[
+                "scoc_import_result"
+            ] = {
+
+                "rows_read": int(
                     result.get(
                         "rows_read",
                         0,
                     )
                 ),
 
-            "observations_created":
-                int(
+                "observations_created": int(
                     result.get(
                         "observations_created",
                         0,
                     )
                 ),
 
-            "observations_updated":
-                int(
+                "observations_updated": int(
                     result.get(
                         "observations_updated",
                         0,
                     )
                 ),
 
-            "legs_created":
-                int(
+                "legs_created": int(
                     result.get(
                         "legs_created",
                         0,
                     )
                 ),
 
-            "legs_updated":
-                int(
+                "legs_updated": int(
                     result.get(
                         "legs_reused",
                         0,
                     )
                 ),
 
-            "rows_skipped":
-                int(
+                "rows_skipped": int(
                     result.get(
                         "rows_skipped",
                         0,
                     )
                 ),
 
-            "errors":
-                result.get(
+                "errors": result.get(
                     "errors",
                     [],
                 ),
+            }
+            request.session["scoc_import_vessel_id"] = vessel.id
 
-            "noon_report":
-                noon_data,
+            return redirect(
+                "scoc_monitoring:import_result"
+            )
 
-            "vessel":
-                vessel_name,
-        }
+        except Exception as exc:
 
-        return redirect(
-            "scoc_monitoring:import_result"
-        )
+            print(
+                "=" * 70,
+                flush=True,
+            )
 
-    except Exception as exc:
+            print(
+                "IMPORT ERROR",
+                flush=True,
+            )
 
-        import traceback
+            print(
+                "ERROR TYPE:",
+                type(exc).__name__,
+                flush=True,
+            )
 
-        traceback.print_exc()
+            print(
+                "ERROR:",
+                str(exc),
+                flush=True,
+            )
 
-        try:
+            import traceback
 
-            if temp_file:
-                temp_file.unlink()
+            traceback.print_exc()
 
-        except Exception:
-            pass
+            return render(
+                request,
+                "scoc_monitoring/upload.html",
+                {
+                    "error": str(exc),
+                },
+            )
 
-        return render(
+    return render(
             request,
             "scoc_monitoring/upload.html",
             {
-                "error": str(exc),
-                "vessels": vessel_names,
+                "vessels": vessels,
             },
-        )
+    )
 
 # ============================================================
 # OVERVIEW
 # ============================================================
 
-def import_result(request):
+# ============================================================
+# OVERVIEW
+# ============================================================
+
+def import_result(request, vessel_id):
     """
-    Main SCoC overview/dashboard.
+    Main SCoC overview/dashboard for one vessel.
 
-    Actual performance is calculated from the daily
-    observations.
+    Dashboard actuals are calculated from the DAILY observations,
+    not by averaging already-averaged VoyageLeg values.
 
-    Average Speed:
-        AVERAGE(all valid daily speeds)
+    This matches the manual Speed and Cons workbook:
 
-    Average Consumption:
-        AVERAGE(all valid daily consumption/day)
-    """
+        Average Speed
+            = AVERAGE(all valid daily speeds)
 
-def import_result(request):
-    """
-    Main SCoC overview/dashboard.
+        Average Consumption
+            = AVERAGE(all valid daily consumption / 24h)
 
-    All vessels are included.
+    The importer calculates and stores the daily values.
+
+    IMPORTANT:
+    Only data belonging to the selected vessel is displayed.
     """
 
     # ========================================================
-    # ALL VESSELS
+    # LOAD SELECTED VESSEL
     # ========================================================
 
-    observation_vessels = (
-        VoyageObservation.objects
-        .exclude(vessel_name="")
-        .exclude(vessel_name__isnull=True)
-        .values_list(
-            "vessel_name",
-            flat=True,
-        )
-        .distinct()
+    vessel = get_object_or_404(
+        Vessel,
+        id=vessel_id,
+        active=True,
+        scoc_active=True,
     )
 
-    leg_vessels = (
-        VoyageLeg.objects
-        .exclude(vessel_name="")
-        .exclude(vessel_name__isnull=True)
-        .values_list(
-            "vessel_name",
-            flat=True,
-        )
-        .distinct()
-    )
-
-    vessels = sorted(
-        set(
-            list(observation_vessels)
-            + list(leg_vessels)
-        )
+    print(
+        "SCoC Overview Vessel:",
+        vessel.vessel_name,
+        flush=True,
     )
 
     # ========================================================
-    # ALL LEGS
+    # LOAD ONLY THIS VESSEL'S LEGS
     # ========================================================
 
     all_legs = (
         VoyageLeg.objects
-        .all()
-        .order_by(
-            "vessel_name",
-            "-start_date",
-            "-id",
+        .filter(
+            vessel=vessel,
         )
+        .order_by("id")
     )
 
-    # ========================================================
-    # GROUP BY LOAD TYPE
-    # ========================================================
-
     grouped_legs = {}
+
+    # ========================================================
+    # GROUP LEGS BY LOAD TYPE
+    # ========================================================
 
     for leg in all_legs:
 
@@ -1200,14 +526,19 @@ def import_result(request):
         )
 
         if not normalized_type:
-            normalized_type = "Unknown"
+            continue
 
         if normalized_type not in grouped_legs:
+
             grouped_legs[normalized_type] = []
 
         grouped_legs[normalized_type].append(
             leg
         )
+
+    # ========================================================
+    # NORMAL ORDER
+    # ========================================================
 
     preferred_order = [
         "Ballast",
@@ -1236,7 +567,7 @@ def import_result(request):
     summaries = []
 
     # ========================================================
-    # SUMMARY
+    # SUMMARY BY LOAD TYPE
     # ========================================================
 
     for load_type in ordered_load_types:
@@ -1246,16 +577,23 @@ def import_result(request):
         ]
 
         speeds = []
+
         consumptions = []
+
         target_speeds = []
+
         target_consumptions = []
+
+        # ====================================================
+        # DAILY ACTUAL PERFORMANCE
+        # ====================================================
 
         for leg in legs:
 
             observations = (
                 VoyageObservation.objects
                 .filter(
-                    leg=leg
+                    leg=leg,
                 )
                 .order_by(
                     "reported_time",
@@ -1277,37 +615,76 @@ def import_result(request):
                     observation.consumption
                 )
 
+                # =================================================
+                # SPEED
+                # =================================================
+                #
+                # Use the daily observation speed.
+                #
+                # Do NOT average VoyageLeg.average_speed here.
+                # =================================================
+
                 if (
                     speed is not None
                     and speed >= 0
+                    and duration_days is not None
+                    and duration_days > 0
                 ):
-                    speeds.append(speed)
+
+                    speeds.append(
+                        speed
+                    )
+
+                # =================================================
+                # CONSUMPTION
+                # =================================================
+                #
+                # Period Consumption / Duration(days)
+                # =================================================
 
                 if (
                     period_consumption is not None
+                    and duration_days is not None
+                    and duration_days > 0
                 ):
 
-                    if (
-                        duration_days is not None
-                        and duration_days > 0
-                    ):
-
-                        consumption_per_day = (
-                            period_consumption
-                            / duration_days
-                        )
-
-                    else:
-
-                        consumption_per_day = (
-                            period_consumption
-                        )
+                    consumption_per_day = (
+                        period_consumption
+                        / duration_days
+                    )
 
                     if consumption_per_day >= 0:
 
                         consumptions.append(
                             consumption_per_day
                         )
+
+        # ========================================================
+        # AVERAGE SPEED
+        # ========================================================
+
+        average_speed = (
+            sum(speeds) / len(speeds)
+            if speeds
+            else None
+        )
+
+        # ========================================================
+        # AVERAGE CONSUMPTION
+        # ========================================================
+
+        average_consumption = (
+            sum(consumptions)
+            / len(consumptions)
+            if consumptions
+            else None
+        )
+
+        # ========================================================
+        # TARGETS
+        # ========================================================
+
+        for leg in legs:
 
             target_speed = safe_float(
                 leg.target_speed
@@ -1329,18 +706,9 @@ def import_result(request):
                     target_consumption
                 )
 
-        average_speed = (
-            sum(speeds) / len(speeds)
-            if speeds
-            else None
-        )
-
-        average_consumption = (
-            sum(consumptions)
-            / len(consumptions)
-            if consumptions
-            else None
-        )
+        # ========================================================
+        # AVERAGE TARGET SPEED
+        # ========================================================
 
         target_speed = (
             sum(target_speeds)
@@ -1349,12 +717,20 @@ def import_result(request):
             else None
         )
 
+        # ========================================================
+        # AVERAGE TARGET CONSUMPTION
+        # ========================================================
+
         target_consumption = (
             sum(target_consumptions)
             / len(target_consumptions)
             if target_consumptions
             else None
         )
+
+        # ========================================================
+        # STATUS
+        # ========================================================
 
         status = calculate_status(
             average_speed,
@@ -1363,10 +739,13 @@ def import_result(request):
             target_consumption,
         )
 
+        # ========================================================
+        # ADD SUMMARY
+        # ========================================================
+
         summaries.append(
             {
-                "load_type":
-                    load_type,
+                "load_type": load_type,
 
                 "average_speed":
                     average_speed,
@@ -1399,37 +778,36 @@ def import_result(request):
         "scoc_import_result",
         {
             "rows_read": 0,
+
             "observations_created": 0,
+
             "observations_updated": 0,
+
             "legs_created": 0,
+
             "legs_updated": 0,
+
             "rows_skipped": 0,
+
             "errors": [],
         },
     )
 
     # ========================================================
-    # RENDER
+    # RENDER OVERVIEW
     # ========================================================
 
     return render(
         request,
         "scoc_monitoring/import_result.html",
         {
-            "result":
-                result,
+            "result": result,
 
-            "summaries":
-                summaries,
+            "summaries": summaries,
 
-            "vessels":
-                vessels,
-
-            "all_legs":
-                all_legs,
+            "vessel": vessel,
         },
     )
-
 # ============================================================
 # ROUTES / VOYAGE LEGS
 # ============================================================
@@ -1442,13 +820,25 @@ def voyage_legs(
     """
     Display voyage legs for Ballast/Laden.
 
+    load_type:
+        ballast
+        laden
+        unknown
+
     performance_type:
         speed
         consumption
 
-    The selected performance type is also passed to the
-    detail page so that the detail page only displays the
-    relevant daily column.
+    If performance_type is omitted,
+    speed is used.
+
+    Therefore:
+
+        /routes/ballast/
+
+    is equivalent to:
+
+        /routes/ballast/speed/
     """
 
     # ========================================================
@@ -1485,6 +875,10 @@ def voyage_legs(
         performance_type
     ).strip().lower()
 
+    # ========================================================
+    # VALIDATE PERFORMANCE TYPE
+    # ========================================================
+
     if performance_type not in [
         "speed",
         "consumption",
@@ -1514,7 +908,10 @@ def voyage_legs(
         )
 
         if database_load_type == display_load_type:
-            legs.append(leg)
+
+            legs.append(
+                leg
+            )
 
     # ========================================================
     # BUILD TABLE ROWS
@@ -1549,14 +946,19 @@ def voyage_legs(
 
         observation_count = (
             VoyageObservation.objects
-            .filter(leg=leg)
+            .filter(
+                leg=leg
+            )
             .count()
         )
 
+        # ----------------------------------------------------
+        # APPEND
+        # ----------------------------------------------------
+
         leg_rows.append(
             {
-                "leg":
-                    leg,
+                "leg": leg,
 
                 "average_speed":
                     average_speed,
@@ -1623,275 +1025,25 @@ def voyage_legs(
 def voyage_detail(
     request,
     leg_id,
-    performance_type="speed",
 ):
     """
-    Display and edit daily data for one voyage leg.
+    Display daily data for one voyage leg.
 
-    Speed page:
-        Edit VoyageObservation.speed
+    Daily speed and duration come from the corrected importer,
+    which follows the manual Excel calculation:
 
-    Consumption page:
-        Edit VoyageObservation.consumption
+        Duration = current report time - previous report time
 
-    After editing, the VoyageLeg averages are recalculated.
+        Speed = Distance / Duration(days) / 24
+
+        Consumption / 24h
+            = Period Consumption / Duration(days)
     """
-
-    # ========================================================
-    # GET LEG
-    # ========================================================
 
     leg = get_object_or_404(
         VoyageLeg,
         id=leg_id,
     )
-
-    # ========================================================
-    # NORMALIZE PERFORMANCE TYPE
-    # ========================================================
-
-    performance_type = str(
-        performance_type
-    ).strip().lower()
-
-    if performance_type not in [
-        "speed",
-        "consumption",
-    ]:
-        performance_type = "speed"
-
-    # ========================================================
-    # EDIT DAILY VALUE
-    # ========================================================
-
-    if request.method == "POST":
-
-        observation_id = request.POST.get(
-            "observation_id"
-        )
-
-        new_value = request.POST.get(
-            "value"
-        )
-
-        # ----------------------------------------------------
-        # Validate observation
-        # ----------------------------------------------------
-
-        observation = get_object_or_404(
-            VoyageObservation,
-            id=observation_id,
-            leg=leg,
-        )
-
-        # ----------------------------------------------------
-        # Convert value
-        # ----------------------------------------------------
-
-        try:
-
-            if new_value is None or not new_value.strip():
-
-                raise ValueError(
-                    "Value cannot be empty."
-                )
-
-            value = float(
-                new_value.strip()
-            )
-
-            if value < 0:
-
-                raise ValueError(
-                    "Value cannot be negative."
-                )
-
-        except (ValueError, TypeError):
-
-            return redirect(
-                "scoc_monitoring:voyage_detail",
-                leg_id=leg.id,
-                performance_type=performance_type,
-            )
-
-        # ----------------------------------------------------
-        # Update selected field
-        # ----------------------------------------------------
-
-        if performance_type == "speed":
-
-            observation.speed = value
-
-        else:
-
-            # IMPORTANT:
-            #
-            # The database stores the original period
-            # consumption.
-            #
-            # The page displays consumption/day.
-            #
-            # Therefore, when editing the displayed MT/day
-            # value, convert it back to the stored period
-            # consumption using duration_days.
-
-            duration_days = safe_float(
-                observation.duration_days
-            )
-
-            if (
-                duration_days is not None
-                and duration_days > 0
-            ):
-
-                observation.consumption = (
-                    value * duration_days
-                )
-
-            else:
-
-                observation.consumption = value
-
-        observation.save()
-
-        # ====================================================
-        # RECALCULATE VOYAGE LEG
-        # ====================================================
-
-        observations = (
-            VoyageObservation.objects
-            .filter(
-                leg=leg
-            )
-            .order_by(
-                "reported_time",
-                "id",
-            )
-        )
-
-        # ----------------------------------------------------
-        # SPEED AVERAGE
-        # ----------------------------------------------------
-
-        speeds = []
-
-        for observation_item in observations:
-
-            speed = safe_float(
-                observation_item.speed
-            )
-
-            if (
-                speed is not None
-                and speed >= 0
-            ):
-
-                speeds.append(
-                    speed
-                )
-
-        if speeds:
-
-            leg.average_speed = (
-                sum(speeds)
-                / len(speeds)
-            )
-
-        else:
-
-            leg.average_speed = None
-
-        # ----------------------------------------------------
-        # CONSUMPTION AVERAGE
-        # ----------------------------------------------------
-
-        consumptions = []
-
-        for observation_item in observations:
-
-            period_consumption = safe_float(
-                observation_item.consumption
-            )
-
-            if period_consumption is None:
-                continue
-
-            duration_days = safe_float(
-                observation_item.duration_days
-            )
-
-            if (
-                duration_days is not None
-                and duration_days > 0
-            ):
-
-                consumption_per_day = (
-                    period_consumption
-                    / duration_days
-                )
-
-            else:
-
-                consumption_per_day = (
-                    period_consumption
-                )
-
-            if consumption_per_day >= 0:
-
-                consumptions.append(
-                    consumption_per_day
-                )
-
-        if consumptions:
-
-            leg.average_consumption = (
-                sum(consumptions)
-                / len(consumptions)
-            )
-
-        else:
-
-            leg.average_consumption = None
-
-        # ----------------------------------------------------
-        # Update latest observation information
-        # ----------------------------------------------------
-
-        latest = observations.last()
-
-        if latest:
-
-            leg.distance_to_go = (
-                latest.distance_to_go
-            )
-
-            leg.end_date = (
-                latest.reported_time
-            )
-
-        # ----------------------------------------------------
-        # Count observations
-        # ----------------------------------------------------
-
-        leg.observation_count = (
-            observations.count()
-        )
-
-        leg.save()
-
-        # ----------------------------------------------------
-        # Return to same route page
-        # ----------------------------------------------------
-
-        return redirect(
-            "scoc_monitoring:voyage_detail",
-            leg_id=leg.id,
-            performance_type=performance_type,
-        )
-
-    # ========================================================
-    # TARGETS
-    # ========================================================
 
     target_speed = safe_float(
         leg.target_speed
@@ -1900,10 +1052,6 @@ def voyage_detail(
     target_consumption = safe_float(
         leg.target_consumption
     )
-
-    # ========================================================
-    # OBSERVATIONS
-    # ========================================================
 
     observations = (
         VoyageObservation.objects
@@ -1919,10 +1067,14 @@ def voyage_detail(
     daily_rows = []
 
     # ========================================================
-    # BUILD DAILY DATA
+    # DAILY OBSERVATIONS
     # ========================================================
 
     for observation in observations:
+
+        # ----------------------------------------------------
+        # VALUES CALCULATED BY IMPORTER
+        # ----------------------------------------------------
 
         speed = safe_float(
             observation.speed
@@ -1945,7 +1097,9 @@ def voyage_detail(
         )
 
         # ----------------------------------------------------
-        # NORMALIZED DAILY CONSUMPTION
+        # EXCEL-STYLE NORMALIZED CONSUMPTION
+        #
+        # Q = P / D
         # ----------------------------------------------------
 
         consumption_per_day = None
@@ -1962,15 +1116,40 @@ def voyage_detail(
             )
 
         # ----------------------------------------------------
+        # DO NOT RECALCULATE SPEED FROM RUNNING HOURS
+        # ----------------------------------------------------
+        #
+        # The corrected importer uses:
+        #
+        # L = Distance / Duration(days) / 24
+        #
+        # Therefore use observation.speed directly.
+        # ----------------------------------------------------
+
+        calculated_speed = speed
+
+        # ----------------------------------------------------
         # STATUS
         # ----------------------------------------------------
 
         status = calculate_observation_status(
-            speed,
+            calculated_speed,
             consumption_per_day,
             target_speed,
             target_consumption,
         )
+
+        # ----------------------------------------------------
+        # REPORT DATE
+        # ----------------------------------------------------
+
+        report_date = (
+            observation.reported_time
+        )
+
+        # ----------------------------------------------------
+        # DAILY ROW
+        # ----------------------------------------------------
 
         daily_rows.append(
             {
@@ -1978,16 +1157,9 @@ def voyage_detail(
                     observation,
 
                 "report_date":
-                    observation.reported_time,
+                    report_date,
 
-                "speed":
-                    speed,
-
-                "period_consumption":
-                    period_consumption,
-
-                "consumption":
-                    consumption_per_day,
+                # Excel columns
 
                 "duration_days":
                     duration_days,
@@ -1997,6 +1169,17 @@ def voyage_detail(
 
                 "distance":
                     distance,
+
+                "speed":
+                    calculated_speed,
+
+                "period_consumption":
+                    period_consumption,
+
+                "consumption":
+                    consumption_per_day,
+
+                # Other fields
 
                 "distance_to_go":
                     safe_float(
@@ -2008,9 +1191,14 @@ def voyage_detail(
                         observation.hsfo_rob
                     ),
 
-                "lsmgo_rob":
+                "lsfo_rob":
                     safe_float(
-                        observation.lsmgo_rob
+                        observation.lsfo_rob
+                    ),
+
+                "mgo_rob":
+                    safe_float(
+                        observation.mgo_rob
                     ),
 
                 "power_kw":
@@ -2038,23 +1226,36 @@ def voyage_detail(
                         observation.cylinder_oil_consumption_l
                     ),
 
+                # Status
+
                 "speed_ok":
-                    status["speed_ok"],
+                    status[
+                        "speed_ok"
+                    ],
 
                 "consumption_ok":
-                    status["consumption_ok"],
+                    status[
+                        "consumption_ok"
+                    ],
 
                 "target_available":
-                    status["target_available"],
+                    status[
+                        "target_available"
+                    ],
 
                 "status":
                     (
                         "Achieved"
-                        if status["achieved"]
+                        if status[
+                            "achieved"
+                        ]
                         else (
                             "Not Achieved"
-                            if status["target_available"]
-                            else "Target Not Available"
+                            if status[
+                                "target_available"
+                            ]
+                            else
+                            "Target Not Available"
                         )
                     ),
             }
@@ -2068,10 +1269,13 @@ def voyage_detail(
         safe_float(
             leg.average_speed
         ),
+
         safe_float(
             leg.average_consumption
         ),
+
         target_speed,
+
         target_consumption,
     )
 
@@ -2111,9 +1315,6 @@ def voyage_detail(
             "daily_rows":
                 daily_rows,
 
-            "performance_type":
-                performance_type,
-
             "target_speed":
                 target_speed,
 
@@ -2143,6 +1344,7 @@ def voyage_detail(
         },
     )
 
+
 # ============================================================
 # OLD OBSERVATION URL
 # ============================================================
@@ -2162,3 +1364,31 @@ def observation_detail(
         leg_id=observation.leg_id,
     )
 
+
+
+
+############################################################################
+
+
+# ============================================================
+# SCoC VESSEL DASHBOARD
+# ============================================================
+
+def dashboard(request):
+
+    vessels = (
+        Vessel.objects
+        .filter(
+            active=True,
+            scoc_active=True,
+        )
+        .order_by("vessel_name")
+    )
+
+    return render(
+        request,
+        "scoc_monitoring/dashboard.html",
+        {
+            "vessels": vessels,
+        },
+    )

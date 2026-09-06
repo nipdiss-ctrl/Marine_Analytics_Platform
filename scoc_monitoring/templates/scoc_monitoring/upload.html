@@ -29,6 +29,49 @@
 
         {% csrf_token %}
 
+        <div style="margin-bottom:20px;">
+
+    <label
+    for="vessel"
+    style="
+        display:block;
+        font-weight:600;
+        margin-bottom:8px;
+    "
+>
+    Vessel
+</label>
+
+   <select
+    id="vessel"
+    name="vessel"
+    required
+    style="
+        width:100%;
+        box-sizing:border-box;
+        padding:12px;
+        border:1px solid #cbd5e1;
+        border-radius:8px;
+        font-size:14px;
+        background:white;
+    "
+>
+
+    <option value="">
+        Select Vessel
+    </option>
+
+    {% for vessel in vessels %}
+
+        <option value="{{ vessel.id }}">
+            {{ vessel.vessel_name }}
+        </option>
+
+    {% endfor %}
+
+</select>
+
+</div>
 
         <div style="margin-bottom:20px;">
 
@@ -179,108 +222,6 @@ TARGET CONSUMPTION: 58.0"
         </div>
 
     </form>
-
-</div>
-
-
-
-{% endblock %}
-
-{% extends "base.html" %}
-
-{% block content %}
-
-<div class="container py-4">
-
-    <div class="card shadow-sm">
-
-        <div class="card-body">
-
-            <h3 class="mb-4">
-                SCoC Report Import
-            </h3>
-
-            {% if error %}
-
-                <div class="alert alert-danger">
-                    {{ error }}
-                </div>
-
-            {% endif %}
-
-            <form
-                method="POST"
-                enctype="multipart/form-data"
-            >
-
-                {% csrf_token %}
-
-                <!-- ================================================= -->
-                <!-- EXCEL -->
-                <!-- ================================================= -->
-
-                <div class="mb-4">
-
-                    <label class="form-label fw-bold">
-                        SCoC Excel File
-                    </label>
-
-                    <input
-                        type="file"
-                        name="file"
-                        class="form-control"
-                        accept=".xlsx,.xls"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- ================================================= -->
-                <!-- NOON REPORT -->
-                <!-- ================================================= -->
-
-                <div class="mb-4">
-
-                    <label class="form-label fw-bold">
-                        Noon Report Message
-                    </label>
-
-                    <p class="text-muted small">
-
-                        Paste the complete noon report email here.
-                        The system will automatically extract the
-                        report date, route, destination, ETA,
-                        speed, consumption, ROB and other values.
-
-                    </p>
-
-                    <textarea
-                        name="noon_report_message"
-                        class="form-control"
-                        rows="18"
-                        placeholder="Paste the complete noon report here..."
-                    ></textarea>
-
-                </div>
-
-
-                <!-- ================================================= -->
-                <!-- SUBMIT -->
-                <!-- ================================================= -->
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    Import SCoC Data
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
 
 </div>
 
