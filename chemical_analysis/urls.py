@@ -1,6 +1,13 @@
 from django.urls import path
 
 from . import views
+from .effectiveness_views import (
+    effectiveness_report,
+)
+
+from .power_sfoc_views import (
+    power_sfoc_analysis,
+)
 
 
 app_name = "chemical_analysis"
@@ -8,50 +15,45 @@ app_name = "chemical_analysis"
 
 urlpatterns = [
 
-    # -----------------------------------------------------
-    # DASHBOARD
-    # -----------------------------------------------------
-
     path(
         "",
         views.chemical_dashboard,
-        name="dashboard"
+        name="dashboard",
     ),
-
-        # -----------------------------------------------------
-    # PERFORMANCE ANALYSIS
-    # -----------------------------------------------------
 
     path(
         "performance/",
         views.performance_analysis,
-        name="performance_analysis"
+        name="performance_analysis",
     ),
-    
-    # -----------------------------------------------------
-    # UPLOAD
-    # -----------------------------------------------------
+
+    path(
+        "sfoc-power/",
+        power_sfoc_analysis,
+        name="power_sfoc",
+    ),
+
+    path(
+        "effectiveness/",
+        effectiveness_report,
+        name="effectiveness",
+    ),
 
     path(
         "upload/",
         views.upload_data,
-        name="upload"
+        name="upload",
     ),
-
-    # -----------------------------------------------------
-    # IMPORT HISTORY
-    # -----------------------------------------------------
 
     path(
         "history/",
         views.import_history,
-        name="history"
+        name="history",
     ),
 
     path(
-    "history/delete/<int:import_id>/",
-    views.delete_import,
-    name="delete_import"
-),
-
+        "history/delete/<int:import_id>/",
+        views.delete_import,
+        name="delete_import",
+    ),
 ]

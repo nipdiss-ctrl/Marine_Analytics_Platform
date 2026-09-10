@@ -1,0 +1,75 @@
+{% extends "scoc_monitoring/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{% url 'scoc_monitoring:voyage_legs' vessel_id=leg.vessel_id load_type=leg.load_type|lower performance_type=performance_type %}" class="text-decoration-none">← Back to Routes</a>
+        <h2 class="fw-bold mt-2 mb-1">{{ leg.departure|default:"Unknown" }} → {{ leg.destination|default:"Unknown" }}</h2>
+        <p class="text-muted mb-0">{% if leg.voyage_reference %}Voyage {{ leg.voyage_reference }}{% endif %}{% if leg.load_type %} · {{ leg.load_type|title }}{% endif %}</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Route Average Speed</small><h3 class="fw-bold">{% if leg.average_speed is not None %}{{ leg.average_speed|floatformat:2 }} <small>kn</small>{% else %}—{% endif %}</h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Route Average Consumption</small><h3 class="fw-bold">{% if leg.average_consumption is not None %}{{ leg.average_consumption|floatformat:2 }} <small>MT/day</small>{% else %}—{% endif %}</h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Daily Reports</small><h3 class="fw-bold">{{ observation_count }}</h3></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Status</small><h5 class="mt-2">{% if voyage_status == 'Achieved' %}<span class="badge bg-success">Achieved</span>{% elif voyage_status == 'Not Achieved' %}<span class="badge bg-danger">Not Achieved</span>{% else %}<span class="badge bg-secondary">{{ voyage_status }}</span>{% endif %}</h5></div></div></div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><div class="d-flex justify-content-between align-items-center"><h5 class="fw-bold mb-0">{% if performance_type == "consumption" %}Daily Noon Report Consumption{% else %}Daily Noon Report Speed{% endif %}</h5><small class="text-muted">Use Edit to change a value</small></div></div>
+        <div class="card-body p-0"><div class="table-responsive">
+            <table class="table table-hover table-sm align-middle mb-0">
+                <thead class="table-light"><tr><th>Date</th><th>{% if performance_type == "consumption" %}Consumption{% else %}Speed{% endif %}</th></tr></thead>
+                <tbody>
+                {% for row in daily_rows %}
+                <tr>
+                    <td>{% if row.report_date %}{{ row.report_date|date:"d M Y H:i" }}{% else %}—{% endif %}</td>
+                    <td>
+                        <div id="display-{{ row.observation.id }}" class="d-flex align-items-center gap-2">
+                            {% if performance_type == "consumption" %}
+                                {% if row.consumption is not None %}<span>{{ row.consumption|floatformat:2 }} MT/day</span>{% else %}<span>—</span>{% endif %}
+                            {% else %}
+                                {% if row.speed is not None %}<span>{{ row.speed|floatformat:2 }} kn</span>{% else %}<span>—</span>{% endif %}
+                            {% endif %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="enableEdit('{{ row.observation.id }}')">Edit</button>
+                        </div>
+
+                        <form method="post" id="edit-{{ row.observation.id }}" class="d-none align-items-center gap-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="observation_id" value="{{ row.observation.id }}">
+                            <input type="hidden" name="performance_type" value="{{ performance_type }}">
+                            <input type="number" name="value" value="{% if performance_type == 'consumption' %}{% if row.consumption is not None %}{{ row.consumption }}{% endif %}{% else %}{% if row.speed is not None %}{{ row.speed }}{% endif %}{% endif %}" step="0.01" min="0" class="form-control form-control-sm" style="max-width:130px;" required>
+                            <span>{% if performance_type == "consumption" %}MT/day{% else %}kn{% endif %}</span>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelEdit('{{ row.observation.id }}')">Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="text-center py-5 text-muted">No daily observations have been imported for this route yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+</div>
+<script>
+function enableEdit(id) {
+    const display = document.getElementById("display-" + id);
+    const form = document.getElementById("edit-" + id);
+    if (!display || !form) return;
+    display.classList.add("d-none");
+    form.classList.remove("d-none");
+    form.classList.add("d-flex");
+    const input = form.querySelector('input[name="value"]');
+    if (input) { input.focus(); input.select(); }
+}
+function cancelEdit(id) {
+    const display = document.getElementById("display-" + id);
+    const form = document.getElementById("edit-" + id);
+    if (!display || !form) return;
+    form.classList.add("d-none");
+    form.classList.remove("d-flex");
+    display.classList.remove("d-none");
+}
+</script>
+{% endblock %}

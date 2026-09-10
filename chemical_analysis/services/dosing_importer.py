@@ -1,4 +1,3 @@
-
 import re
 from io import BytesIO
 
@@ -104,6 +103,18 @@ def _normalise_column_name(value):
 
 
 def _find_column(df, possible_names):
+    """
+    Find a single matching column.
+
+    IMPORTANT:
+    Some Excel sheets contain duplicate column names such as
+    two separate REMARKS columns.
+
+    This function is intentionally kept as a single-column
+    finder. Fields which can legitimately have duplicates,
+    such as REMARKS, are handled separately in _convert_sheet().
+    """
+
     if df is None or df.empty:
         return None
 
@@ -139,6 +150,61 @@ def _find_column(df, possible_names):
                 return column
 
     return None
+
+
+# =========================================================
+# FIND ALL MATCHING COLUMNS
+# =========================================================
+
+def _find_columns(df, possible_names):
+    """
+    Find ALL columns matching the supplied names.
+
+    This is needed because the Excel workbook can contain
+    duplicate headers, especially multiple REMARKS columns.
+    """
+
+    if df is None or df.empty:
+        return []
+
+    possible_keys = {
+        _normalise_column_name(name)
+        for name in possible_names
+    }
+
+    matched_columns = []
+
+    for column in df.columns:
+
+        column_key = _normalise_column_name(column)
+
+        # Exact match
+        if column_key in possible_keys:
+
+            matched_columns.append(column)
+
+    # If exact matches were found, use them.
+    if matched_columns:
+        return matched_columns
+
+    # Otherwise use partial matching.
+    for column in df.columns:
+
+        column_key = _normalise_column_name(column)
+
+        for name in possible_names:
+
+            name_key = _normalise_column_name(name)
+
+            if (
+                name_key
+                and name_key in column_key
+            ):
+
+                matched_columns.append(column)
+                break
+
+    return matched_columns
 
 
 # =========================================================
@@ -247,6 +313,7 @@ def _read_dosing_sheet(
     """
 
     try:
+
         excel_buffer.seek(0)
 
         raw_df = pd.read_excel(
@@ -307,7 +374,15 @@ def _read_dosing_sheet(
     if df.empty:
         return pd.DataFrame()
 
+    # -----------------------------------------------------
     # Clean column names
+    #
+    # IMPORTANT:
+    # We do NOT remove duplicate column names here.
+    # Pandas will preserve them and _find_columns() will
+    # detect them later.
+    # -----------------------------------------------------
+
     cleaned = []
 
     for column in df.columns:
@@ -569,8 +644,26 @@ def _convert_sheet(
     # -----------------------------------------------------
     # REMARKS
     # -----------------------------------------------------
+    #
+    # IMPORTANT:
+    #
+    # The workbook can have TWO columns named REMARKS.
+    #
+    # For example:
+    #
+    #     CHEMICAL ROB | REMARKS | ... | REMARKS
+    #
+    # Therefore:
+    #
+    #     df["REMARKS"]
+    #
+    # can return a DataFrame rather than a Series.
+    #
+    # We explicitly find ALL remarks columns and combine
+    # their contents row-by-row.
+    # -----------------------------------------------------
 
-    remarks_column = _find_column(
+    remarks_columns = _find_columns(
         df,
         [
             "remarks",
@@ -581,13 +674,43 @@ def _convert_sheet(
         ],
     )
 
-    if remarks_column is not None:
+    if remarks_columns:
+
+        print(
+            f"[DOSING] {sheet_name}: "
+            f"Found {len(remarks_columns)} "
+            f"remarks column(s): "
+            f"{remarks_columns}"
+        )
+
+        def combine_remarks(row):
+
+            values = []
+
+            for value in row:
+
+                text = _clean_text(
+                    value
+                )
+
+                if text:
+
+                    values.append(
+                        text
+                    )
+
+            # Remove duplicates while preserving order
+            return " | ".join(
+                dict.fromkeys(
+                    values
+                )
+            )
 
         result["remarks"] = (
-            df[remarks_column]
-            .map(
-                lambda value:
-                _clean_text(value)
+            df[remarks_columns]
+            .apply(
+                combine_remarks,
+                axis=1,
             )
         )
 
@@ -649,6 +772,26 @@ def _convert_sheet(
                 index=False
             )
         )
+
+        # Show remarks if available
+        if "remarks" in august.columns:
+
+            remarks_preview = august[
+                [
+                    "date",
+                    "remarks",
+                ]
+            ].tail(10)
+
+            print(
+                "[DOSING] August remarks:"
+            )
+
+            print(
+                remarks_preview.to_string(
+                    index=False
+                )
+            )
 
     return result
 
@@ -772,14 +915,17 @@ def import_dosing_log(
         print("=" * 80)
         print("DOSING WORKBOOK IMPORT")
         print("=" * 80)
+
         print(
             f"Vessel: {vessel}"
         )
+
         print(
             f"Sheets found: {len(sheet_names)}"
         )
 
         for sheet in sheet_names:
+
             print(
                 f"  -> {sheet}"
             )
@@ -793,11 +939,18 @@ def import_dosing_log(
 
         for sheet_name in sheet_names:
 
-            print("\n" + "-" * 70)
             print(
-                f"PROCESSING SHEET: {sheet_name}"
+                "\n" + "-" * 70
             )
-            print("-" * 70)
+
+            print(
+                f"PROCESSING SHEET: "
+                f"{sheet_name}"
+            )
+
+            print(
+                "-" * 70
+            )
 
             raw_df = _read_dosing_sheet(
                 excel_buffer,
@@ -846,10 +999,12 @@ def import_dosing_log(
 
             return {
                 "success": False,
+
                 "message": (
                     "No valid dosing records "
                     "were found in any sheet."
                 ),
+
                 "all_sheets":
                     sheet_names,
             }
@@ -873,6 +1028,7 @@ def import_dosing_log(
         )
 
         print("\n")
+
         print(
             f"TOTAL ROWS FROM ALL SHEETS: "
             f"{len(df)}"
@@ -917,7 +1073,8 @@ def import_dosing_log(
                 break
 
         print(
-            f"Voyage field: {voyage_field}"
+            f"Voyage field: "
+            f"{voyage_field}"
         )
 
         # =================================================
@@ -934,19 +1091,14 @@ def import_dosing_log(
         if voyage_field is None:
 
             print(
-                "\n[DOSING] Model has no voyage field."
+                "\n[DOSING] Model has "
+                "no voyage field."
             )
 
             print(
-                "[DOSING] Combining all sheets by date."
+                "[DOSING] Combining all "
+                "sheets by date."
             )
-
-            numeric_columns = [
-                "morning_additive",
-                "evening_additive",
-                "total_additive",
-                "total_fuel_qty",
-            ]
 
             grouped_rows = []
 
@@ -958,6 +1110,7 @@ def import_dosing_log(
                 row = {
                     "date":
                         date_value,
+
                     "voyage":
                         "MULTI-SHEET",
                 }
@@ -978,10 +1131,13 @@ def import_dosing_log(
                     ).dropna()
 
                     if not values.empty:
+
                         row[column] = float(
                             values.sum()
                         )
+
                     else:
+
                         row[column] = None
 
                 # -------------------------------------------------
@@ -1027,19 +1183,22 @@ def import_dosing_log(
 
                 # -------------------------------------------------
                 # REMARKS
+                #
+                # Combine remarks from all sheets for the date.
                 # -------------------------------------------------
 
                 remarks = []
 
-                for value in group[
+                for remark in group[
                     "remarks"
-                ]:
+                ].tolist():
 
                     text = _clean_text(
-                        value
+                        remark
                     )
 
                     if text:
+
                         remarks.append(
                             text
                         )
@@ -1061,8 +1220,9 @@ def import_dosing_log(
             )
 
             print(
-                f"[DOSING] After date "
-                f"combination: {len(df)} rows"
+                f"[DOSING] Rows after "
+                f"date grouping: "
+                f"{len(df)}"
             )
 
         # =================================================
@@ -1096,8 +1256,11 @@ def import_dosing_log(
                 )
 
                 field_data = {
-                    "vessel": vessel,
-                    "date": date_value,
+                    "vessel":
+                        vessel,
+
+                    "date":
+                        date_value,
                 }
 
                 # -------------------------------------------------
@@ -1157,12 +1320,15 @@ def import_dosing_log(
                         continue
 
                     # Convert NaN to None
-                    if isinstance(
-                        value,
-                        float,
-                    ) and pd.isna(value):
+                    try:
 
-                        value = None
+                        if pd.isna(value):
+
+                            value = None
+
+                    except Exception:
+
+                        pass
 
                     field_data[
                         field_name
@@ -1188,8 +1354,10 @@ def import_dosing_log(
                 # -------------------------------------------------
 
                 lookup = {
+
                     "vessel":
                         vessel,
+
                     "date":
                         date_value,
                 }
@@ -1212,6 +1380,7 @@ def import_dosing_log(
                         ChemicalDosing.objects
                         .update_or_create(
                             **lookup,
+
                             defaults={
                                 key: value
                                 for key, value
@@ -1225,7 +1394,10 @@ def import_dosing_log(
 
                         created += 1
 
-                        if date_value.month == 8:
+                        if (
+                            date_value.month
+                            == 8
+                        ):
 
                             august_created += 1
 
@@ -1233,7 +1405,10 @@ def import_dosing_log(
 
                         updated += 1
 
-                        if date_value.month == 8:
+                        if (
+                            date_value.month
+                            == 8
+                        ):
 
                             august_updated += 1
 
@@ -1260,9 +1435,18 @@ def import_dosing_log(
         ]
 
         print("\n")
-        print("=" * 80)
-        print("AUGUST DOSING CHECK")
-        print("=" * 80)
+
+        print(
+            "=" * 80
+        )
+
+        print(
+            "AUGUST DOSING CHECK"
+        )
+
+        print(
+            "=" * 80
+        )
 
         print(
             f"August rows processed: "
@@ -1279,6 +1463,32 @@ def import_dosing_log(
                         "morning_additive",
                         "evening_additive",
                         "total_additive",
+                    ]
+                ].tail(20).to_string(
+                    index=False
+                )
+            )
+
+        # -----------------------------------------------------
+        # AUGUST REMARKS CHECK
+        # -----------------------------------------------------
+
+        if (
+            not august_df.empty
+            and
+            "remarks" in august_df.columns
+        ):
+
+            print(
+                "\nAugust remarks:"
+            )
+
+            print(
+                august_df[
+                    [
+                        "date",
+                        "voyage",
+                        "remarks",
                     ]
                 ].tail(20).to_string(
                     index=False
@@ -1309,9 +1519,18 @@ def import_dosing_log(
         # =================================================
 
         print("\n")
-        print("=" * 80)
-        print("DOSING IMPORT COMPLETE")
-        print("=" * 80)
+
+        print(
+            "=" * 80
+        )
+
+        print(
+            "DOSING IMPORT COMPLETE"
+        )
+
+        print(
+            "=" * 80
+        )
 
         print(
             f"Sheets found: "
@@ -1436,15 +1655,29 @@ def import_dosing_log(
     except Exception as exc:
 
         print("\n")
-        print("=" * 80)
-        print("DOSING IMPORT ERROR")
-        print("=" * 80)
+
+        print(
+            "=" * 80
+        )
+
+        print(
+            "DOSING IMPORT ERROR"
+        )
+
+        print(
+            "=" * 80
+        )
+
         print(
             repr(exc)
         )
-        print("=" * 80)
+
+        print(
+            "=" * 80
+        )
 
         return {
+
             "success":
                 False,
 
@@ -1453,4 +1686,3 @@ def import_dosing_log(
                 f"data: {exc}"
             ),
         }
-

@@ -1,0 +1,31 @@
+{% extends "scoc_monitoring/base.html" %}
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title">Routes</h2>
+    <p class="page-subtitle">Select a vessel and loading condition.</p>
+</div>
+
+{% if vessels %}
+<div class="row g-4">
+{% for vessel in vessels %}
+<div class="col-xl-4 col-lg-6">
+    <div class="card h-100">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">{{ vessel.vessel_name }}</h5>
+            <p class="text-muted mb-4">SCoC voyage routes</p>
+
+            <div class="d-grid gap-2">
+                <a class="btn btn-outline-primary" href="{% url 'scoc_monitoring:voyage_legs' vessel.id 'ballast' 'speed' %}">Ballast Speed</a>
+                <a class="btn btn-outline-primary" href="{% url 'scoc_monitoring:voyage_legs' vessel.id 'ballast' 'consumption' %}">Ballast Consumption</a>
+                <a class="btn btn-outline-primary" href="{% url 'scoc_monitoring:voyage_legs' vessel.id 'laden' 'speed' %}">Laden Speed</a>
+                <a class="btn btn-outline-primary" href="{% url 'scoc_monitoring:voyage_legs' vessel.id 'laden' 'consumption' %}">Laden Consumption</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No active SCoC vessels are available.</div>
+{% endif %}
+{% endblock %}

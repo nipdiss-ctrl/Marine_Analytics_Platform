@@ -3,105 +3,123 @@
 {% block content %}
 
 <div class="page-header">
-
-    <h1>
-        SCoC Monitoring
-    </h1>
-
-    <p>
-        Import vessel performance data from the Excel noon report.
-    </p>
-
+    <h1>SCoC Monitoring</h1>
+    <p>Import vessel performance data from an Excel noon report or noon report message.</p>
 </div>
 
 
 <div class="card">
 
-    <h2>
-        Upload Performance Excel
-    </h2>
+    <h2>Import Performance Data</h2>
+
+    {% if error %}
+    <div class="alert alert-danger mb-3">
+        {{ error }}
+    </div>
+    {% endif %}
 
 
-    <form
-        method="post"
-        enctype="multipart/form-data"
-    >
+    <form method="post" enctype="multipart/form-data">
 
         {% csrf_token %}
 
+
+        <!-- ================================================= -->
+        <!-- VESSEL -->
+        <!-- ================================================= -->
+
         <div style="margin-bottom:20px;">
 
-    <label
-    for="vessel"
-    style="
-        display:block;
-        font-weight:600;
-        margin-bottom:8px;
-    "
->
-    Vessel
-</label>
+            <label
+                for="vessel"
+                style="display:block;font-weight:600;margin-bottom:8px;"
+            >
+                Vessel
+            </label>
 
-   <select
-    id="vessel"
-    name="vessel"
-    required
-    style="
-        width:100%;
-        box-sizing:border-box;
-        padding:12px;
-        border:1px solid #cbd5e1;
-        border-radius:8px;
-        font-size:14px;
-        background:white;
-    "
->
+            <select
+                id="vessel"
+                name="vessel"
+                required
+                style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:white;"
+            >
 
-    <option value="">
-        Select Vessel
-    </option>
+                <option value="">
+                    Select Vessel
+                </option>
 
-    {% for vessel in vessels %}
+                {% for vessel in vessels %}
 
-        <option value="{{ vessel.id }}">
-            {{ vessel.vessel_name }}
-        </option>
+                    <option value="{{ vessel.id }}">
 
-    {% endfor %}
+                        {{ vessel.vessel_name }}
 
-</select>
+                    </option>
 
-</div>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- EXCEL FILE -->
+        <!-- ================================================= -->
+
+        <div style="margin-bottom:20px;">
+
+            <label
+                for="file"
+                style="display:block;font-weight:600;margin-bottom:8px;"
+            >
+                Performance Excel File
+            </label>
+
+            <div class="upload-box">
+
+                <p style="margin-bottom:8px;">
+                    Select the vessel performance Excel file.
+                </p>
+
+                <p
+                    style="color:#64748b;font-size:13px;line-height:1.6;margin-bottom:12px;"
+                >
+                    Excel is optional. You can import using the Excel file,
+                    the noon report message, or both.
+                </p>
+
+                <input
+                    type="file"
+                    id="file"
+                    name="file"
+                    accept=".xlsx,.xls,.xlsm"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- NOON REPORT MESSAGE -->
+        <!-- ================================================= -->
 
         <div style="margin-bottom:20px;">
 
             <label
                 for="noon_report_message"
-                style="
-                    display:block;
-                    font-weight:600;
-                    margin-bottom:8px;
-                "
+                style="display:block;font-weight:600;margin-bottom:8px;"
             >
                 Noon Report Message
             </label>
-
 
             <textarea
                 id="noon_report_message"
                 name="noon_report_message"
                 rows="14"
-                style="
-                    width:100%;
-                    box-sizing:border-box;
-                    padding:12px;
-                    border:1px solid #cbd5e1;
-                    border-radius:8px;
-                    font-family:monospace;
-                    font-size:13px;
-                    resize:vertical;
-                "
-                placeholder="Paste the noon report message here if required...
+                style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-family:monospace;font-size:13px;resize:vertical;"
+                placeholder="Paste the noon report message here if you are importing from a message.
 
 Example:
 
@@ -127,99 +145,67 @@ TARGET SPEED: 10.5
 TARGET CONSUMPTION: 58.0"
             ></textarea>
 
-
-            <p style="
-                color:#64748b;
-                font-size:13px;
-                line-height:1.6;
-                margin-top:8px;
-            ">
-                The Excel file is the primary source.
-                The noon report message is supplementary and
-                is used only to fill information missing from
-                the Excel data for the same report date.
+            <p
+                style="color:#64748b;font-size:13px;line-height:1.6;margin-top:8px;"
+            >
+                The noon report message is optional. If an Excel file is
+                provided, the Excel data is the primary source and the
+                message is used to fill information that is missing.
             </p>
 
         </div>
 
 
-        <div class="upload-box">
+        <!-- ================================================= -->
+        <!-- IMPORT INFORMATION -->
+        <!-- ================================================= -->
 
-            <p>
-                Select the vessel performance Excel file.
-            </p>
+        <div
+            style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:15px;margin-bottom:20px;"
+        >
 
+            <strong>Import requirements</strong>
 
-            <p style="
-                color:#64748b;
-                font-size:13px;
-                line-height:1.6;
-            ">
-
-                The importer can read, when available:
-
-                Reported Time,
-                Voyage / Leg,
-                Load Condition,
-                Departure,
-                Destination,
-                Speed,
-                ME Consumption,
-                Distance,
-                Distance To Go,
-                Running Hours,
-                HSFO ROB,
-                LSFO ROB,
-                MGO ROB,
-                ME Power,
-                RPM,
-                Engine Load,
-                SCoC,
-                Cylinder Oil,
-                and target values.
-
-            </p>
-
-
-            <p style="
-                color:#64748b;
-                font-size:13px;
-                line-height:1.6;
-            ">
-
-                No fuel quantity, target, voyage, load condition,
-                speed or consumption value is invented when it
-                is unavailable in the source data.
-
-            </p>
-
-
-            <!--
-                IMPORTANT:
-                The name MUST be "file" because views.py uses:
-
-                    request.FILES.get("file")
-            -->
-
-            <input
-                type="file"
-                name="file"
-                accept=".xlsx,.xls"
-                required
+            <ul
+                style="margin-top:10px;margin-bottom:0;color:#475569;"
             >
 
+                <li>
+                    Vessel selection is required.
+                </li>
 
-            <br><br>
+                <li>
+                    Excel file is optional.
+                </li>
 
+                <li>
+                    Noon report message is optional.
+                </li>
 
-            <button
-                type="submit"
-                class="button"
-            >
-                Upload & Import
-            </button>
+                <li>
+                    Provide at least one: Excel file or noon report message.
+                </li>
+
+                <li>
+                    If both are provided, both will be used.
+                </li>
+
+            </ul>
 
         </div>
+
+
+        <!-- ================================================= -->
+        <!-- SUBMIT -->
+        <!-- ================================================= -->
+
+        <button
+            type="submit"
+            class="button"
+        >
+            Upload &amp; Import
+        </button>
+
 
     </form>
 

@@ -1,0 +1,152 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+
+<div class="page-title">
+
+    <h1>Voyage Performance</h1>
+
+    <p>
+        Current vessel speed and main engine consumption
+        against the target values.
+    </p>
+
+</div>
+
+
+<div class="cards">
+
+{% for item in performance %}
+
+    {% if item.leg %}
+
+        <a
+            href="{% url 'scoc_monitoring:leg_detail' item.leg.id %}"
+            class="performance-card"
+        >
+
+            <div class="card-header">
+
+                <div class="load-title">
+                    {{ item.load_type }}
+                </div>
+
+                {% if item.status.achieved %}
+
+                    <div class="status status-achieved">
+                        TARGET ACHIEVED
+                    </div>
+
+                {% else %}
+
+                    <div class="status status-not-achieved">
+                        TARGET NOT ACHIEVED
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="metrics">
+
+                <div class="metric">
+
+                    <div class="metric-label">
+                        Average Speed
+                    </div>
+
+                    <div class="metric-value">
+                        {{ item.leg.average_speed|floatformat:2 }}
+                        <small>kn</small>
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-label">
+                        Average Consumption
+                    </div>
+
+                    <div class="metric-value">
+                        {{ item.leg.average_consumption|floatformat:2 }}
+                        <small>MT/day</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="target">
+
+                <div class="target-item">
+
+                    Target Speed:
+                    <strong>
+                        {{ item.leg.target_speed|floatformat:2 }} kn
+                    </strong>
+
+                </div>
+
+                <div class="target-item">
+
+                    Target Consumption:
+                    <strong>
+                        {{ item.leg.target_consumption|floatformat:2 }}
+                        MT/day
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="route">
+
+                <strong>
+                    {{ item.leg.departure }}
+                </strong>
+
+                →
+
+                <strong>
+                    {{ item.leg.destination }}
+                </strong>
+
+            </div>
+
+        </a>
+
+    {% else %}
+
+        <div class="performance-card">
+
+            <div class="card-header">
+
+                <div class="load-title">
+                    {{ item.load_type }}
+                </div>
+
+                <div class="status status-none">
+                    NO DATA
+                </div>
+
+            </div>
+
+            <p>
+                No {{ item.load_type|lower }} voyage data
+                has been imported yet.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

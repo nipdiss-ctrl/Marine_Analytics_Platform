@@ -5,10 +5,6 @@ from . import views
 
 urlpatterns = [
 
-    # =====================================================
-    # VESSELS
-    # =====================================================
-
     path(
         "vessels/",
         views.vessel_list,
@@ -32,10 +28,6 @@ urlpatterns = [
         views.vessel_delete,
         name="vessel_delete",
     ),
-
-    # =====================================================
-    # INSPECTIONS
-    # =====================================================
 
     path(
         "",
@@ -61,10 +53,6 @@ urlpatterns = [
         name="finding_create",
     ),
 
-    # =====================================================
-    # CHECKLIST
-    # =====================================================
-
     path(
         "checklist-items/new/",
         views.checklistitem_create,
@@ -77,26 +65,17 @@ urlpatterns = [
         name="checklistitem_list",
     ),
 
-    # =====================================================
-    # IMPORT
-    # =====================================================
-
     path(
         "import/",
         views.inspection_import,
         name="inspection_import",
     ),
 
-    # =====================================================
-    # RISK
-    # =====================================================
-
     path(
         "finding/<int:pk>/edit-risk/",
         views.finding_edit_risk,
         name="finding_edit_risk",
     ),
-
 
     path(
         "finding/<int:pk>/delete/",
@@ -114,4 +93,19 @@ urlpatterns = [
         name="rightship_dashboard",
     ),
 
+    # =====================================================
+    # RIGHTSHIP REPORTS
+    # =====================================================
+
+    path(
+        "reports/",
+        views.rightship_reports,
+        name="rightship_reports",
+    ),
+
+    path(
+        "reports/<int:pk>/",
+        views.rightship_report_detail,
+        name="rightship_report_detail",
+    ),
 ]

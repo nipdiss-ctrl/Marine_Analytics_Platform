@@ -1,0 +1,279 @@
+{% extends "inspections/base_rightship.html" %}
+
+{% block content %}
+
+<style>
+
+.report-page-title {
+
+    font-size:
+        28px;
+
+    font-weight:
+        700;
+
+    color:
+        #12304a;
+
+    margin-bottom:
+        22px;
+}
+
+
+.vessel-report-group {
+
+    background:
+        white;
+
+    border:
+        1px solid #d6dde3;
+
+    border-radius:
+        7px;
+
+    margin-bottom:
+        25px;
+
+    overflow:
+        hidden;
+}
+
+
+.vessel-report-header {
+
+    background:
+        #0d3451;
+
+    color:
+        white;
+
+    padding:
+        13px 18px;
+
+    font-size:
+        18px;
+
+    font-weight:
+        700;
+}
+
+
+.report-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.5fr
+        1fr
+        1fr
+        1fr
+        1fr
+        1fr
+        auto;
+
+    gap:
+        10px;
+
+    align-items:
+        center;
+
+    padding:
+        11px 15px;
+
+    border-bottom:
+        1px solid #e1e6ea;
+}
+
+
+.report-row:last-child {
+    border-bottom: none;
+}
+
+
+.report-date {
+    font-weight:
+        600;
+}
+
+
+.report-stats {
+
+    font-size:
+        13px;
+
+    color:
+        #536572;
+}
+
+
+.risk-high {
+    color:
+        #b40000;
+
+    font-weight:
+        700;
+}
+
+
+.risk-medium {
+    color:
+        #c45b00;
+
+    font-weight:
+        700;
+}
+
+
+.risk-low {
+    color:
+        #8a7300;
+
+    font-weight:
+        700;
+}
+
+
+.view-button {
+
+    background:
+        #164b70;
+
+    color:
+        white;
+
+    text-decoration:
+        none;
+
+    padding:
+        7px 12px;
+
+    border-radius:
+        4px;
+
+    font-size:
+        12px;
+}
+
+
+@media (
+    max-width: 900px
+) {
+
+    .report-row {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+}
+
+</style>
+
+
+<div class="report-page-title">
+
+    📄 RightShip Inspection Reports
+
+</div>
+
+
+{% for vessel, reports in report_groups.items %}
+
+
+<div class="vessel-report-group">
+
+
+    <div class="vessel-report-header">
+
+        {{ vessel }}
+
+    </div>
+
+
+    {% for row in reports %}
+
+
+    <div class="report-row">
+
+
+        <div class="report-date">
+
+            {{ row.inspection.inspection_date|date:"d-M-Y" }}
+
+        </div>
+
+
+        <div class="report-stats">
+
+            <span class="risk-high">
+                High: {{ row.high }}
+            </span>
+
+        </div>
+
+
+        <div class="report-stats">
+
+            <span class="risk-medium">
+                Medium: {{ row.medium }}
+            </span>
+
+        </div>
+
+
+        <div class="report-stats">
+
+            <span class="risk-low">
+                Low: {{ row.low }}
+            </span>
+
+        </div>
+
+
+        <div class="report-stats">
+
+            Findings:
+            {{ row.total }}
+
+        </div>
+
+
+        <div class="report-stats">
+
+            S{{ row.severity }}
+
+        </div>
+
+
+        <a
+            class="view-button"
+            href="{% url 'rightship_report_detail' row.inspection.id %}"
+        >
+            Open Report
+        </a>
+
+
+    </div>
+
+
+    {% endfor %}
+
+
+</div>
+
+
+{% empty %}
+
+
+<div>
+
+    No inspection reports have been imported yet.
+
+</div>
+
+
+{% endfor %}
+
+{% endblock %}

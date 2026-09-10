@@ -1,0 +1,53 @@
+{% extends "scoc_monitoring/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">{{ page_title }}</h2>
+        <p class="page-subtitle">Set the persistent targets used for new voyage legs.</p>
+    </div>
+    <a href="{% url 'scoc_monitoring:vessel_list' %}" class="btn btn-outline-secondary">Back to Vessels</a>
+</div>
+
+<form method="post" novalidate>
+{% csrf_token %}
+{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+<div class="card mb-4"><div class="card-body p-4">
+<h5 class="fw-bold mb-3">Basic Information</h5>
+<div class="row g-3">
+{% for field in form %}
+    {% if field.name in "vessel_name engine_mcr_kw cylinder_oil_density target_scoc high_alarm_threshold low_alarm_threshold" %}
+    <div class="col-md-4">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+        {{ field.errors }}
+    </div>
+    {% endif %}
+{% endfor %}
+</div></div></div>
+
+<div class="card mb-4"><div class="card-body p-4">
+<h5 class="fw-bold mb-3">Laden Targets</h5>
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label">{{ form.target_speed_laden.label }}</label>{{ form.target_speed_laden }}{{ form.target_speed_laden.errors }}</div>
+<div class="col-md-6"><label class="form-label">{{ form.target_consumption_laden.label }}</label>{{ form.target_consumption_laden }}{{ form.target_consumption_laden.errors }}</div>
+</div></div></div>
+
+<div class="card mb-4"><div class="card-body p-4">
+<h5 class="fw-bold mb-3">Ballast Targets</h5>
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label">{{ form.target_speed_ballast.label }}</label>{{ form.target_speed_ballast }}{{ form.target_speed_ballast.errors }}</div>
+<div class="col-md-6"><label class="form-label">{{ form.target_consumption_ballast.label }}</label>{{ form.target_consumption_ballast }}{{ form.target_consumption_ballast.errors }}</div>
+</div></div></div>
+
+<div class="card mb-4"><div class="card-body p-4">
+<div class="form-check">{{ form.active }}<label class="form-check-label" for="{{ form.active.id_for_label }}">Active</label></div>
+</div></div>
+
+<div class="d-flex gap-2">
+<button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>{{ submit_label }}</button>
+<a href="{% url 'scoc_monitoring:vessel_list' %}" class="btn btn-outline-secondary">Cancel</a>
+</div>
+</form>
+{% endblock %}

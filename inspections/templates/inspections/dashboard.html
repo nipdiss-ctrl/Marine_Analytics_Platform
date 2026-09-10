@@ -1,534 +1,420 @@
-{% extends "base_rightship.html" %}
+{% extends "inspections/base_rightship.html" %}
+
+{% block title %}
+RightShip Dashboard
+{% endblock %}
+
+
+{% block rightship_dashboard_active %}
+active
+{% endblock %}
+
 
 {% block content %}
 
-<div class="container-fluid py-4">
+<div class="page-header">
 
-    <!-- ========================================================= -->
-    <!-- HEADER -->
-    <!-- ========================================================= -->
+    <div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            RightShip Inspection Dashboard
+        </h1>
 
-        <div>
-            <h1 class="fw-bold mb-1">
-                RightShip Intelligence Dashboard
-            </h1>
+        <p>
+            Inspection findings, risk severity and validity overview
+        </p>
 
-            <p class="text-muted mb-0">
-                Vessel inspection, findings and risk intelligence
-            </p>
+    </div>
+
+    <div class="page-actions">
+
+        <a
+            href="{% url 'rightship_reports' %}"
+            class="btn btn-secondary"
+        >
+            Reports
+        </a>
+
+        <a
+            href="{% url 'inspection_import' %}"
+            class="btn btn-primary"
+        >
+            Import Excel
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     KPI SECTION
+============================================================= -->
+
+<div class="kpi-grid">
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2026 Completed Inspections
         </div>
 
+        <div class="kpi-value">
+            {{ year_kpis.2026.completed_inspections }}
+        </div>
+
+        <div class="kpi-note">
+            Current inspection year
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2026 Total Findings
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2026.total_findings }}
+        </div>
+
+        <div class="kpi-note">
+            All risk levels
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2026 High Risk
+        </div>
+
+        <div
+            class="kpi-value"
+            style="color:#E31B17;"
+        >
+            {{ year_kpis.2026.high_risk_findings }}
+        </div>
+
+        <div class="kpi-note">
+            Immediate management attention
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2026 Average Severity
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2026.average_severity }}
+        </div>
+
+        <div class="kpi-note">
+            H×3 + M×2 + L
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2026 Average Validity
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2026.average_validity }}
+        </div>
+
+        <div class="kpi-note">
+            Months
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     2025 KPI ROW
+============================================================= -->
+
+<div
+    class="kpi-grid"
+    style="margin-top:-7px;"
+>
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2025 Completed Inspections
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2025.completed_inspections }}
+        </div>
+
+        <div class="kpi-note">
+            Previous inspection year
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2025 Total Findings
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2025.total_findings }}
+        </div>
+
+        <div class="kpi-note">
+            All risk levels
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2025 High Risk
+        </div>
+
+        <div
+            class="kpi-value"
+            style="color:#b86b6b;"
+        >
+            {{ year_kpis.2025.high_risk_findings }}
+        </div>
+
+        <div class="kpi-note">
+            Muted historical view
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2025 Average Severity
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2025.average_severity }}
+        </div>
+
+        <div class="kpi-note">
+            H×3 + M×2 + L
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div class="kpi-label">
+            2025 Average Validity
+        </div>
+
+        <div class="kpi-value">
+            {{ year_kpis.2025.average_validity }}
+        </div>
+
+        <div class="kpi-note">
+            Months
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     GRAPH
+============================================================= -->
+
+<div class="card">
+
+    <div class="card-header">
+
         <div>
 
-            <a
-                href="{% url 'inspection_import' %}"
-                class="btn btn-primary"
+            <h2 class="card-title">
+                Inspection Risk Profile
+            </h2>
+
+            <div
+                style="
+                    margin-top:5px;
+                    font-size:11px;
+                    color:#7b8b98;
+                "
             >
-                <i class="bi bi-upload"></i>
-                Import Inspection Data
-            </a>
+                Each step represents one inspection.
+                Inspections are ordered latest to oldest within each vessel.
+            </div>
+
+        </div>
+
+
+        <div class="page-actions">
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="changeZoom(-0.15)"
+            >
+                −
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="resetZoom()"
+            >
+                Reset
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="changeZoom(0.15)"
+            >
+                +
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="downloadGraph()"
+            >
+                Download PNG
+            </button>
 
         </div>
 
     </div>
 
 
-    <!-- ========================================================= -->
-    <!-- KPI CARDS -->
-    <!-- ========================================================= -->
+    <div class="card-body">
 
-    <div class="row g-3">
+        <div
+            style="
+                display:flex;
+                gap:18px;
+                align-items:center;
+                flex-wrap:wrap;
+                margin-bottom:15px;
+                font-size:11px;
+            "
+        >
 
-        <!-- VESSELS -->
+            <strong>
+                Risk:
+            </strong>
 
-        <div class="col-xl-2 col-md-4 col-sm-6">
+            <span>
+                <span
+                    style="
+                        display:inline-block;
+                        width:12px;
+                        height:12px;
+                        background:#E31B17;
+                        margin-right:5px;
+                        vertical-align:-2px;
+                    "
+                ></span>
+                High
+            </span>
 
-            <div class="card shadow-sm border-0 h-100">
+            <span>
+                <span
+                    style="
+                        display:inline-block;
+                        width:12px;
+                        height:12px;
+                        background:#FF8C00;
+                        margin-right:5px;
+                        vertical-align:-2px;
+                    "
+                ></span>
+                Medium
+            </span>
 
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        Vessels
-                    </div>
-
-                    <div class="fs-2 fw-bold">
-                        {{ total_vessels }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- INSPECTIONS -->
-
-        <div class="col-xl-2 col-md-4 col-sm-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        Inspections
-                    </div>
-
-                    <div class="fs-2 fw-bold">
-                        {{ total_inspections }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- FINDINGS -->
-
-        <div class="col-xl-2 col-md-4 col-sm-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        Findings
-                    </div>
-
-                    <div class="fs-2 fw-bold">
-                        {{ total_findings }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
+            <span>
+                <span
+                    style="
+                        display:inline-block;
+                        width:12px;
+                        height:12px;
+                        background:#FFD21F;
+                        margin-right:5px;
+                        vertical-align:-2px;
+                    "
+                ></span>
+                Low
+            </span>
 
 
-        <!-- HIGH -->
+            <span style="margin-left:12px;">
+                <span
+                    style="
+                        display:inline-block;
+                        width:12px;
+                        height:12px;
+                        background:#F3A3A3;
+                        margin-right:5px;
+                        vertical-align:-2px;
+                    "
+                ></span>
+                2025
+            </span>
 
-        <div class="col-xl-2 col-md-4 col-sm-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        High Risk
-                    </div>
-
-                    <div class="fs-2 fw-bold text-danger">
-                        {{ high_risk }}
-                    </div>
-
-                </div>
-
-            </div>
+            <span>
+                <span
+                    style="
+                        display:inline-block;
+                        width:12px;
+                        height:12px;
+                        background:#E31B17;
+                        margin-right:5px;
+                        vertical-align:-2px;
+                    "
+                ></span>
+                2026
+            </span>
 
         </div>
 
 
-        <!-- MEDIUM -->
-
-        <div class="col-xl-2 col-md-4 col-sm-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        Medium Risk
-                    </div>
-
-                    <div class="fs-2 fw-bold text-warning">
-                        {{ medium_risk }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- LOW -->
-
-        <div class="col-xl-2 col-md-4 col-sm-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-body">
-
-                    <div class="text-muted small">
-                        Low Risk
-                    </div>
-
-                    <div class="fs-2 fw-bold text-success">
-                        {{ low_risk }}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================================================= -->
-    <!-- CHARTS -->
-    <!-- ========================================================= -->
-
-    <div class="row g-4 mt-2">
-
-
-        <!-- ===================================================== -->
-        <!-- RISK FINDINGS BY INSPECTION -->
-        <!-- ===================================================== -->
-
-        <div class="col-lg-8">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-header bg-white border-0 pt-4 px-4">
-
-                    <h5 class="fw-bold mb-1">
-                        Risk Findings by Inspection
-                    </h5>
-
-                    <p class="text-muted small mb-0">
-                        High, medium and low risk findings per inspection
-                    </p>
-
-                </div>
-
-                <div class="card-body">
-
-                    <div style="height: 430px;">
-
-                        <canvas id="riskChart"></canvas>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================================================== -->
-        <!-- RISK DISTRIBUTION -->
-        <!-- ===================================================== -->
-
-        <div class="col-lg-4">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-header bg-white border-0 pt-4 px-4">
-
-                    <h5 class="fw-bold mb-1">
-                        Overall Risk Distribution
-                    </h5>
-
-                    <p class="text-muted small mb-0">
-                        Distribution of all findings
-                    </p>
-
-                </div>
-
-                <div class="card-body">
-
-                    <div style="height: 430px;">
-
-                        <canvas id="riskPieChart"></canvas>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================================================= -->
-    <!-- INSPECTION REGISTER -->
-    <!-- ========================================================= -->
-
-    <div class="card shadow-sm border-0 mt-4">
-
-        <div class="card-header bg-white border-0 pt-4 px-4">
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <div>
-
-                    <h5 class="fw-bold mb-1">
-                        Inspection Register
-                    </h5>
-
-                    <p class="text-muted small mb-0">
-                        Inspection history and risk summary
-                    </p>
-
-                </div>
-
-                <span class="badge bg-secondary">
-
-                    {{ total_inspections }} inspection(s)
-
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="card-body px-4 pb-4">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-dark">
-
-                        <tr>
-
-                            <th>
-                                Inspection
-                            </th>
-
-                            <th>
-                                Vessel
-                            </th>
-
-                            <th>
-                                Date
-                            </th>
-
-                            <th>
-                                High
-                            </th>
-
-                            <th>
-                                Medium
-                            </th>
-
-                            <th>
-                                Low
-                            </th>
-
-                            <th>
-                                Total
-                            </th>
-
-                            <th>
-                                Severity
-                            </th>
-
-                            <th>
-                                Validity
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        {% for row in inspection_register %}
-
-                        <tr>
-
-                            <!-- INSPECTION -->
-
-                            <td>
-
-                                <strong>
-                                    {{ row.inspection.inspection_no }}
-                                </strong>
-
-                            </td>
-
-
-                            <!-- VESSEL -->
-
-                            <td>
-
-                                {{ row.vessel }}
-
-                            </td>
-
-
-                            <!-- DATE -->
-
-                            <td>
-
-                                {% if row.date %}
-
-                                    {{ row.date|date:"d-M-Y" }}
-
-                                {% else %}
-
-                                    -
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <!-- HIGH -->
-
-                            <td>
-
-                                {% if row.high > 0 %}
-
-                                    <span class="badge bg-danger">
-                                        {{ row.high }}
-                                    </span>
-
-                                {% else %}
-
-                                    0
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <!-- MEDIUM -->
-
-                            <td>
-
-                                {% if row.medium > 0 %}
-
-                                    <span class="badge bg-warning text-dark">
-                                        {{ row.medium }}
-                                    </span>
-
-                                {% else %}
-
-                                    0
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <!-- LOW -->
-
-                            <td>
-
-                                {% if row.low > 0 %}
-
-                                    <span class="badge bg-success">
-                                        {{ row.low }}
-                                    </span>
-
-                                {% else %}
-
-                                    0
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <!-- TOTAL -->
-
-                            <td>
-
-                                <strong>
-                                    {{ row.total }}
-                                </strong>
-
-                            </td>
-
-
-                            <!-- SEVERITY -->
-
-                            <td>
-
-                                {% if row.severity >= 3 %}
-
-                                    <span class="badge bg-danger">
-                                        HIGH
-                                    </span>
-
-                                {% elif row.severity == 2 %}
-
-                                    <span class="badge bg-warning text-dark">
-                                        MEDIUM
-                                    </span>
-
-                                {% elif row.severity == 1 %}
-
-                                    <span class="badge bg-success">
-                                        LOW
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge bg-secondary">
-                                        NONE
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <!-- VALIDITY -->
-
-                            <td>
-
-                                {% if row.validity %}
-
-                                    {{ row.validity }} months
-
-                                {% else %}
-
-                                    -
-
-                                {% endif %}
-
-                            </td>
-
-                        </tr>
-
-
-                        {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="9"
-                                class="text-center text-muted py-5"
-                            >
-
-                                No inspections available.
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
+        <div
+            id="chart-scroll"
+            style="
+                width:100%;
+                overflow-x:auto;
+                overflow-y:hidden;
+                border:1px solid #e0e6eb;
+                background:#ffffff;
+            "
+        >
+
+            <canvas
+                id="riskChart"
+                height="620"
+            ></canvas>
 
         </div>
 
@@ -537,255 +423,1212 @@
 </div>
 
 
-<!-- ============================================================= -->
-<!-- CHART DATA -->
-<!-- ============================================================= -->
+<!-- ============================================================
+     REGISTER
+============================================================= -->
+
+<div
+    class="card"
+    style="margin-top:20px;"
+>
+
+    <div class="card-header">
+
+        <div>
+
+            <h2 class="card-title">
+                Inspection Register
+            </h2>
+
+            <div
+                style="
+                    margin-top:4px;
+                    font-size:11px;
+                    color:#7b8b98;
+                "
+            >
+                {{ total_inspections }} inspections
+            </div>
+
+        </div>
+
+        <a
+            href="{% url 'rightship_reports' %}"
+            class="btn btn-secondary"
+        >
+            View Reports
+        </a>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Vessel
+                        </th>
+
+                        <th>
+                            Inspection Date
+                        </th>
+
+                        <th>
+                            Year
+                        </th>
+
+                        <th>
+                            High
+                        </th>
+
+                        <th>
+                            Medium
+                        </th>
+
+                        <th>
+                            Low
+                        </th>
+
+                        <th>
+                            Findings
+                        </th>
+
+                        <th>
+                            Severity
+                        </th>
+
+                        <th>
+                            Validity
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for group in vessel_groups %}
+
+                        {% for row in group.inspections %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ row.vessel_name }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ row.inspection_date|date:"d-M-Y" }}
+                                </td>
+
+                                <td>
+
+                                    {% if row.year == 2026 %}
+
+                                        <span class="year-badge year-2026">
+                                            2026
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="year-badge year-2025">
+                                            {{ row.year }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="risk-badge risk-high"
+                                    >
+                                        {{ row.high }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="risk-badge risk-medium"
+                                    >
+                                        {{ row.medium }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="risk-badge risk-low"
+                                    >
+                                        {{ row.low }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    {{ row.total }}
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        {{ row.severity }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ row.validity_months }} months
+                                </td>
+
+                                <td>
+
+                                    <a
+                                        href="{% url 'rightship_report_detail' row.inspection_id %}"
+                                        class="btn btn-secondary"
+                                        style="padding:6px 10px;"
+                                    >
+                                        Open
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="10"
+                                class="empty-state"
+                            >
+
+                                <div class="empty-state-title">
+                                    No inspections imported
+                                </div>
+
+                                <div class="empty-state-text">
+                                    Import the RightShip Excel workbook to populate the dashboard.
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+    #riskChart {
+        display:
+            block;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
 
 <script>
 
-const chartLabels =
-    {{ chart_labels|safe }};
+    /*
+     * ==========================================================
+     * RIGHTSHIP GRAPH
+     *
+     * One inspection = one connected staircase.
+     *
+     * High starts at the baseline.
+     * Medium starts at the top of High.
+     * Low starts at the top of Medium.
+     * ==========================================================
+     */
 
-const highData =
-    {{ high_data|safe }};
+    const chartData = {{ chart_data|safe }};
 
-const mediumData =
-    {{ medium_data|safe }};
+    const canvas =
+        document.getElementById("riskChart");
 
-const lowData =
-    {{ low_data|safe }};
+    const ctx =
+        canvas.getContext("2d");
 
-</script>
 
+    let zoom =
+        1;
 
-<!-- ============================================================= -->
-<!-- CHART.JS -->
-<!-- ============================================================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    function getColours(year) {
 
+        if (year === 2025) {
 
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-
-        /* ===================================================== */
-        /* RISK BAR CHART */
-        /* ===================================================== */
-
-        const riskCanvas =
-            document.getElementById(
-                "riskChart"
-            );
-
-
-        if (riskCanvas) {
-
-            new Chart(
-                riskCanvas,
-                {
-
-                    type: "bar",
-
-                    data: {
-
-                        labels: chartLabels,
-
-                        datasets: [
-
-                            {
-                                label: "High",
-                                data: highData,
-                                backgroundColor: "#dc3545"
-                            },
-
-                            {
-                                label: "Medium",
-                                data: mediumData,
-                                backgroundColor: "#ffc107"
-                            },
-
-                            {
-                                label: "Low",
-                                data: lowData,
-                                backgroundColor: "#198754"
-                            }
-
-                        ]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        interaction: {
-
-                            mode: "index",
-
-                            intersect: false
-
-                        },
-
-                        plugins: {
-
-                            legend: {
-
-                                position: "top"
-
-                            },
-
-                            tooltip: {
-
-                                callbacks: {
-
-                                    title: function(context) {
-
-                                        return context[0].label;
-
-                                    },
-
-                                    label: function(context) {
-
-                                        return (
-                                            context.dataset.label
-                                            + ": "
-                                            + context.parsed.y
-                                        );
-
-                                    }
-
-                                }
-
-                            }
-
-                        },
-
-                        scales: {
-
-                            x: {
-
-                                ticks: {
-
-                                    autoSkip: false,
-
-                                    maxRotation: 90,
-
-                                    minRotation: 45
-
-                                }
-
-                            },
-
-                            y: {
-
-                                beginAtZero: true,
-
-                                ticks: {
-
-                                    precision: 0
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            );
+            return {
+                high: "#F3A3A3",
+                medium: "#F4BE91",
+                low: "#F4DF91",
+                text: "#6f777d"
+            };
 
         }
 
-
-        /* ===================================================== */
-        /* RISK DISTRIBUTION */
-        /* ===================================================== */
-
-        const pieCanvas =
-            document.getElementById(
-                "riskPieChart"
-            );
-
-
-        if (pieCanvas) {
-
-            new Chart(
-                pieCanvas,
-                {
-
-                    type: "doughnut",
-
-                    data: {
-
-                        labels: [
-
-                            "High",
-                            "Medium",
-                            "Low"
-
-                        ],
-
-                        datasets: [
-
-                            {
-
-                                data: [
-
-                                    {{ high_risk }},
-                                    {{ medium_risk }},
-                                    {{ low_risk }}
-
-                                ],
-
-                                backgroundColor: [
-
-                                    "#dc3545",
-                                    "#ffc107",
-                                    "#198754"
-
-                                ],
-
-                                borderWidth: 1
-
-                            }
-
-                        ]
-
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        plugins: {
-
-                            legend: {
-
-                                position: "bottom"
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            );
-
-        }
+        return {
+            high: "#E31B17",
+            medium: "#FF8C00",
+            low: "#FFD21F",
+            text: "#173b56"
+        };
 
     }
 
-);
+
+    function roundedRect(
+        context,
+        x,
+        y,
+        width,
+        height,
+        radius
+    ) {
+
+        const r =
+            Math.min(
+                radius,
+                width / 2,
+                height / 2
+            );
+
+        context.beginPath();
+
+        context.moveTo(
+            x + r,
+            y
+        );
+
+        context.lineTo(
+            x + width - r,
+            y
+        );
+
+        context.quadraticCurveTo(
+            x + width,
+            y,
+            x + width,
+            y + r
+        );
+
+        context.lineTo(
+            x + width,
+            y + height - r
+        );
+
+        context.quadraticCurveTo(
+            x + width,
+            y + height,
+            x + width - r,
+            y + height
+        );
+
+        context.lineTo(
+            x + r,
+            y + height
+        );
+
+        context.quadraticCurveTo(
+            x,
+            y + height,
+            x,
+            y + height - r
+        );
+
+        context.lineTo(
+            x,
+            y + r
+        );
+
+        context.quadraticCurveTo(
+            x,
+            y,
+            x + r,
+            y
+        );
+
+        context.closePath();
+
+    }
+
+
+    function drawText(
+        text,
+        x,
+        y,
+        font,
+        colour,
+        align = "center"
+    ) {
+
+        ctx.font = font;
+        ctx.fillStyle = colour;
+        ctx.textAlign = align;
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(
+            text,
+            x,
+            y
+        );
+
+    }
+
+
+    function drawChart() {
+
+        const barWidth =
+            58 * zoom;
+
+        const gap =
+            92 * zoom;
+
+        const vesselGap =
+            55 * zoom;
+
+        const leftMargin =
+            85 * zoom;
+
+        const rightMargin =
+            80 * zoom;
+
+        const topMargin =
+            80 * zoom;
+
+        const bottomMargin =
+            105 * zoom;
+
+        const pixelsPerFinding =
+            17 * zoom;
+
+        let chartWidth =
+            leftMargin
+            + rightMargin;
+
+        let previousVessel =
+            null;
+
+        chartData.forEach(
+            item => {
+
+                if (
+                    previousVessel !== null
+                    &&
+                    previousVessel !== item.vessel
+                ) {
+
+                    chartWidth +=
+                        vesselGap;
+
+                }
+
+                chartWidth +=
+                    barWidth + gap;
+
+                previousVessel =
+                    item.vessel;
+
+            }
+        );
+
+
+        chartWidth =
+            Math.max(
+                chartWidth,
+                900
+            );
+
+
+        const chartHeight =
+            620 * zoom;
+
+
+        canvas.width =
+            chartWidth;
+
+        canvas.height =
+            chartHeight;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        /*
+         * Background
+         */
+
+        ctx.fillStyle =
+            "#ffffff";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        /*
+         * Determine maximum stack.
+         */
+
+        let maxStack =
+            1;
+
+        chartData.forEach(
+            item => {
+
+                maxStack =
+                    Math.max(
+                        maxStack,
+                        item.high
+                        + item.medium
+                        + item.low
+                    );
+
+            }
+        );
+
+
+        const graphTop =
+            topMargin + 35;
+
+        const graphBottom =
+            chartHeight - bottomMargin;
+
+
+        const graphHeight =
+            graphBottom
+            - graphTop;
+
+
+        /*
+         * Horizontal grid.
+         */
+
+        const gridSteps =
+            Math.max(
+                5,
+                Math.ceil(
+                    maxStack / 5
+                )
+            );
+
+
+        for (
+            let i = 0;
+            i <= gridSteps;
+            i++
+        ) {
+
+            const value =
+                Math.round(
+                    (maxStack / gridSteps)
+                    * i
+                );
+
+            const y =
+                graphBottom
+                -
+                (
+                    value
+                    /
+                    maxStack
+                )
+                *
+                graphHeight;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                leftMargin - 10,
+                y
+            );
+
+            ctx.lineTo(
+                chartWidth - rightMargin,
+                y
+            );
+
+            ctx.strokeStyle =
+                "#e7ecf0";
+
+            ctx.lineWidth =
+                1;
+
+            ctx.stroke();
+
+
+            drawText(
+                String(value),
+                leftMargin - 20,
+                y,
+                "10px Arial",
+                "#80909c",
+                "right"
+            );
+
+        }
+
+
+        /*
+         * Axis label.
+         */
+
+        ctx.save();
+
+        ctx.translate(
+            22,
+            (
+                graphTop
+                + graphBottom
+            ) / 2
+        );
+
+        ctx.rotate(
+            -Math.PI / 2
+        );
+
+        drawText(
+            "Number of findings",
+            0,
+            0,
+            "700 11px Arial",
+            "#6d7d89"
+        );
+
+        ctx.restore();
+
+
+        /*
+         * Draw each inspection.
+         */
+
+        let x =
+            leftMargin;
+
+        previousVessel =
+            null;
+
+
+        chartData.forEach(
+            (item, index) => {
+
+                /*
+                 * Vessel separator.
+                 */
+
+                if (
+                    previousVessel !== null
+                    &&
+                    previousVessel !== item.vessel
+                ) {
+
+                    const separatorX =
+                        x - gap / 2;
+
+                    ctx.beginPath();
+
+                    ctx.moveTo(
+                        separatorX,
+                        graphTop - 35
+                    );
+
+                    ctx.lineTo(
+                        separatorX,
+                        graphBottom + 25
+                    );
+
+                    ctx.strokeStyle =
+                        "#cbd6de";
+
+                    ctx.setLineDash(
+                        [5, 5]
+                    );
+
+                    ctx.stroke();
+
+                    ctx.setLineDash([]);
+
+                    x +=
+                        vesselGap;
+
+                }
+
+
+                const colours =
+                    getColours(
+                        item.year
+                    );
+
+
+                /*
+                 * Heights.
+                 */
+
+                const highHeight =
+                    item.high
+                    *
+                    pixelsPerFinding;
+
+                const mediumHeight =
+                    item.medium
+                    *
+                    pixelsPerFinding;
+
+                const lowHeight =
+                    item.low
+                    *
+                    pixelsPerFinding;
+
+
+                /*
+                 * Keep the stack inside graph area.
+                 */
+
+                const totalHeight =
+                    highHeight
+                    + mediumHeight
+                    + lowHeight;
+
+
+                const maxDrawable =
+                    graphHeight
+                    - 10;
+
+
+                const scale =
+                    totalHeight > maxDrawable
+                        ? maxDrawable / totalHeight
+                        : 1;
+
+
+                const h =
+                    highHeight * scale;
+
+                const m =
+                    mediumHeight * scale;
+
+                const l =
+                    lowHeight * scale;
+
+
+                /*
+                 * Staircase offset.
+                 */
+
+                const stepOffset =
+                    Math.min(
+                        18 * zoom,
+                        gap * .35
+                    );
+
+
+                const highX =
+                    x;
+
+                const mediumX =
+                    x + stepOffset;
+
+                const lowX =
+                    x + stepOffset * 2;
+
+
+                /*
+                 * Baseline.
+                 */
+
+                const baseline =
+                    graphBottom;
+
+
+                /*
+                 * HIGH
+                 */
+
+                const highBottom =
+                    baseline;
+
+                const highTop =
+                    highBottom - h;
+
+
+                if (item.high > 0) {
+
+                    ctx.fillStyle =
+                        colours.high;
+
+                    roundedRect(
+                        ctx,
+                        highX,
+                        highTop,
+                        barWidth,
+                        h,
+                        4
+                    );
+
+                    ctx.fill();
+
+                }
+
+
+                /*
+                 * MEDIUM
+                 *
+                 * Starts from top of HIGH.
+                 */
+
+                const mediumBottom =
+                    highTop;
+
+                const mediumTop =
+                    mediumBottom - m;
+
+
+                if (item.medium > 0) {
+
+                    ctx.fillStyle =
+                        colours.medium;
+
+                    roundedRect(
+                        ctx,
+                        mediumX,
+                        mediumTop,
+                        barWidth,
+                        m,
+                        4
+                    );
+
+                    ctx.fill();
+
+                }
+
+
+                /*
+                 * LOW
+                 *
+                 * Starts from top of MEDIUM.
+                 */
+
+                const lowBottom =
+                    mediumTop;
+
+                const lowTop =
+                    lowBottom - l;
+
+
+                if (item.low > 0) {
+
+                    ctx.fillStyle =
+                        colours.low;
+
+                    roundedRect(
+                        ctx,
+                        lowX,
+                        lowTop,
+                        barWidth,
+                        l,
+                        4
+                    );
+
+                    ctx.fill();
+
+                }
+
+
+                /*
+                 * If a risk level is zero, keep the staircase
+                 * logically connected.
+                 */
+
+                if (
+                    item.high === 0
+                    &&
+                    item.medium > 0
+                ) {
+
+                    const mediumBottom =
+                        baseline;
+
+                    const mediumTop =
+                        mediumBottom - m;
+
+                    ctx.fillStyle =
+                        colours.medium;
+
+                    roundedRect(
+                        ctx,
+                        mediumX,
+                        mediumTop,
+                        barWidth,
+                        m,
+                        4
+                    );
+
+                    ctx.fill();
+
+                }
+
+
+                if (
+                    item.high === 0
+                    &&
+                    item.medium === 0
+                    &&
+                    item.low > 0
+                ) {
+
+                    ctx.fillStyle =
+                        colours.low;
+
+                    roundedRect(
+                        ctx,
+                        lowX,
+                        baseline - l,
+                        barWidth,
+                        l,
+                        4
+                    );
+
+                    ctx.fill();
+
+                }
+
+
+                /*
+                 * Severity label.
+                 */
+
+                const topOfStack =
+                    Math.min(
+                        highTop,
+                        mediumTop,
+                        lowTop
+                    );
+
+
+                const labelY =
+                    Math.max(
+                        25,
+                        topOfStack - 18
+                    );
+
+
+                drawText(
+                    "S" + item.severity,
+                    lowX + barWidth / 2,
+                    labelY,
+                    "700 11px Arial",
+                    colours.text
+                );
+
+
+                /*
+                 * Validity label.
+                 */
+
+                drawText(
+                    "V" + item.validity + "M",
+                    lowX + barWidth / 2,
+                    labelY - 15,
+                    "10px Arial",
+                    "#71818d"
+                );
+
+
+                /*
+                 * Vessel name.
+                 */
+
+                const labelX =
+                    lowX + barWidth / 2;
+
+
+                drawText(
+                    item.vessel,
+                    labelX,
+                    graphBottom + 25,
+                    "700 11px Arial",
+                    "#2d4658"
+                );
+
+
+                /*
+                 * Date.
+                 */
+
+                drawText(
+                    item.date,
+                    labelX,
+                    graphBottom + 43,
+                    "10px Arial",
+                    "#7a8a96"
+                );
+
+
+                /*
+                 * Year.
+                 */
+
+                drawText(
+                    String(item.year),
+                    labelX,
+                    graphBottom + 59,
+                    "700 10px Arial",
+                    colours.text
+                );
+
+
+                /*
+                 * Click target.
+                 */
+
+                item._hitX =
+                    highX;
+
+                item._hitWidth =
+                    barWidth
+                    + stepOffset * 2;
+
+                item._hitTop =
+                    Math.min(
+                        highTop,
+                        mediumTop,
+                        lowTop
+                    );
+
+                item._hitBottom =
+                    graphBottom + 75;
+
+
+                x +=
+                    barWidth + gap;
+
+
+                previousVessel =
+                    item.vessel;
+
+            }
+        );
+
+
+        /*
+         * Baseline.
+         */
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            leftMargin - 5,
+            graphBottom
+        );
+
+        ctx.lineTo(
+            chartWidth - rightMargin,
+            graphBottom
+        );
+
+        ctx.strokeStyle =
+            "#8e9da8";
+
+        ctx.lineWidth =
+            1.2;
+
+        ctx.stroke();
+
+
+        /*
+         * Instructions.
+         */
+
+        drawText(
+            "Click an inspection to open the full report",
+            chartWidth - rightMargin,
+            chartHeight - 17,
+            "10px Arial",
+            "#84929c",
+            "right"
+        );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * CLICK HANDLING
+     * ==========================================================
+     */
+
+    canvas.addEventListener(
+        "click",
+        function(event) {
+
+            const rect =
+                canvas.getBoundingClientRect();
+
+            const scaleX =
+                canvas.width
+                /
+                rect.width;
+
+            const scaleY =
+                canvas.height
+                /
+                rect.height;
+
+            const mouseX =
+                (event.clientX - rect.left)
+                * scaleX;
+
+            const mouseY =
+                (event.clientY - rect.top)
+                * scaleY;
+
+
+            for (
+                const item of chartData
+            ) {
+
+                if (
+                    mouseX >= item._hitX
+                    &&
+                    mouseX <=
+                        item._hitX
+                        + item._hitWidth
+                    &&
+                    mouseY >= item._hitTop
+                    &&
+                    mouseY <= item._hitBottom
+                ) {
+
+                    window.location.href =
+                        "{% url 'rightship_report_detail' 0 %}"
+                        .replace(
+                            "/0/",
+                            "/" + item.id + "/"
+                        );
+
+                    return;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ==========================================================
+     * ZOOM
+     * ==========================================================
+     */
+
+    function changeZoom(amount) {
+
+        zoom += amount;
+
+        zoom =
+            Math.max(
+                .55,
+                Math.min(
+                    2.5,
+                    zoom
+                )
+            );
+
+        drawChart();
+
+    }
+
+
+    function resetZoom() {
+
+        zoom =
+            1;
+
+        drawChart();
+
+    }
+
+
+    /*
+     * ==========================================================
+     * PNG DOWNLOAD
+     * ==========================================================
+     */
+
+    function downloadGraph() {
+
+        const link =
+            document.createElement("a");
+
+        link.download =
+            "RightShip_Inspection_Risk_Profile.png";
+
+        link.href =
+            canvas.toDataURL(
+                "image/png"
+            );
+
+        link.click();
+
+    }
+
+
+    /*
+     * ==========================================================
+     * INITIAL DRAW
+     * ==========================================================
+     */
+
+    drawChart();
 
 </script>
 

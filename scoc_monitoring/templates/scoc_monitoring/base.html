@@ -1,367 +1,87 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SCoC Monitoring | NEU Marine Analytics</title>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        SCoC Monitoring | NEU Marine Analytics
-    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-            background: #f4f7fb;
-            color: #172b4d;
-        }
-
-        /* =====================================================
-           HEADER
-        ===================================================== */
-
-        .header {
-            background: #17365d;
-            color: white;
-            padding: 18px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            font-size: 21px;
-            font-weight: 700;
-        }
-
-        .brand small {
-            display: block;
-            font-size: 12px;
-            font-weight: 400;
-            opacity: 0.75;
-            margin-top: 4px;
-        }
-
-        .module-title {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* =====================================================
-           NAVIGATION
-        ===================================================== */
-
-        .navigation {
-            background: white;
-            border-bottom: 1px solid #d9e2ec;
-            padding: 0 32px;
-            display: flex;
-            gap: 28px;
-        }
-
-        .navigation a {
-            text-decoration: none;
-            color: #486581;
-            padding: 15px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .navigation a:hover {
-            color: #17365d;
-        }
-
-        /* =====================================================
-           CONTENT
-        ===================================================== */
-
-        .content {
-            max-width: 1250px;
-            margin: 0 auto;
-            padding: 35px 25px 60px;
-        }
-
-        .page-title {
-            margin-bottom: 5px;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .page-subtitle {
-            color: #627d98;
-            margin-bottom: 30px;
-        }
-
-        /* =====================================================
-           CARDS
-        ===================================================== */
-
-        .cards {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 24px;
-        }
-
-        .card {
-            background: white;
-            border: 1px solid #d9e2ec;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow:
-                0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        .card.clickable {
-            cursor: pointer;
-            transition:
-                transform 0.15s ease,
-                box-shadow 0.15s ease;
-        }
-
-        .card.clickable:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 7px 20px rgba(0,0,0,0.08);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .metric-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .metric {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: #627d98;
-            margin-bottom: 7px;
-        }
-
-        .metric-value {
-            font-size: 23px;
-            font-weight: 700;
-        }
-
-        .target {
-            color: #486581;
-        }
-
-        /* =====================================================
-           STATUS
-        ===================================================== */
-
-        .status {
-            display: inline-block;
-            margin-top: 22px;
-            padding: 8px 13px;
-            border-radius: 7px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .status-achieved {
-            background: #e3fcef;
-            color: #087f5b;
-        }
-
-        .status-not {
-            background: #fff3bf;
-            color: #8a6116;
-        }
-
-        /* =====================================================
-           TABLE
-        ===================================================== */
-
-        .table-card {
-            background: white;
-            border: 1px solid #d9e2ec;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            background: #f8fafc;
-            color: #627d98;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 14px 16px;
-            border-bottom: 1px solid #d9e2ec;
-        }
-
-        td {
-            padding: 15px 16px;
-            border-bottom: 1px solid #edf2f7;
-            font-size: 14px;
-        }
-
-        tr:hover td {
-            background: #f8fafc;
-        }
-
-        .row-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        /* =====================================================
-           BUTTONS
-        ===================================================== */
-
-        .button {
-            display: inline-block;
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 7px;
-            background: #17365d;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .button:hover {
-            background: #1f4e78;
-        }
-
-        .back {
-            margin-bottom: 22px;
-        }
-
-        /* =====================================================
-           FOOTER
-        ===================================================== */
-
-        .footer {
-            text-align: center;
-            color: #829ab1;
-            font-size: 12px;
-            padding: 25px;
-        }
-
-        /* =====================================================
-           MOBILE
-        ===================================================== */
-
-        @media (max-width: 800px) {
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                padding: 16px 20px;
-            }
-
-            .navigation {
-                padding: 0 20px;
-            }
-
-            .content {
-                padding: 25px 15px;
-            }
-
-            .metric-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        body { margin:0; background:#f4f6f9; font-family:"Segoe UI",Arial,sans-serif; color:#263238; }
+        .sidebar { position:fixed; top:0; left:0; width:245px; height:100vh; background:#102a43; color:white; padding:20px 15px; z-index:1000; }
+        .brand { padding:10px 12px 25px; border-bottom:1px solid rgba(255,255,255,.12); margin-bottom:20px; }
+        .brand-title { font-size:20px; font-weight:600; }
+        .brand small { display:block; font-size:11px; color:#9fb3c8; margin-top:5px; }
+        .sidebar-section { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#829ab1; margin:20px 12px 8px; }
+        .sidebar a { display:flex; align-items:center; gap:12px; padding:10px 12px; margin-bottom:4px; border-radius:7px; color:#d9e2ec; text-decoration:none; font-size:14px; transition:background .15s ease; }
+        .sidebar a:hover { background:#1f4668; color:white; }
+        .sidebar a.active { background:#2f80ed; color:white; }
+        .sidebar .back-platform { margin-top:28px; border-top:1px solid rgba(255,255,255,.12); padding-top:18px; }
+        .main-wrapper { margin-left:245px; min-height:100vh; }
+        .topbar { height:65px; background:white; border-bottom:1px solid #e4e7eb; display:flex; align-items:center; justify-content:space-between; padding:0 30px; }
+        .topbar-title { font-size:16px; font-weight:600; color:#334e68; }
+        .topbar-subtitle { font-size:12px; color:#829ab1; }
+        .content-area { padding:30px; }
+        .page-title { font-size:24px; font-weight:600; color:#243b53; margin-bottom:4px; }
+        .page-subtitle { color:#829ab1; font-size:14px; margin-bottom:0; }
+        .card { border:none; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+        .btn { border-radius:7px; }
+        .form-control { border-radius:7px; }
+        .table thead th { font-size:12px; text-transform:uppercase; letter-spacing:.4px; color:#627d98; background:#f8fafc; border-bottom:1px solid #d9e2ec; padding:13px; }
+        .table tbody td { padding:13px; font-size:14px; vertical-align:middle; }
+        @media (max-width:992px) { .sidebar{width:210px}.main-wrapper{margin-left:210px}.content-area{padding:20px} }
+        @media (max-width:768px) { .sidebar{position:relative;width:100%;height:auto}.main-wrapper{margin-left:0}.topbar{display:none} }
+        {% block extra_css %}{% endblock %}
     </style>
-
-    {% block extra_css %}
-    {% endblock %}
-
 </head>
-
-
 <body>
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-title">⚓ SCoC Monitoring</div>
+        <small>Marine Performance Platform</small>
+    </div>
 
-    <header class="header">
+    <div class="sidebar-section">SCoC</div>
 
-        <div class="brand">
-            ⚓ NEU Marine Analytics
+    <a href="{% url 'scoc_monitoring:home' %}">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+    </a>
 
-            <small>
-                Marine Performance Platform
-            </small>
+    <a href="{% url 'scoc_monitoring:routes_home' %}">
+        <i class="bi bi-signpost-2"></i> Routes
+    </a>
+
+    <a href="{% url 'scoc_monitoring:upload_excel' %}">
+        <i class="bi bi-cloud-arrow-up"></i> Import Report
+    </a>
+
+    <a href="{% url 'scoc_monitoring:vessel_list' %}">
+        <i class="bi bi-ship"></i> Vessels
+    </a>
+
+    <a class="back-platform" href="/">
+        <i class="bi bi-arrow-left-circle"></i> Marine Analytics
+    </a>
+</aside>
+
+<div class="main-wrapper">
+    <header class="topbar">
+        <div>
+            <div class="topbar-title">SCoC Monitoring</div>
+            <div class="topbar-subtitle">Voyage &amp; performance monitoring</div>
         </div>
-
-        <div class="module-title">
-            SCoC Monitoring
-        </div>
-
+        <div class="text-muted"><i class="bi bi-person-circle me-1"></i> NEU</div>
     </header>
 
-
-    <nav class="navigation">
-
-        <a href="/scoc/">
-            Overview
-        </a>
-
-        <a href="/scoc/upload/">
-            Upload Excel
-        </a>
-
-        <a href="/core/">
-            Main Platform
-        </a>
-
-    </nav>
-
-
-    <main class="content">
-
-        {% block content %}
-        {% endblock %}
-
+    <main class="content-area">
+        {% block content %}{% endblock %}
     </main>
+</div>
 
-
-    <footer class="footer">
-        NEU Marine Analytics Platform · SCoC Monitoring
-    </footer>
-
-
-    {% block extra_js %}
-    {% endblock %}
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
 </body>
-
 </html>
-

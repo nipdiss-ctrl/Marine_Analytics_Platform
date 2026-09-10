@@ -1,0 +1,600 @@
+{% extends "inspections/base_rightship.html" %}
+
+{% block content %}
+
+<style>
+
+.report-title {
+
+    text-align:
+        center;
+
+    font-size:
+        27px;
+
+    font-weight:
+        700;
+
+    color:
+        #173b57;
+
+    margin-bottom:
+        22px;
+}
+
+
+.report-header {
+
+    background:
+        white;
+
+    border:
+        1px solid #cfd8df;
+
+    margin-bottom:
+        20px;
+}
+
+
+.header-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        230px 1fr;
+
+    border-bottom:
+        1px solid #dce2e7;
+}
+
+
+.header-row:last-child {
+    border-bottom: none;
+}
+
+
+.header-label {
+
+    background:
+        #edf2f5;
+
+    font-weight:
+        700;
+
+    padding:
+        10px;
+}
+
+
+.header-value {
+
+    padding:
+        10px;
+}
+
+
+.summary-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap:
+        10px;
+
+    margin-bottom:
+        20px;
+}
+
+
+.summary-card {
+
+    background:
+        white;
+
+    border:
+        1px solid #d6dde3;
+
+    border-radius:
+        5px;
+
+    padding:
+        12px;
+
+    text-align:
+        center;
+}
+
+
+.summary-number {
+
+    font-size:
+        24px;
+
+    font-weight:
+        700;
+}
+
+
+.high-number {
+    color:
+        #c00000;
+}
+
+
+.medium-number {
+    color:
+        #d96b00;
+}
+
+
+.low-number {
+    color:
+        #9c8500;
+}
+
+
+.findings-table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    background:
+        white;
+}
+
+
+.findings-table th {
+
+    background:
+        #173b57;
+
+    color:
+        white;
+
+    padding:
+        10px 8px;
+
+    border:
+        1px solid #cbd4dc;
+
+    font-size:
+        12px;
+}
+
+
+.findings-table td {
+
+    padding:
+        9px 8px;
+
+    border:
+        1px solid #d8dee4;
+
+    vertical-align:
+        top;
+
+    font-size:
+        12px;
+}
+
+
+.sr {
+
+    width:
+        50px;
+
+    text-align:
+        center;
+}
+
+
+.ref {
+
+    width:
+        85px;
+
+    text-align:
+        center;
+
+    font-weight:
+        700;
+}
+
+
+.item {
+
+    width:
+        35%;
+}
+
+
+.description {
+
+    width:
+        45%;
+}
+
+
+.risk {
+
+    width:
+        85px;
+
+    text-align:
+        center;
+
+    font-weight:
+        700;
+}
+
+
+.risk-HIGH {
+
+    background:
+        #ff0000;
+
+    color:
+        white;
+}
+
+
+.risk-MEDIUM {
+
+    background:
+        #f4b183;
+
+    color:
+        #4a2600;
+}
+
+
+.risk-LOW {
+
+    background:
+        #ffff00;
+
+    color:
+        #4a4300;
+}
+
+
+.back-link {
+
+    display:
+        inline-block;
+
+    margin-bottom:
+        18px;
+
+    color:
+        #164b70;
+
+    text-decoration:
+        none;
+
+    font-weight:
+        600;
+}
+
+
+@media (
+    max-width: 900px
+) {
+
+    .summary-row {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .header-row {
+
+        grid-template-columns:
+            150px 1fr;
+
+    }
+
+}
+
+</style>
+
+
+<a
+    class="back-link"
+    href="{% url 'rightship_reports' %}"
+>
+    ← Back to Reports
+</a>
+
+
+<div class="report-title">
+
+    RightShip Inspection Findings –
+    {{ inspection.vessel.vessel_name }}
+
+</div>
+
+
+<!-- =====================================================
+     EXCEL HEADER INFORMATION
+     ===================================================== -->
+
+<div class="report-header">
+
+
+    <div class="header-row">
+
+        <div class="header-label">
+            Port
+        </div>
+
+        <div class="header-value">
+            {{ inspection.port }}
+        </div>
+
+    </div>
+
+
+    <div class="header-row">
+
+        <div class="header-label">
+            Inspection Date
+        </div>
+
+        <div class="header-value">
+            {{ inspection.inspection_date|date:"d-M-y" }}
+        </div>
+
+    </div>
+
+
+    <div class="header-row">
+
+        <div class="header-label">
+            Inspector
+        </div>
+
+        <div class="header-value">
+            {{ inspection.inspector }}
+        </div>
+
+    </div>
+
+
+    <div class="header-row">
+
+        <div class="header-label">
+            Number of Findings
+        </div>
+
+        <div class="header-value">
+            {{ total }}
+        </div>
+
+    </div>
+
+
+    <div class="header-row">
+
+        <div class="header-label">
+            Validity Period
+        </div>
+
+        <div class="header-value">
+            {{ inspection.validity_months }} months
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<div class="summary-row">
+
+
+    <div class="summary-card">
+
+        <div>
+            High Risk
+        </div>
+
+        <div class="
+            summary-number
+            high-number
+        ">
+            {{ high }}
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div>
+            Medium Risk
+        </div>
+
+        <div class="
+            summary-number
+            medium-number
+        ">
+            {{ medium }}
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div>
+            Low Risk
+        </div>
+
+        <div class="
+            summary-number
+            low-number
+        ">
+            {{ low }}
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div>
+            Total Findings
+        </div>
+
+        <div class="summary-number">
+            {{ total }}
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div>
+            Severity Score
+        </div>
+
+        <div class="summary-number">
+            S{{ severity }}
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     FINDINGS
+     ===================================================== -->
+
+<table class="findings-table">
+
+
+    <thead>
+
+        <tr>
+
+            <th class="sr">
+                Sr. No.
+            </th>
+
+            <th class="ref">
+                Ref No
+            </th>
+
+            <th class="item">
+                Inspected Item
+            </th>
+
+            <th class="description">
+                Finding Description
+            </th>
+
+            <th class="risk">
+                Risk
+            </th>
+
+        </tr>
+
+    </thead>
+
+
+    <tbody>
+
+
+        {% for finding in findings %}
+
+
+        <tr>
+
+
+            <td class="sr">
+
+                {{ forloop.counter }}
+
+            </td>
+
+
+            <td class="
+                ref
+                risk-{{ finding.risk_level }}
+            ">
+
+                {{ finding.checklist_item.ref_no }}
+
+            </td>
+
+
+            <td class="item">
+
+                {{ finding.checklist_item.inspected_item }}
+
+            </td>
+
+
+            <td class="description">
+
+                {{ finding.finding_description|linebreaksbr }}
+
+            </td>
+
+
+            <td class="
+                risk
+                risk-{{ finding.risk_level }}
+            ">
+
+                {{ finding.risk_level }}
+
+            </td>
+
+
+        </tr>
+
+
+        {% empty %}
+
+
+        <tr>
+
+            <td
+                colspan="5"
+                style="text-align:center;"
+            >
+
+                No findings recorded.
+
+            </td>
+
+        </tr>
+
+
+        {% endfor %}
+
+
+    </tbody>
+
+
+</table>
+
+
+{% endblock %}

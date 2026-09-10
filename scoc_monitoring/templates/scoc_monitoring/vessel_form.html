@@ -1,0 +1,195 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">{{ page_title }}</h2>
+        <p class="page-subtitle">
+            Manage vessel information and persistent speed and consumption targets.
+        </p>
+    </div>
+
+    <a href="{% url 'scoc_monitoring:vessel_list' %}"
+       class="btn btn-outline-secondary">
+        Back to Vessels
+    </a>
+</div>
+
+
+<form method="post" novalidate>
+
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                Basic Information
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.vessel_name.id_for_label }}">
+                        {{ form.vessel_name.label }}
+                    </label>
+
+                    {{ form.vessel_name }}
+
+                    {% if form.vessel_name.help_text %}
+                        <div class="form-text">
+                            {{ form.vessel_name.help_text }}
+                        </div>
+                    {% endif %}
+
+                    {{ form.vessel_name.errors }}
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.vessel_type.id_for_label }}">
+                        {{ form.vessel_type.label }}
+                    </label>
+
+                    {{ form.vessel_type }}
+
+                    {% if form.vessel_type.help_text %}
+                        <div class="form-text">
+                            {{ form.vessel_type.help_text }}
+                        </div>
+                    {% endif %}
+
+                    {{ form.vessel_type.errors }}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Laden Targets -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                Laden Targets
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.target_speed_laden.id_for_label }}">
+                        {{ form.target_speed_laden.label }}
+                    </label>
+
+                    {{ form.target_speed_laden }}
+                    {{ form.target_speed_laden.errors }}
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.target_consumption_laden.id_for_label }}">
+                        {{ form.target_consumption_laden.label }}
+                    </label>
+
+                    {{ form.target_consumption_laden }}
+                    {{ form.target_consumption_laden.errors }}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Ballast Targets -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                Ballast Targets
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.target_speed_ballast.id_for_label }}">
+                        {{ form.target_speed_ballast.label }}
+                    </label>
+
+                    {{ form.target_speed_ballast }}
+                    {{ form.target_speed_ballast.errors }}
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label"
+                           for="{{ form.target_consumption_ballast.id_for_label }}">
+                        {{ form.target_consumption_ballast.label }}
+                    </label>
+
+                    {{ form.target_consumption_ballast }}
+                    {{ form.target_consumption_ballast.errors }}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Active -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+
+            <div class="form-check">
+
+                {{ form.active }}
+
+                <label class="form-check-label"
+                       for="{{ form.active.id_for_label }}">
+                    {{ form.active.label }}
+                </label>
+
+            </div>
+
+            {{ form.active.errors }}
+
+        </div>
+    </div>
+
+
+    <!-- Buttons -->
+    <div class="d-flex gap-2">
+
+        <button type="submit"
+                class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>
+            {{ submit_label }}
+        </button>
+
+        <a href="{% url 'scoc_monitoring:vessel_list' %}"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </div>
+
+</form>
+
+{% endblock %}

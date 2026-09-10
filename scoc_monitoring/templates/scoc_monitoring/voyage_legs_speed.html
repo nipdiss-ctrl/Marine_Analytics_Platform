@@ -1,18 +1,12 @@
-{% extends "base.html" %}
+{% extends "scoc_monitoring/base.html" %}
 
 {% block content %}
 
 <div class="container-fluid py-4">
 
-
-    <!-- ===================================================== -->
-    <!-- PAGE HEADER -->
-    <!-- ===================================================== -->
-
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-
             <h2 class="fw-bold mb-1">
                 {{ load_type }} Routes
             </h2>
@@ -20,24 +14,15 @@
             <p class="text-muted mb-0">
                 Speed performance for each voyage route
             </p>
-
         </div>
 
-
-        <a
-            href="{% url 'scoc_monitoring:import_result' %}"
-            class="btn btn-outline-primary"
-        >
+        <a href="{% url 'scoc_monitoring:import_result' vessel_id=vessel_id %}"
+           class="btn btn-outline-primary">
             ← Overview
         </a>
 
     </div>
 
-
-
-    <!-- ===================================================== -->
-    <!-- ROUTE TABLE -->
-    <!-- ===================================================== -->
 
     {% if leg_rows %}
 
@@ -49,210 +34,117 @@
 
                 <table class="table table-hover align-middle">
 
-
-                    <!-- ================================================= -->
-                    <!-- TABLE HEADER -->
-                    <!-- ================================================= -->
-
                     <thead>
-
                         <tr>
-
-                            <th>
-                                Route
-                            </th>
-
-                            <th>
-                                Voyage
-                            </th>
-
-                            <th>
-                                Start
-                            </th>
-
-                            <th>
-                                End
-                            </th>
-
-                            <th>
-                                Avg Speed
-                            </th>
-
-                            <th>
-                                Target Speed
-                            </th>
-
-                            <th>
-                                Daily Reports
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
+                            <th>Route</th>
+                            <th>Voyage</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Avg Speed</th>
+                            <th>Target Speed</th>
+                            <th>Daily Reports</th>
+                            <th>Status</th>
                         </tr>
-
                     </thead>
 
-
-
-                    <!-- ================================================= -->
-                    <!-- TABLE BODY -->
-                    <!-- ================================================= -->
 
                     <tbody>
 
                     {% for row in leg_rows %}
 
-                        <tr>
+                    <tr>
 
+                        <td>
+                            <a href="{% url 'scoc_monitoring:voyage_detail' leg_id=row.leg.id %}?performance_type=speed"
+                               class="text-decoration-none">
 
-                            <!-- ========================================= -->
-                            <!-- ROUTE -->
-                            <!-- ========================================= -->
+                                {{ row.leg.departure|default:"—" }}
+                                →
+                                {{ row.leg.destination|default:"—" }}
 
-                            <td>
+                            </a>
+                        </td>
 
-                                <a
-                                    href="{% url 'scoc_monitoring:voyage_detail' row.leg.id 'speed' %}"
-                                >
 
-                                    {{ row.leg.departure|default:"—" }}
+                        <td>
+                            {{ row.leg.voyage_reference|default:"—" }}
+                        </td>
 
-                                    →
 
-                                    {{ row.leg.destination|default:"—" }}
+                        <td>
+                            {{ row.leg.start_date|default:"—" }}
+                        </td>
 
-                                </a>
 
-                            </td>
+                        <td>
+                            {{ row.leg.end_date|default:"—" }}
+                        </td>
 
 
+                        <td>
 
-                            <!-- ========================================= -->
-                            <!-- VOYAGE -->
-                            <!-- ========================================= -->
+                            {% if row.average_speed is not None %}
 
-                            <td>
+                                {{ row.average_speed|floatformat:2 }}
+                                kn
 
-                                {{ row.leg.voyage_name|default:"—" }}
+                            {% else %}
 
-                            </td>
+                                —
 
+                            {% endif %}
 
+                        </td>
 
-                            <!-- ========================================= -->
-                            <!-- START -->
-                            <!-- ========================================= -->
 
-                            <td>
+                        <td>
 
-                                {{ row.leg.start_date|default:"—" }}
+                            {% if row.target_speed is not None %}
 
-                            </td>
+                                <strong>
+                                    {{ row.target_speed|floatformat:2 }}
+                                </strong>
+                                kn
 
+                            {% else %}
 
+                                —
 
-                            <!-- ========================================= -->
-                            <!-- END -->
-                            <!-- ========================================= -->
+                            {% endif %}
 
-                            <td>
+                        </td>
 
-                                {{ row.leg.end_date|default:"—" }}
 
-                            </td>
+                        <td>
+                            {{ row.observation_count }}
+                        </td>
 
 
+                        <td>
 
-                            <!-- ========================================= -->
-                            <!-- AVERAGE SPEED -->
-                            <!-- ========================================= -->
+                            {% if row.status == "Achieved" %}
 
-                            <td>
+                                <span class="badge bg-success">
+                                    Target Achieved
+                                </span>
 
-                                {% if row.average_speed is not None %}
+                            {% elif row.status == "Not Achieved" %}
 
-                                    {{ row.average_speed|floatformat:2 }}
+                                <span class="badge bg-danger">
+                                    Target Not Achieved
+                                </span>
 
-                                    kn
+                            {% else %}
 
-                                {% else %}
+                                <span class="badge bg-secondary">
+                                    Target Not Available
+                                </span>
 
-                                    —
+                            {% endif %}
 
-                                {% endif %}
+                        </td>
 
-                            </td>
-
-
-
-                            <!-- ========================================= -->
-                            <!-- TARGET SPEED -->
-                            <!-- ========================================= -->
-
-                            <td>
-
-                                {% if row.target_speed is not None %}
-
-                                    <strong>
-                                        {{ row.target_speed|floatformat:2 }}
-                                    </strong>
-
-                                    kn
-
-                                {% else %}
-
-                                    —
-
-                                {% endif %}
-
-                            </td>
-
-
-
-                            <!-- ========================================= -->
-                            <!-- DAILY REPORTS -->
-                            <!-- ========================================= -->
-
-                            <td>
-
-                                {{ row.observation_count }}
-
-                            </td>
-
-
-
-                            <!-- ========================================= -->
-                            <!-- STATUS -->
-                            <!-- ========================================= -->
-
-                            <td>
-
-                                {% if row.status == "Achieved" %}
-
-                                    <span class="badge bg-success">
-                                        Achieved
-                                    </span>
-
-                                {% elif row.status == "Not Achieved" %}
-
-                                    <span class="badge bg-danger">
-                                        Not Achieved
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge bg-secondary">
-                                        Target Not Available
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-
-                        </tr>
+                    </tr>
 
                     {% endfor %}
 
@@ -269,11 +161,6 @@
 
     {% else %}
 
-
-    <!-- ===================================================== -->
-    <!-- NO ROUTES -->
-    <!-- ===================================================== -->
-
     <div class="card shadow-sm">
 
         <div class="card-body text-center py-5">
@@ -283,17 +170,15 @@
             </h5>
 
             <p class="text-muted mb-0">
-                The database does not currently contain voyage
-                legs matching this loading condition.
+                The database does not currently contain voyage legs
+                matching this loading condition.
             </p>
 
         </div>
 
     </div>
 
-
     {% endif %}
-
 
 </div>
 

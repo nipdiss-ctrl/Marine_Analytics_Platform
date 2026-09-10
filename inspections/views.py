@@ -1,7 +1,12 @@
+import re
+from collections import defaultdict
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from openpyxl import load_workbook
@@ -19,6 +24,7 @@ from .models import (
     Inspection,
     ChecklistItem,
     InspectionFinding,
+    RightShipRegisterRecord,
 )
 
 
@@ -30,14 +36,11 @@ def get_excel_colour(cell):
     """
     Return the actual Excel colour information from a cell.
 
-    Excel colours can be stored as:
+    Supports:
         RGB
         ARGB
         indexed
         theme
-
-    We primarily use RGB/ARGB because the RightShip workbook
-    normally stores the inspection risk colours this way.
     """
 
     if cell is None:
@@ -56,26 +59,18 @@ def get_excel_colour(cell):
     if color is None:
         return None
 
-    # -----------------------------------------------------
-    # RGB / ARGB
-    # -----------------------------------------------------
-
     if color.type == "rgb":
 
         rgb = color.rgb
 
         if rgb:
+
             rgb = str(rgb).upper().replace("#", "")
 
-            # Remove alpha channel if present
             if len(rgb) == 8:
                 rgb = rgb[-6:]
 
             return rgb
-
-    # -----------------------------------------------------
-    # Indexed colours
-    # -----------------------------------------------------
 
     if color.type == "indexed":
 
@@ -83,10 +78,6 @@ def get_excel_colour(cell):
 
         if indexed is not None:
             return f"INDEXED:{indexed}"
-
-    # -----------------------------------------------------
-    # Theme colours
-    # -----------------------------------------------------
 
     if color.type == "theme":
 
@@ -100,16 +91,17 @@ def get_excel_colour(cell):
 
 def get_risk_from_excel_cell(cell):
     """
-    Detect RightShip risk from the fill colour of the Ref No. cell.
+    Detect RightShip risk from the Excel fill colour.
 
     RightShip convention:
 
-        Yellow  -> LOW
-        Orange  -> MEDIUM
-        Red     -> HIGH
-
-    Supports RGB, indexed and theme colours.
+        RED     -> HIGH
+        ORANGE  -> MEDIUM
+        YELLOW  -> LOW
     """
+
+    if cell is None:
+        return None
 
     fill = cell.fill
 
@@ -119,34 +111,30 @@ def get_risk_from_excel_cell(cell):
     if fill.fill_type != "solid":
         return None
 
-    # ---------------------------------------------------------
-    # Try foreground colour
-    # ---------------------------------------------------------
-
     color = fill.fgColor
 
-    # ---------------------------------------------------------
-    # RGB
-    # ---------------------------------------------------------
+    if color is None:
+        return None
+
+    # =====================================================
+    # RGB / ARGB
+    # =====================================================
 
     if color.type == "rgb" and color.rgb:
 
-        rgb = color.rgb.upper().replace("#", "")
+        rgb = str(color.rgb).upper().replace("#", "")
 
-        # Remove alpha if present
         if len(rgb) == 8:
-            rgb = rgb[2:]
+            rgb = rgb[-6:]
 
-        # Yellow
         yellow_values = {
             "FFFF00",
             "FFF200",
             "FFD966",
             "FFE699",
-            "FFFF00",
+            "FFFF99",
         }
 
-        # Orange
         orange_values = {
             "FFC000",
             "F4B183",
@@ -155,7 +143,6 @@ def get_risk_from_excel_cell(cell):
             "F39C12",
         }
 
-        # Red
         red_values = {
             "FF0000",
             "C00000",
@@ -173,37 +160,31 @@ def get_risk_from_excel_cell(cell):
         if rgb in red_values:
             return "HIGH"
 
-    # ---------------------------------------------------------
-    # Indexed colours
-    # ---------------------------------------------------------
+    # =====================================================
+    # INDEXED COLOURS
+    # =====================================================
 
     if color.type == "indexed":
 
         indexed = color.indexed
 
-        # Common Excel indexed colours
         if indexed in {6, 13}:
             return "LOW"
 
         if indexed in {45, 52}:
             return "MEDIUM"
 
-        if indexed in {10, 9}:
+        if indexed in {9, 10}:
             return "HIGH"
 
     return None
+
 
 # =========================================================
 # DEBUG HELPER
 # =========================================================
 
 def inspect_excel_colour(cell):
-    """
-    Useful while testing the workbook.
-
-    Returns a dictionary describing how openpyxl sees
-    the cell colour.
-    """
 
     fill = cell.fill
     color = fill.fgColor if fill else None
@@ -353,9 +334,9 @@ def vessel_delete(request, pk):
     )
 
 
-    # =========================================================
-    # INSPECTION LIST
-    # =========================================================
+# =========================================================
+# INSPECTION LIST
+# =========================================================
 
 @login_required
 def inspection_list(request):
@@ -364,12 +345,11 @@ def inspection_list(request):
         Inspection.objects
         .select_related("vessel")
         .prefetch_related("findings")
-        .order_by("-inspection_date", "-id")
+        .order_by(
+            "-inspection_date",
+            "-id",
+        )
     )
-
-    # =====================================================
-    # KPI COUNTS
-    # =====================================================
 
     total_inspections = inspections.count()
 
@@ -383,10 +363,6 @@ def inspection_list(request):
 
     total_vessels = Vessel.objects.count()
 
-    # =====================================================
-    # RISK COUNTS
-    # =====================================================
-
     high_risk = InspectionFinding.objects.filter(
         risk_level="HIGH"
     ).count()
@@ -399,24 +375,32 @@ def inspection_list(request):
         risk_level="LOW"
     ).count()
 
-    # =====================================================
-    # RENDER
-    # =====================================================
-
     return render(
         request,
         "inspections/inspection_list.html",
         {
             "inspections": inspections,
 
-            "total_inspections": total_inspections,
-            "open_inspections": open_inspections,
-            "completed_inspections": completed_inspections,
-            "total_vessels": total_vessels,
+            "total_inspections":
+                total_inspections,
 
-            "high_risk": high_risk,
-            "medium_risk": medium_risk,
-            "low_risk": low_risk,
+            "open_inspections":
+                open_inspections,
+
+            "completed_inspections":
+                completed_inspections,
+
+            "total_vessels":
+                total_vessels,
+
+            "high_risk":
+                high_risk,
+
+            "medium_risk":
+                medium_risk,
+
+            "low_risk":
+                low_risk,
         },
     )
 
@@ -443,7 +427,9 @@ def inspection_create(request):
             last = (
                 Inspection.objects
                 .filter(
-                    inspection_no__startswith=f"INS-{year}-"
+                    inspection_no__startswith=(
+                        f"INS-{year}-"
+                    )
                 )
                 .order_by("-id")
                 .first()
@@ -498,7 +484,9 @@ def inspection_create(request):
 def inspection_findings(request, pk):
 
     inspection = get_object_or_404(
-        Inspection.objects.select_related("vessel"),
+        Inspection.objects.select_related(
+            "vessel"
+        ),
         pk=pk,
     )
 
@@ -509,10 +497,6 @@ def inspection_findings(request, pk):
             "checklist_item__ref_no"
         )
     )
-
-    # =====================================================
-    # RISK COUNTS
-    # =====================================================
 
     total_findings = findings.count()
 
@@ -528,24 +512,37 @@ def inspection_findings(request, pk):
         risk_level="LOW"
     ).count()
 
-    # =====================================================
-    # CONTEXT
-    # =====================================================
-
-    context = {
-        "inspection": inspection,
-        "findings": findings,
-
-        "total_findings": total_findings,
-        "high_risk": high_risk,
-        "medium_risk": medium_risk,
-        "low_risk": low_risk,
-    }
+    severity_score = (
+        high_risk * 3
+        + medium_risk * 2
+        + low_risk
+    )
 
     return render(
         request,
         "inspections/inspection_findings.html",
-        context,
+        {
+            "inspection":
+                inspection,
+
+            "findings":
+                findings,
+
+            "total_findings":
+                total_findings,
+
+            "high_risk":
+                high_risk,
+
+            "medium_risk":
+                medium_risk,
+
+            "low_risk":
+                low_risk,
+
+            "severity_score":
+                severity_score,
+        },
     )
 
 
@@ -645,9 +642,14 @@ def finding_create(
         request,
         "inspections/finding_form.html",
         {
-            "inspection": inspection,
-            "form": form,
-            "findings": findings,
+            "inspection":
+                inspection,
+
+            "form":
+                form,
+
+            "findings":
+                findings,
         },
     )
 
@@ -695,10 +697,14 @@ def finding_edit_risk(request, pk):
         request,
         "inspections/finding_edit_risk.html",
         {
-            "finding": finding,
-            "form": form,
+            "finding":
+                finding,
+
+            "form":
+                form,
         },
     )
+
 
 # =========================================================
 # DELETE FINDING
@@ -712,7 +718,9 @@ def finding_delete(request, pk):
         pk=pk,
     )
 
-    inspection_id = finding.inspection.id
+    inspection_id = (
+        finding.inspection.id
+    )
 
     if request.method == "POST":
 
@@ -723,15 +731,12 @@ def finding_delete(request, pk):
             "Finding deleted successfully.",
         )
 
-        return redirect(
-            "inspection_findings",
-            pk=inspection_id,
-        )
-
     return redirect(
         "inspection_findings",
         pk=inspection_id,
     )
+
+
 # =========================================================
 # CHECKLIST ITEM CREATE
 # =========================================================
@@ -766,7 +771,8 @@ def checklistitem_create(request):
         request,
         "inspections/checklistitem_form.html",
         {
-            "form": form,
+            "form":
+                form,
         },
     )
 
@@ -788,9 +794,351 @@ def checklistitem_list(request):
         request,
         "inspections/checklistitem_list.html",
         {
-            "items": items,
+            "items":
+                items,
         },
     )
+
+
+# =========================================================
+# RIGHTSHIP GRAPH IMPORT
+# =========================================================
+
+def import_graph_register(workbook):
+    """
+    Import the authoritative GRAPH worksheet.
+
+    GRAPH headers are located around row 42:
+
+        C = Vessel Name
+        D = Inspection Date
+        E = High Risk
+        F = Medium Risk
+        G = Low Risk
+        H = Total Findings
+        I = Severity Score
+        J = Validity (Months)
+
+    This stores both 2025 and 2026 records in
+    RightShipRegisterRecord.
+
+    The GRAPH data is deliberately kept separate from
+    InspectionFinding because the GRAPH sheet is the
+    authoritative historical register.
+    """
+
+    if "GRAPH" not in workbook.sheetnames:
+        return 0, 0
+
+    ws = workbook["GRAPH"]
+
+    header_row = None
+
+    # Search for the actual header instead of assuming
+    # the exact row number.
+    for row in range(1, min(ws.max_row, 60) + 1):
+
+        values = []
+
+        for col in range(1, ws.max_column + 1):
+
+            value = ws.cell(
+                row=row,
+                column=col,
+            ).value
+
+            if value is not None:
+
+                values.append(
+                    str(value).strip().casefold()
+                )
+
+        if (
+            "vessel name" in values
+            and "inspection date" in values
+            and "high risk" in values
+            and "medium risk" in values
+            and "low risk" in values
+        ):
+
+            header_row = row
+            break
+
+    if header_row is None:
+        return 0, 0
+
+    # -----------------------------------------------------
+    # Header mapping
+    # -----------------------------------------------------
+
+    headers = {}
+
+    for col in range(
+        1,
+        ws.max_column + 1,
+    ):
+
+        value = ws.cell(
+            row=header_row,
+            column=col,
+        ).value
+
+        if value is None:
+            continue
+
+        key = str(
+            value
+        ).strip().casefold()
+
+        headers[key] = col
+
+    vessel_col = headers.get(
+        "vessel name"
+    )
+
+    date_col = headers.get(
+        "inspection date"
+    )
+
+    high_col = headers.get(
+        "high risk"
+    )
+
+    medium_col = headers.get(
+        "medium risk"
+    )
+
+    low_col = headers.get(
+        "low risk"
+    )
+
+    total_col = headers.get(
+        "total findings"
+    )
+
+    severity_col = headers.get(
+        "severity score"
+    )
+
+    validity_col = headers.get(
+        "validity (months)"
+    )
+
+    required_columns = [
+        vessel_col,
+        date_col,
+        high_col,
+        medium_col,
+        low_col,
+    ]
+
+    if any(
+        column is None
+        for column in required_columns
+    ):
+        return 0, 0
+
+    created = 0
+    updated = 0
+
+    # -----------------------------------------------------
+    # Import rows
+    # -----------------------------------------------------
+
+    for row_number in range(
+        header_row + 1,
+        ws.max_row + 1,
+    ):
+
+        vessel_value = ws.cell(
+            row=row_number,
+            column=vessel_col,
+        ).value
+
+        inspection_date = ws.cell(
+            row=row_number,
+            column=date_col,
+        ).value
+
+        if (
+            vessel_value is None
+            or inspection_date is None
+        ):
+            continue
+
+        vessel_name = str(
+            vessel_value
+        ).strip()
+
+        if not vessel_name:
+            continue
+
+        # -------------------------------------------------
+        # Date
+        # -------------------------------------------------
+
+        if not hasattr(
+            inspection_date,
+            "year",
+        ):
+            continue
+
+        # -------------------------------------------------
+        # Numeric values
+        # -------------------------------------------------
+
+        def graph_int(value):
+
+            if value is None:
+                return 0
+
+            try:
+                return int(
+                    float(value)
+                )
+            except (
+                ValueError,
+                TypeError,
+            ):
+                return 0
+
+        high = graph_int(
+            ws.cell(
+                row=row_number,
+                column=high_col,
+            ).value
+        )
+
+        medium = graph_int(
+            ws.cell(
+                row=row_number,
+                column=medium_col,
+            ).value
+        )
+
+        low = graph_int(
+            ws.cell(
+                row=row_number,
+                column=low_col,
+            ).value
+        )
+
+        calculated_total = (
+            high
+            + medium
+            + low
+        )
+
+        if total_col is not None:
+
+            total_value = graph_int(
+                ws.cell(
+                    row=row_number,
+                    column=total_col,
+                ).value
+            )
+
+            total = (
+                total_value
+                if total_value
+                else calculated_total
+            )
+
+        else:
+
+            total = calculated_total
+
+        calculated_severity = (
+            high * 3
+            + medium * 2
+            + low
+        )
+
+        if severity_col is not None:
+
+            severity_value = graph_int(
+                ws.cell(
+                    row=row_number,
+                    column=severity_col,
+                ).value
+            )
+
+            severity = (
+                severity_value
+                if severity_value
+                else calculated_severity
+            )
+
+        else:
+
+            severity = calculated_severity
+
+        validity = 0
+
+        if validity_col is not None:
+
+            validity = graph_int(
+                ws.cell(
+                    row=row_number,
+                    column=validity_col,
+                ).value
+            )
+
+        # -------------------------------------------------
+        # Vessel
+        # -------------------------------------------------
+
+        vessel, _ = (
+            Vessel.objects.get_or_create(
+                vessel_name=vessel_name,
+            )
+        )
+
+        # -------------------------------------------------
+        # Register record
+        # -------------------------------------------------
+
+        register_record, record_created = (
+            RightShipRegisterRecord.objects.update_or_create(
+
+                vessel=vessel,
+
+                inspection_date=(
+                    inspection_date
+                ),
+
+                defaults={
+
+                    "high_risk":
+                        high,
+
+                    "medium_risk":
+                        medium,
+
+                    "low_risk":
+                        low,
+
+                    "total_findings":
+                        total,
+
+                    "severity_score":
+                        severity,
+
+                    "validity_months":
+                        validity,
+
+                    "source_row":
+                        row_number,
+                },
+            )
+        )
+
+        if record_created:
+            created += 1
+        else:
+            updated += 1
+
+    return created, updated
 
 
 # =========================================================
@@ -809,7 +1157,8 @@ def inspection_import(request):
             request,
             "inspections/inspection_import.html",
             {
-                "sheet_data": sheet_data,
+                "sheet_data":
+                    sheet_data,
             },
         )
 
@@ -828,7 +1177,8 @@ def inspection_import(request):
             request,
             "inspections/inspection_import.html",
             {
-                "sheet_data": sheet_data,
+                "sheet_data":
+                    sheet_data,
             },
         )
 
@@ -850,9 +1200,35 @@ def inspection_import(request):
             request,
             "inspections/inspection_import.html",
             {
-                "sheet_data": sheet_data,
+                "sheet_data":
+                    sheet_data,
             },
         )
+
+    # =====================================================
+    # GRAPH WORKSHEET
+    # =====================================================
+
+    graph_created, graph_updated = (
+        import_graph_register(
+            workbook
+        )
+    )
+
+    if graph_created or graph_updated:
+
+        messages.success(
+            request,
+            (
+                f"GRAPH register imported: "
+                f"{graph_created} new record(s), "
+                f"{graph_updated} updated record(s)."
+            ),
+        )
+
+    # =====================================================
+    # DETAILED SHEETS
+    # =====================================================
 
     skip_sheets = {
         "Index",
@@ -885,28 +1261,14 @@ def inspection_import(request):
         if not vessel_name:
             continue
 
-        print(
-        "IMPORT DEBUG:",
-        ws.title,
-        "| D3:", ws["D3"].value,
-        "| D4:", ws["D4"].value,
-        "| D5:", ws["D5"].value,
-        "| D6:", ws["D6"].value,
-        "| D7:", ws["D7"].value,
-    )
-
         # =================================================
         # HEADER
         # =================================================
 
         port = ws["D3"].value
-
         inspection_date = ws["D4"].value
-
         inspector = ws["D5"].value
-
         findings = ws["D6"].value
-
         validity_text = ws["D7"].value
 
         # =================================================
@@ -1016,7 +1378,9 @@ def inspection_import(request):
                         inspector or ""
                     ),
 
-                    validity_months=validity,
+                    validity_months=(
+                        validity
+                    ),
 
                     status="OPEN",
 
@@ -1030,7 +1394,9 @@ def inspection_import(request):
 
         else:
 
-            inspection.port = port or ""
+            inspection.port = (
+                port or ""
+            )
 
             inspection.inspector = (
                 inspector or ""
@@ -1082,7 +1448,10 @@ def inspection_import(request):
                 ws[f"D{row}"].value
             )
 
-            # Skip completely empty rows
+            # ---------------------------------------------
+            # Skip empty rows
+            # ---------------------------------------------
+
             if ref_no is None:
                 continue
 
@@ -1109,9 +1478,9 @@ def inspection_import(request):
                 else ""
             )
 
-            # =================================================
-            # RISK FROM EXCEL COLOUR
-            # =================================================
+            # ---------------------------------------------
+            # Risk from Excel colour
+            # ---------------------------------------------
 
             risk_level = (
                 get_risk_from_excel_cell(
@@ -1119,13 +1488,12 @@ def inspection_import(request):
                 )
             )
 
-            # =================================================
-            # CHECKLIST ITEM
-            # =================================================
+            # ---------------------------------------------
+            # Checklist item
+            # ---------------------------------------------
 
             checklist_item, _ = (
-                ChecklistItem.objects
-                .get_or_create(
+                ChecklistItem.objects.get_or_create(
 
                     ref_no=ref_no,
 
@@ -1153,9 +1521,9 @@ def inspection_import(request):
                     ]
                 )
 
-            # =================================================
-            # EXISTING FINDING
-            # =================================================
+            # ---------------------------------------------
+            # Existing finding
+            # ---------------------------------------------
 
             finding = (
                 InspectionFinding.objects
@@ -1166,9 +1534,9 @@ def inspection_import(request):
                 .first()
             )
 
-            # =================================================
-            # NO RECOGNISED COLOUR
-            # =================================================
+            # ---------------------------------------------
+            # Unclassified
+            # ---------------------------------------------
 
             if risk_level is None:
 
@@ -1203,9 +1571,9 @@ def inspection_import(request):
 
                 continue
 
-            # =================================================
+            # ---------------------------------------------
             # CREATE
-            # =================================================
+            # ---------------------------------------------
 
             if finding is None:
 
@@ -1227,9 +1595,9 @@ def inspection_import(request):
                 findings_created += 1
                 total_created += 1
 
-            # =================================================
+            # ---------------------------------------------
             # UPDATE
-            # =================================================
+            # ---------------------------------------------
 
             else:
 
@@ -1269,9 +1637,9 @@ def inspection_import(request):
                     findings_skipped += 1
                     total_skipped += 1
 
-            # =================================================
-            # RISK COUNTS
-            # =================================================
+            # ---------------------------------------------
+            # Risk counts
+            # ---------------------------------------------
 
             if risk_level == "LOW":
 
@@ -1382,185 +1750,958 @@ def inspection_import(request):
         request,
         "inspections/inspection_import.html",
         {
-            "sheet_data": sheet_data,
+            "sheet_data":
+                sheet_data,
         },
     )
 
+
 # =========================================================
-# RIGHTSHIP PERFORMANCE DASHBOARD
+# RIGHTSHIP VESSEL NAME NORMALISATION
+# =========================================================
+
+def build_vessel_alias_map(vessel_names):
+
+    cleaned_names = {
+        " ".join(
+            str(name).split()
+        ).strip()
+
+        for name in vessel_names
+
+        if name
+    }
+
+    lookup = {
+        name.casefold(): name
+        for name in cleaned_names
+    }
+
+    aliases = {}
+
+    for name in cleaned_names:
+
+        match = re.match(
+            r"^(.*?)(?:\s+\d+)$",
+            name,
+        )
+
+        if match:
+
+            base_name = (
+                match.group(1)
+                .strip()
+            )
+
+            real_base_name = (
+                lookup.get(
+                    base_name.casefold()
+                )
+            )
+
+            if real_base_name:
+
+                aliases[name] = (
+                    real_base_name
+                )
+
+                continue
+
+        aliases[name] = name
+
+    return aliases
+
+
+# =========================================================
+# RIGHTSHIP PREFERRED VESSEL ORDER
+# =========================================================
+
+PREFERRED_VESSEL_ORDER = [
+
+    "Edward N",
+    "Julia N",
+    "Daniel N",
+    "Saar N",
+    "Helen N",
+    "Mosel N",
+    "Hugo N",
+    "Steven N",
+    "Abigail N",
+]
+
+
+# =========================================================
+# RIGHTSHIP VESSEL SORT KEY
+# =========================================================
+
+def rightship_vessel_sort_key(
+    vessel_name
+):
+
+    preferred_position = {
+        name.casefold(): index
+
+        for index, name
+
+        in enumerate(
+            PREFERRED_VESSEL_ORDER
+        )
+    }
+
+    return (
+
+        preferred_position.get(
+            vessel_name.casefold(),
+            9999,
+        ),
+
+        vessel_name.casefold(),
+
+    )
+
+
+# =========================================================
+# BUILD RIGHTSHIP INSPECTION ROWS
+# =========================================================
+
+def build_rightship_rows():
+
+    # =====================================================
+    # AUTHORITATIVE GRAPH RECORDS
+    # =====================================================
+
+    graph_records = list(
+        RightShipRegisterRecord.objects
+        .select_related("vessel")
+        .order_by(
+            "source_row"
+        )
+    )
+
+    actual_vessel_names = [
+
+        record.vessel.vessel_name
+
+        for record in graph_records
+
+        if record.vessel
+    ]
+
+    # Also include detailed inspection vessels
+    # so existing detailed records continue to work.
+    detailed_inspections = list(
+
+        Inspection.objects
+        .select_related("vessel")
+        .prefetch_related(
+            "findings__checklist_item"
+        )
+    )
+
+    actual_vessel_names.extend([
+
+        inspection.vessel.vessel_name
+
+        for inspection in detailed_inspections
+
+        if inspection.vessel
+    ])
+
+    vessel_aliases = (
+        build_vessel_alias_map(
+            actual_vessel_names
+        )
+    )
+
+    grouped = defaultdict(list)
+
+    # =====================================================
+    # GRAPH ROWS
+    # =====================================================
+
+    graph_dates = set()
+
+    for record in graph_records:
+
+        if not record.vessel:
+            continue
+
+        raw_vessel_name = (
+            record.vessel.vessel_name
+        )
+
+        vessel_name = (
+            vessel_aliases.get(
+                raw_vessel_name,
+                raw_vessel_name,
+            )
+        )
+
+        graph_dates.add(
+            (
+                record.vessel_id,
+                record.inspection_date,
+            )
+        )
+
+        # Try to find corresponding detailed inspection.
+        detailed_inspection = (
+            Inspection.objects
+            .filter(
+                vessel=record.vessel,
+                inspection_date=record.inspection_date,
+            )
+            .first()
+        )
+
+        report_url = None
+
+        if detailed_inspection:
+
+            report_url = reverse(
+                "rightship_report_detail",
+                args=[
+                    detailed_inspection.id
+                ],
+            )
+
+        year = (
+            record.inspection_date.year
+            if record.inspection_date
+            else None
+        )
+
+        row = {
+
+            "inspection":
+                detailed_inspection,
+
+            "register_record":
+                record,
+
+            "vessel":
+                vessel_name,
+
+            "original_vessel":
+                raw_vessel_name,
+
+            "date":
+                record.inspection_date,
+
+            "year":
+                year,
+
+            "high":
+                record.high_risk,
+
+            "medium":
+                record.medium_risk,
+
+            "low":
+                record.low_risk,
+
+            "total":
+                record.total_findings,
+
+            "severity":
+                record.severity_score,
+
+            "validity":
+                record.validity_months,
+
+            "port":
+                (
+                    detailed_inspection.port
+                    if detailed_inspection
+                    else ""
+                ),
+
+            "inspector":
+                (
+                    detailed_inspection.inspector
+                    if detailed_inspection
+                    else ""
+                ),
+
+            "status":
+                (
+                    detailed_inspection.status
+                    if detailed_inspection
+                    else ""
+                ),
+
+            "report_url":
+                report_url,
+        }
+
+        grouped[
+            vessel_name
+        ].append(row)
+
+    # =====================================================
+    # DETAILED INSPECTIONS NOT PRESENT IN GRAPH
+    #
+    # This preserves the existing application behaviour.
+    # =====================================================
+
+    for inspection in detailed_inspections:
+
+        if not inspection.vessel:
+            continue
+
+        key = (
+            inspection.vessel_id,
+            inspection.inspection_date,
+        )
+
+        if key in graph_dates:
+            continue
+
+        raw_vessel_name = (
+            inspection.vessel.vessel_name
+        )
+
+        vessel_name = (
+            vessel_aliases.get(
+                raw_vessel_name,
+                raw_vessel_name,
+            )
+        )
+
+        findings = list(
+            inspection.findings.all()
+        )
+
+        high = sum(
+
+            1
+
+            for finding in findings
+
+            if str(
+                finding.risk_level
+            ).upper() == "HIGH"
+
+        )
+
+        medium = sum(
+
+            1
+
+            for finding in findings
+
+            if str(
+                finding.risk_level
+            ).upper() == "MEDIUM"
+
+        )
+
+        low = sum(
+
+            1
+
+            for finding in findings
+
+            if str(
+                finding.risk_level
+            ).upper() == "LOW"
+
+        )
+
+        total = (
+            high
+            + medium
+            + low
+        )
+
+        severity = (
+            high * 3
+            + medium * 2
+            + low
+        )
+
+        inspection_date = (
+            inspection.inspection_date
+        )
+
+        year = (
+
+            inspection_date.year
+
+            if inspection_date
+
+            else None
+
+        )
+
+        report_url = reverse(
+            "rightship_report_detail",
+            args=[
+                inspection.id
+            ],
+        )
+
+        row = {
+
+            "inspection":
+                inspection,
+
+            "register_record":
+                None,
+
+            "vessel":
+                vessel_name,
+
+            "original_vessel":
+                raw_vessel_name,
+
+            "date":
+                inspection_date,
+
+            "year":
+                year,
+
+            "high":
+                high,
+
+            "medium":
+                medium,
+
+            "low":
+                low,
+
+            "total":
+                total,
+
+            "severity":
+                severity,
+
+            "validity":
+                inspection.validity_months,
+
+            "port":
+                inspection.port,
+
+            "inspector":
+                inspection.inspector,
+
+            "status":
+                inspection.status,
+
+            "report_url":
+                report_url,
+        }
+
+        grouped[
+            vessel_name
+        ].append(row)
+
+    # =====================================================
+    # SORT EACH VESSEL
+    # Latest inspection FIRST
+    # =====================================================
+
+    for vessel_name in grouped:
+
+        grouped[
+            vessel_name
+        ].sort(
+
+            key=lambda row: (
+
+                row["date"]
+                or date.min,
+
+                (
+                    row["inspection"].id
+                    if row["inspection"]
+                    else 0
+                ),
+
+            ),
+
+            reverse=True,
+        )
+
+    # =====================================================
+    # SORT VESSELS
+    # =====================================================
+
+    ordered_vessels = sorted(
+
+        grouped.keys(),
+
+        key=rightship_vessel_sort_key,
+
+    )
+
+    # =====================================================
+    # FLATTEN
+    # =====================================================
+
+    rows = []
+
+    for vessel_name in ordered_vessels:
+
+        rows.extend(
+            grouped[vessel_name]
+        )
+
+    return rows
+
+
+# =========================================================
+# RIGHTSHIP DASHBOARD
 # =========================================================
 
 @login_required
 def rightship_dashboard(request):
 
-    # =====================================================
-    # BASIC COUNTS
-    # =====================================================
-
-    total_vessels = Vessel.objects.count()
-
-    total_inspections = Inspection.objects.count()
-
-    total_findings = InspectionFinding.objects.count()
+    rows = build_rightship_rows()
 
     # =====================================================
-    # RISK COUNTS
+    # GRAPH DATA
     # =====================================================
 
-    high_risk = InspectionFinding.objects.filter(
-        risk_level="HIGH"
-    ).count()
+    chart_data = []
 
-    medium_risk = InspectionFinding.objects.filter(
-        risk_level="MEDIUM"
-    ).count()
+    for row in rows:
 
-    low_risk = InspectionFinding.objects.filter(
-        risk_level="LOW"
-    ).count()
+        chart_data.append({
+
+            "vessel":
+                row["vessel"],
+
+            "date":
+                (
+                    row["date"].strftime(
+                        "%d-%b-%Y"
+                    )
+
+                    if row["date"]
+
+                    else ""
+                ),
+
+            "year":
+                row["year"],
+
+            "high":
+                row["high"],
+
+            "medium":
+                row["medium"],
+
+            "low":
+                row["low"],
+
+            "total":
+                row["total"],
+
+            "severity":
+                row["severity"],
+
+            "validity":
+                row["validity"] or 0,
+
+            "report_url":
+                row["report_url"],
+        })
 
     # =====================================================
-    # INSPECTION DATA
+    # VESSEL GROUP POSITIONS
     # =====================================================
 
-    inspections = (
-        Inspection.objects
-        .select_related("vessel")
-        .order_by("inspection_date", "id")
+    vessel_groups = []
+
+    current_vessel = None
+    start_index = 0
+
+    for index, row in enumerate(rows):
+
+        if row["vessel"] != current_vessel:
+
+            if current_vessel is not None:
+
+                vessel_groups.append({
+
+                    "vessel":
+                        current_vessel,
+
+                    "start":
+                        start_index,
+
+                    "end":
+                        index - 1,
+                })
+
+            current_vessel = (
+                row["vessel"]
+            )
+
+            start_index = index
+
+    if current_vessel is not None:
+
+        vessel_groups.append({
+
+            "vessel":
+                current_vessel,
+
+            "start":
+                start_index,
+
+            "end":
+                len(rows) - 1,
+        })
+
+    # =====================================================
+    # YEAR KPI DATA
+    # =====================================================
+
+    year_kpis = {}
+
+    for year in [2026, 2025]:
+
+        year_rows = [
+
+            row
+
+            for row in rows
+
+            if row["year"] == year
+
+        ]
+
+        completed = len(
+            year_rows
+        )
+
+        total_findings = sum(
+
+            row["total"]
+
+            for row in year_rows
+
+        )
+
+        high_findings = sum(
+
+            row["high"]
+
+            for row in year_rows
+
+        )
+
+        average_severity = (
+
+            round(
+
+                sum(
+                    row["severity"]
+                    for row in year_rows
+                )
+                / completed,
+
+                1,
+
+            )
+
+            if completed
+
+            else 0
+
+        )
+
+        average_validity = (
+
+            round(
+
+                sum(
+                    row["validity"] or 0
+                    for row in year_rows
+                )
+                / completed,
+
+                1,
+
+            )
+
+            if completed
+
+            else 0
+
+        )
+
+        year_kpis[year] = {
+
+            "completed":
+                completed,
+
+            "total_findings":
+                total_findings,
+
+            "high_findings":
+                high_findings,
+
+            "average_severity":
+                average_severity,
+
+            "average_validity":
+                average_validity,
+        }
+
+    # =====================================================
+    # REPORTS
+    # =====================================================
+
+    reports = rows.copy()
+
+    # =====================================================
+    # GLOBAL COUNTS
+    #
+    # Dashboard register totals come from GRAPH.
+    # =====================================================
+
+    graph_records = list(
+        RightShipRegisterRecord.objects.all()
     )
 
-    inspection_rows = []
+    total_vessels = (
+        Vessel.objects.count()
+    )
 
-    for inspection in inspections:
+    total_inspections = (
+        len(graph_records)
+        if graph_records
+        else Inspection.objects.count()
+    )
 
-        findings = InspectionFinding.objects.filter(
-            inspection=inspection
-        )
+    total_findings = sum(
+        record.total_findings
+        for record in graph_records
+    )
 
-        high = findings.filter(
-            risk_level="HIGH"
-        ).count()
+    high_risk = sum(
+        record.high_risk
+        for record in graph_records
+    )
 
-        medium = findings.filter(
-            risk_level="MEDIUM"
-        ).count()
+    medium_risk = sum(
+        record.medium_risk
+        for record in graph_records
+    )
 
-        low = findings.filter(
-            risk_level="LOW"
-        ).count()
-
-        total = findings.count()
-
-        # -------------------------------------------------
-        # SEVERITY
-        # -------------------------------------------------
-
-        if high > 0:
-            severity = 3
-
-        elif medium > 0:
-            severity = 2
-
-        elif low > 0:
-            severity = 1
-
-        else:
-            severity = 0
-
-        inspection_rows.append(
-            {
-                "inspection": inspection,
-                "vessel": inspection.vessel.vessel_name,
-                "date": inspection.inspection_date,
-                "high": high,
-                "medium": medium,
-                "low": low,
-                "total": total,
-                "severity": severity,
-                "validity": inspection.validity_months,
-            }
-        )
-
-    # =====================================================
-    # CHART DATA
-    # =====================================================
-
-    chart_labels = []
-    high_data = []
-    medium_data = []
-    low_data = []
-    severity_data = []
-    validity_data = []
-
-    for row in inspection_rows:
-
-        inspection_date = row["date"]
-
-        if inspection_date:
-            date_text = inspection_date.strftime(
-                "%d-%b-%y"
-            )
-        else:
-            date_text = ""
-
-        chart_labels.append(
-            f"{row['vessel']} - {date_text}"
-        )
-
-        high_data.append(
-            row["high"]
-        )
-
-        medium_data.append(
-            row["medium"]
-        )
-
-        low_data.append(
-            row["low"]
-        )
-
-        severity_data.append(
-            row["severity"]
-        )
-
-        validity_data.append(
-            row["validity"] or 0
-        )
+    low_risk = sum(
+        record.low_risk
+        for record in graph_records
+    )
 
     # =====================================================
     # CONTEXT
     # =====================================================
 
     context = {
-        "total_vessels": total_vessels,
 
-        "total_inspections": total_inspections,
+        "rows":
+            rows,
 
-        "total_findings": total_findings,
+        "chart_data":
+            chart_data,
 
-        "high_risk": high_risk,
+        "vessel_groups":
+            vessel_groups,
 
-        "medium_risk": medium_risk,
+        "year_kpis":
+            year_kpis,
 
-        "low_risk": low_risk,
+        "reports":
+            reports,
 
-        "inspections_register": inspection_rows,
+        "total_vessels":
+            total_vessels,
 
-        "chart_labels": chart_labels,
+        "total_inspections":
+            total_inspections,
 
-        "high_data": high_data,
+        "total_findings":
+            total_findings,
 
-        "medium_data": medium_data,
+        "high_risk":
+            high_risk,
 
-        "low_data": low_data,
+        "medium_risk":
+            medium_risk,
 
-        "severity_data": severity_data,
-
-        "validity_data": validity_data,
+        "low_risk":
+            low_risk,
     }
 
     return render(
+
         request,
+
         "inspections/dashboard.html",
+
         context,
+
+    )
+
+
+# =========================================================
+# RIGHTSHIP REPORT LIST
+# =========================================================
+
+@login_required
+def rightship_reports(request):
+
+    rows = build_rightship_rows()
+
+    report_groups = {}
+
+    for row in rows:
+
+        vessel_name = (
+            row["vessel"]
+        )
+
+        if vessel_name not in report_groups:
+
+            report_groups[
+                vessel_name
+            ] = []
+
+        report_groups[
+            vessel_name
+        ].append(row)
+
+    return render(
+
+        request,
+
+        "inspections/reports.html",
+
+        {
+            "report_groups":
+                report_groups,
+        },
+
+    )
+
+
+# =========================================================
+# RIGHTSHIP INDIVIDUAL REPORT
+# =========================================================
+
+@login_required
+def rightship_report_detail(
+    request,
+    pk,
+):
+
+    inspection = get_object_or_404(
+
+        Inspection.objects
+        .select_related("vessel")
+        .prefetch_related(
+            "findings__checklist_item"
+        ),
+
+        pk=pk,
+
+    )
+
+    findings = list(
+        inspection.findings.all()
+    )
+
+    # =====================================================
+    # RISK COUNTS
+    # =====================================================
+
+    high = sum(
+
+        1
+
+        for finding in findings
+
+        if str(
+            finding.risk_level
+        ).upper() == "HIGH"
+
+    )
+
+    medium = sum(
+
+        1
+
+        for finding in findings
+
+        if str(
+            finding.risk_level
+        ).upper() == "MEDIUM"
+
+    )
+
+    low = sum(
+
+        1
+
+        for finding in findings
+
+        if str(
+            finding.risk_level
+        ).upper() == "LOW"
+
+    )
+
+    # =====================================================
+    # TOTAL
+    # =====================================================
+
+    total = (
+        high
+        + medium
+        + low
+    )
+
+    # =====================================================
+    # SEVERITY
+    # =====================================================
+
+    severity = (
+        high * 3
+        + medium * 2
+        + low
+    )
+
+    return render(
+
+        request,
+
+        "inspections/report_detail.html",
+
+        {
+            "inspection":
+                inspection,
+
+            "findings":
+                findings,
+
+            "high":
+                high,
+
+            "medium":
+                medium,
+
+            "low":
+                low,
+
+            "total":
+                total,
+
+            "severity":
+                severity,
+        },
+
     )

@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Chemical Effectiveness Report - {{ vessel }}
+    </title>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            background: #07131d;
+
+            color: #eaf4ff;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+        }
+
+
+        .page {
+
+            max-width: 1550px;
+
+            margin: auto;
+
+            padding:
+                28px
+                34px
+                70px;
+
+        }
+
+
+        /* =====================================================
+           TOP
+           ===================================================== */
+
+        .top {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .brand h1 {
+
+            margin: 0;
+
+            font-size: 24px;
+
+        }
+
+
+        .brand p {
+
+            margin:
+                5px
+                0
+                0;
+
+            color: #86a0b2;
+
+            font-size: 12px;
+
+        }
+
+
+        nav {
+
+            display: flex;
+
+            gap: 6px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        nav a {
+
+            color: #91a9bd;
+
+            text-decoration: none;
+
+            padding:
+                9px
+                12px;
+
+            border-radius: 9px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        nav a:hover,
+        nav a.active {
+
+            color: white;
+
+            background: #155d7c;
+
+        }
+
+
+        /* =====================================================
+           CARDS
+           ===================================================== */
+
+        .hero,
+        .card {
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(17,44,66,.94),
+                    rgba(7,23,38,.97)
+                );
+
+            border:
+                1px solid
+                rgba(130,190,230,.14);
+
+            border-radius: 18px;
+
+            box-shadow:
+                0
+                18px
+                45px
+                rgba(0,0,0,.20);
+
+        }
+
+
+        .hero {
+
+            padding: 28px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .eyebrow {
+
+            color: #5ed0e6;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+        }
+
+
+        .hero h2 {
+
+            margin:
+                8px
+                0;
+
+            font-size: 31px;
+
+        }
+
+
+        .hero p {
+
+            color: #91a9bd;
+
+            max-width: 900px;
+
+            line-height: 1.65;
+
+            margin: 0;
+
+        }
+
+
+        /* =====================================================
+           STATUS
+           ===================================================== */
+
+        .status {
+
+            margin-top: 20px;
+
+            padding:
+                17px
+                19px;
+
+            border-radius: 14px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.09);
+
+        }
+
+
+        .status.positive {
+
+            background:
+                rgba(22,163,74,.12);
+
+            border-color:
+                rgba(74,222,128,.22);
+
+        }
+
+
+        .status.warning {
+
+            background:
+                rgba(234,179,8,.10);
+
+            border-color:
+                rgba(250,204,21,.22);
+
+        }
+
+
+        .status.negative {
+
+            background:
+                rgba(220,38,38,.10);
+
+            border-color:
+                rgba(248,113,113,.22);
+
+        }
+
+
+        .status strong {
+
+            font-size: 17px;
+
+        }
+
+
+        .status p {
+
+            margin:
+                8px
+                0
+                0;
+
+            color: #c2d0da;
+
+        }
+
+
+        /* =====================================================
+           GRID / KPI
+           ===================================================== */
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 13px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .metric {
+
+            padding: 18px;
+
+            min-height: 112px;
+
+        }
+
+
+        .metric .label {
+
+            color: #7895a8;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+        }
+
+
+        .metric .value {
+
+            margin-top: 10px;
+
+            font-size: 26px;
+
+            font-weight: 750;
+
+        }
+
+
+        .metric .sub {
+
+            margin-top: 5px;
+
+            color: #7895a8;
+
+            font-size: 11px;
+
+        }
+
+
+        /* =====================================================
+           SECTIONS
+           ===================================================== */
+
+        .section {
+
+            margin:
+                18px
+                0
+                0;
+
+        }
+
+
+        .section-title {
+
+            font-size: 19px;
+
+            margin:
+                0
+                0
+                10px;
+
+        }
+
+
+        .section-note {
+
+            color: #7895a8;
+
+            font-size: 12px;
+
+            margin:
+                0
+                0
+                12px;
+
+            line-height: 1.6;
+
+        }
+
+
+        .two {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr;
+
+            gap: 18px;
+
+        }
+
+
+        .card {
+
+            padding: 21px;
+
+        }
+
+
+        .chart-wrap {
+
+            height: 380px;
+
+        }
+
+
+        /* =====================================================
+           CHART LEGEND
+           ===================================================== */
+
+        .chart-legend {
+
+            display: flex;
+
+            gap: 18px;
+
+            flex-wrap: wrap;
+
+            margin:
+                0
+                0
+                10px;
+
+            color: #9eb2c0;
+
+            font-size: 11px;
+
+        }
+
+
+        .legend-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+        }
+
+
+        .legend-swatch {
+
+            width: 18px;
+
+            height: 10px;
+
+            border-radius: 3px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.18);
+
+        }
+
+
+        .legend-dosing {
+
+            background:
+                rgba(34,197,94,.16);
+
+        }
+
+
+        .legend-nodosing {
+
+            background:
+                rgba(148,163,184,.10);
+
+        }
+
+
+        /* =====================================================
+           TABLE
+           ===================================================== */
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            font-size: 12px;
+
+        }
+
+
+        th,
+        td {
+
+            padding:
+                10px
+                9px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.07);
+
+            text-align: left;
+
+            white-space: nowrap;
+
+        }
+
+
+        th {
+
+            color: #7895a8;
+
+            text-transform: uppercase;
+
+            font-size: 9px;
+
+            letter-spacing: 1px;
+
+        }
+
+
+        td {
+
+            color: #d8e4ec;
+
+        }
+
+
+        .scroll {
+
+            overflow: auto;
+
+            max-height: 470px;
+
+        }
+
+
+        .pill {
+
+            display: inline-block;
+
+            padding:
+                4px
+                8px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(91,192,222,.10);
+
+            color: #8dddf0;
+
+            font-size: 10px;
+
+        }
+
+
+        .good {
+
+            color: #6ee7a0;
+
+            font-weight: 700;
+
+        }
+
+
+        .bad {
+
+            color: #ff8f8f;
+
+            font-weight: 700;
+
+        }
+
+
+        .muted {
+
+            color: #7895a8;
+
+        }
+
+
+        /* =====================================================
+           FINANCE
+           ===================================================== */
+
+        .finance-form {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1fr
+                auto;
+
+            gap: 10px;
+
+            align-items: end;
+
+        }
+
+
+        .field label {
+
+            display: block;
+
+            color: #7895a8;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        input {
+
+            width: 100%;
+
+            background: #091b29;
+
+            color: #eaf4ff;
+
+            border:
+                1px solid
+                #284252;
+
+            border-radius: 9px;
+
+            padding: 11px;
+
+            outline: none;
+
+        }
+
+
+        button,
+        .print {
+
+            border: 0;
+
+            border-radius: 9px;
+
+            padding:
+                11px
+                16px;
+
+            background: #16749a;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            text-decoration: none;
+
+            display: inline-block;
+
+        }
+
+
+        /* =====================================================
+           CALLOUT
+           ===================================================== */
+
+        .callout {
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            background:
+                rgba(255,255,255,.035);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            color: #bdccd6;
+
+            line-height: 1.6;
+
+            font-size: 12px;
+
+        }
+
+
+        .decision-box {
+
+            margin-top: 14px;
+
+            padding: 16px;
+
+            border-radius: 12px;
+
+            background:
+                rgba(234,179,8,.08);
+
+            border:
+                1px solid
+                rgba(250,204,21,.18);
+
+            line-height: 1.65;
+
+            color: #d4e0e7;
+
+            font-size: 12px;
+
+        }
+
+
+        .footer-note {
+
+            color: #6e8798;
+
+            font-size: 10px;
+
+            line-height: 1.6;
+
+            margin-top: 16px;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media(max-width:1100px) {
+
+            .grid {
+
+                grid-template-columns:
+                    repeat(2,1fr);
+
+            }
+
+
+            .two {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+        }
+
+
+        @media(max-width:700px) {
+
+            .page {
+
+                padding: 18px;
+
+            }
+
+
+            .top {
+
+                align-items: flex-start;
+
+                flex-direction: column;
+
+            }
+
+
+            .grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .finance-form {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           PRINT
+           ===================================================== */
+
+        @media print {
+
+            body,
+            body * {
+                color: #000 !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .page {
+                max-width: none;
+                padding: 0;
+            }
+
+            .hero,
+            .card {
+                color: #000 !important;
+                box-shadow: none;
+                border: 1px solid #ddd;
+                background: white !important;
+            }
+
+            nav,
+            .finance-form,
+            .print {
+                display: none !important;
+            }
+
+            .section {
+                break-inside: avoid;
+            }
+
+            .hero p {
+                font-size: 16px !important;
+                line-height: 1.65 !important;
+            }
+
+            .hero p[style] {
+                font-size: 15px !important;
+            }
+
+            .status strong {
+                font-size: 18px !important;
+            }
+
+            .status p {
+                font-size: 16px !important;
+                line-height: 1.6 !important;
+            }
+
+            .section-title {
+                font-size: 22px !important;
+            }
+
+            .section-note {
+                color: #000 !important;
+                font-size: 15px !important;
+                line-height: 1.65 !important;
+            }
+
+            .metric .label {
+                font-size: 14px !important;
+            }
+
+            .metric .value {
+                font-size: 26px !important;
+            }
+
+            .metric .sub {
+                font-size: 14px !important;
+                line-height: 1.5 !important;
+            }
+
+            table {
+                font-size: 14px !important;
+            }
+
+            th {
+                font-size: 12px !important;
+            }
+
+            td {
+                font-size: 14px !important;
+            }
+
+            th,
+            td {
+                border-color: #ddd !important;
+                color: #000 !important;
+            }
+
+            .pill {
+                font-size: 12px !important;
+            }
+
+            .chart-legend {
+                font-size: 13px !important;
+            }
+
+            .callout {
+                color: #000 !important;
+                font-size: 16px !important;
+                line-height: 1.7 !important;
+            }
+
+            .decision-box {
+                color: #000 !important;
+                font-size: 16px !important;
+                line-height: 1.7 !important;
+            }
+
+            .management-conclusion .callout,
+            .management-conclusion .decision-box {
+                font-size: 17px !important;
+                line-height: 1.75 !important;
+            }
+
+            .footer-note {
+                color: #000 !important;
+                font-size: 16px !important;
+                line-height: 1.65 !important;
+            }
+
+            .muted {
+                color: #000 !important;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- =====================================================
+         NAVIGATION
+         ===================================================== -->
+
+    <div class="top">
+
+        <div class="brand">
+
+            <h1>
+                ⚓ Chemical Effectiveness Report
+            </h1>
+
+            <p>
+                Management assessment ·
+                {{ vessel }} ·
+                Current trial assessment
+            </p>
+
+        </div>
+
+
+        <nav>
+
+            <a
+                href="{% url 'chemical_analysis:dashboard' %}?vessel={{ vessel }}"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="{% url 'chemical_analysis:performance_analysis' %}?vessel={{ vessel }}"
+            >
+                Performance
+            </a>
+
+
+            <a
+                href="{% url 'chemical_analysis:effectiveness' %}?vessel={{ vessel }}"
+                class="active"
+            >
+                Effectiveness
+            </a>
+
+
+            <a
+                href="{% url 'chemical_analysis:history' %}?vessel={{ vessel }}"
+            >
+                History
+            </a>
+
+
+            <a
+                href="{% url 'chemical_analysis:upload' %}"
+            >
+                Data Import
+            </a>
+
+        </nav>
+
+    </div>
+
+
+    {% if error %}
+
+
+        <!-- =================================================
+             ERROR
+             ================================================= -->
+
+        <div class="hero">
+
+            <h2>
+                Unable to generate report
+            </h2>
+
+            <p>
+                {{ error }}
+            </p>
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             EXECUTIVE ASSESSMENT
+             ================================================= -->
+
+        <section class="hero">
+
+            <div class="eyebrow">
+                Executive assessment
+            </div>
+
+
+            <h2>
+                Does the additive demonstrate a meaningful
+                fuel-saving benefit?
+            </h2>
+
+
+            <p>
+
+                This is a current-trial assessment based on
+                the data available to date.
+
+                The raw dosing/non-dosing comparison is shown
+                for context, but the operating-condition-matched
+                result is the primary effectiveness measure.
+
+                Raw fuel consumption in kg/h is not used as
+                evidence of savings because it changes with
+                engine load and power.
+
+            </p>
+
+
+            <p
+                style="
+                    margin-top:10px;
+                    color:#7895a8;
+                    font-size:12px;
+                "
+            >
+
+                Observation period:
+
+                <strong
+                    style="color:#c2d0da;"
+                >
+
+                    {{ report.observation.start }}
+
+                    –
+
+                    {{ report.observation.end }}
+
+                </strong>
+
+                ·
+
+                {{ report.observation.days }}
+                daily observations
+
+            </p>
+
+
+            <div
+                class="
+                    status
+                    {{ report.status_level }}
+                "
+            >
+
+                <strong>
+
+                    {{ report.status_icon }}
+
+                    {{ report.status }}
+
+                </strong>
+
+
+                <p>
+                    {{ report.recommendation }}
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             KPI CARDS
+             ================================================= -->
+
+        <div class="grid">
+
+
+            <div class="card metric">
+
+                <div class="label">
+                    Raw SFOC improvement
+                </div>
+
+
+                <div class="value">
+
+                    {{ report.raw.improvement|default:"—" }}%
+
+                </div>
+
+
+                <div class="sub">
+
+                    Dosing
+                    {{ report.raw.dosing_sfoc|default:"—" }}
+
+                    vs no dosing
+
+                    {{ report.raw.no_dosing_sfoc|default:"—" }}
+
+                    g/kWh
+
+                </div>
+
+            </div>
+
+
+            <div class="card metric">
+
+                <div class="label">
+                    Adjusted SFOC effect
+                </div>
+
+
+                <div class="value">
+
+                    {{ report.normalized.improvement|default:"—" }}%
+
+                </div>
+
+
+                <div class="sub">
+
+                    Primary decision metric after
+                    operating-condition matching
+
+                </div>
+
+            </div>
+
+
+            <div class="card metric">
+
+                <div class="label">
+                    Matched observations
+                </div>
+
+
+                <div class="value">
+
+                    {{ report.normalized.matched }}
+
+                </div>
+
+
+                <div class="sub">
+
+                    {{ report.normalized.rejected }}
+                    rejected ·
+
+                    {{ report.normalized.match_rate|default:"—" }}%
+                    match rate
+
+                </div>
+
+            </div>
+
+
+            <div class="card metric">
+
+                <div class="label">
+                    Additive used
+                </div>
+
+
+                <div class="value">
+
+                    {{ report.dosing.total_additive|default:"0" }}
+                    L
+
+                </div>
+
+
+                <div class="sub">
+
+                    {{ report.dosing.days }}
+                    dosing days
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RAW VS NORMALIZED
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                With additive vs without additive
+
+            </h3>
+
+
+            <p class="section-note">
+
+                This comparison deliberately separates the
+                raw observation from the operating-condition-
+                normalized comparison.
+
+            </p>
+
+
+            <div class="two">
+
+
+                <div class="card">
+
+                    <div class="chart-wrap">
+
+                        <canvas
+                            id="comparisonChart"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <table>
+
+                        <tr>
+
+                            <th>
+                                Measure
+                            </th>
+
+                            <th>
+                                Value
+                            </th>
+
+                            <th>
+                                Meaning
+                            </th>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Without additive
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ report.raw.no_dosing_sfoc|default:"—" }}
+
+                                    g/kWh
+
+                                </strong>
+
+                            </td>
+
+                            <td class="muted">
+                                Raw average
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                With additive
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ report.raw.dosing_sfoc|default:"—" }}
+
+                                    g/kWh
+
+                                </strong>
+
+                            </td>
+
+                            <td class="muted">
+                                Raw average
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Matched baseline
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ report.normalized.baseline_sfoc|default:"—" }}
+
+                                    g/kWh
+
+                                </strong>
+
+                            </td>
+
+                            <td class="muted">
+
+                                Expected under
+                                similar conditions
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Normalized dosing
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ report.normalized.dosing_sfoc|default:"—" }}
+
+                                    g/kWh
+
+                                </strong>
+
+                            </td>
+
+                            <td class="muted">
+
+                                Matched dosing result
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Adjusted effect
+                            </td>
+
+                            <td
+                                class="
+                                    {% if report.normalized.improvement > 0 %}
+                                        good
+                                    {% elif report.normalized.improvement < 0 %}
+                                        bad
+                                    {% endif %}
+                                "
+                            >
+
+                                {{ report.normalized.improvement|default:"—" }}%
+
+                            </td>
+
+                            <td class="muted">
+
+                                Primary decision metric
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+
+                    <div
+                        class="callout"
+                        style="margin-top:15px;"
+                    >
+
+                        <strong>
+                            Management interpretation:
+                        </strong>
+
+                        based on the data available to date,
+
+                        <strong>
+                            no meaningful fuel-saving benefit
+                            has been demonstrated after correcting
+                            for operating conditions
+                        </strong>.
+
+                        The adjusted difference of
+
+                        <strong>
+                            {{ report.normalized.improvement|default:"—" }}%
+                        </strong>
+
+                        is below the level that would justify
+                        claiming a proven fuel saving.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SFOC TREND
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                SFOC trend and dosing periods
+
+            </h3>
+
+
+            <p class="section-note">
+
+                Green shaded periods indicate days when additive
+                dosing was recorded; grey periods indicate
+                no dosing.
+
+                The line shows daily SFOC.
+
+                Low-load, port and incomplete days should not
+                be interpreted as chemical performance evidence.
+
+            </p>
+
+
+            <div class="card">
+
+
+                <div class="chart-legend">
+
+
+                    <span class="legend-item">
+
+                        <span
+                            class="
+                                legend-swatch
+                                legend-dosing
+                            "
+                        ></span>
+
+                        Additive dosing period
+
+                    </span>
+
+
+                    <span class="legend-item">
+
+                        <span
+                            class="
+                                legend-swatch
+                                legend-nodosing
+                            "
+                        ></span>
+
+                        No-dosing period
+
+                    </span>
+
+
+                    <span class="legend-item">
+
+                        <strong>
+                            Line
+                        </strong>
+
+                        Daily SFOC
+
+                    </span>
+
+                </div>
+
+
+                <div class="chart-wrap">
+
+                    <canvas
+                        id="trendChart"
+                    ></canvas>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EVIDENCE QUALITY
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+                Evidence quality
+            </h3>
+
+
+            <div class="grid">
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Operating-condition
+                        match quality
+
+                    </div>
+
+
+                    <div
+                        class="value"
+                        style="font-size:21px;"
+                    >
+
+                        {{ report.normalized.quality }}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Similarity of paired operating
+                        conditions only
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+                        Mean pair difference
+                    </div>
+
+
+                    <div class="value">
+
+                        {{ report.normalized.mean_pair_difference|default:"—" }}
+
+                    </div>
+
+
+                    <div class="sub">
+                        g/kWh
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+                        Median pair difference
+                    </div>
+
+
+                    <div class="value">
+
+                        {{ report.normalized.median_pair_difference|default:"—" }}
+
+                    </div>
+
+
+                    <div class="sub">
+                        g/kWh
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+                        Indicative 95% range
+                    </div>
+
+
+                    <div
+                        class="value"
+                        style="font-size:20px;"
+                    >
+
+                        {% if report.normalized.ci_low != None %}
+
+                            {{ report.normalized.ci_low }}
+
+                            to
+
+                            {{ report.normalized.ci_high }}%
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Pair-level range;
+                        not a formal statistical test
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             OPERATING CONDITIONS
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                Operating-condition context
+
+            </h3>
+
+
+            <div class="card">
+
+
+                <table>
+
+                    <tr>
+
+                        <th></th>
+
+                        <th>
+                            With additive
+                        </th>
+
+                        <th>
+                            Without additive
+                        </th>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            SFOC
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.dosing_sfoc|default:"—" }}
+
+                            g/kWh
+
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.no_dosing_sfoc|default:"—" }}
+
+                            g/kWh
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Average power
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.dosing_power|default:"—" }}
+
+                            kW
+
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.no_dosing_power|default:"—" }}
+
+                            kW
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Average speed
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.dosing_speed|default:"—" }}
+
+                            kn
+
+                        </td>
+
+                        <td>
+
+                            {{ report.operating.no_dosing_speed|default:"—" }}
+
+                            kn
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <p class="footer-note">
+
+                    The raw fuel-consumption comparison is
+                    intentionally not used for the effectiveness
+                    decision because different power/load levels
+                    can produce different kg/h consumption even
+                    when engine efficiency is unchanged.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FINANCIAL ASSESSMENT
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                Financial assessment
+
+            </h3>
+
+
+            <p class="section-note">
+
+                Optional scenario calculation only.
+
+                It illustrates the commercial impact if the
+                observed adjusted effect were real and repeatable.
+
+                It does not establish actual savings or ROI.
+
+                Annualized figures use the observed dosing
+                frequency rather than assuming additive use
+                every day.
+
+            </p>
+
+
+            <!-- Financial inputs -->
+
+            <div class="card">
+
+
+                <form
+                    class="finance-form"
+                    method="get"
+                >
+
+
+                    <input
+                        type="hidden"
+                        name="vessel"
+                        value="{{ vessel }}"
+                    >
+
+
+                    <div class="field">
+
+                        <label>
+                            Fuel price (€/tonne)
+                        </label>
+
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            name="fuel_price"
+                            value="{{ fuel_price }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Additive price (€/L)
+                        </label>
+
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            name="additive_price"
+                            value="{{ additive_price }}"
+                        >
+
+                    </div>
+
+
+                    <button type="submit">
+
+                        Calculate
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- =================================================
+                 TRIAL SCENARIO
+                 ================================================= -->
+
+            <div
+                style="
+                    margin-top:18px;
+                    margin-bottom:8px;
+                    color:#9eb2c0;
+                    font-size:11px;
+                    font-weight:700;
+                    text-transform:uppercase;
+                    letter-spacing:1px;
+                "
+            >
+
+                Observed trial scenario
+
+            </div>
+
+
+            <div class="grid">
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Illustrative trial fuel saving
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {{ report.financial.trial_fuel_saved_t|default:"—" }}
+
+                        t
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Based on
+                        {{ report.dosing.days }}
+                        dosing days
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Illustrative fuel value
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.trial_fuel_saving_eur != None %}
+
+                            €
+                            {{ report.financial.trial_fuel_saving_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Requires fuel price
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Additive cost
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.trial_additive_cost_eur != None %}
+
+                            €
+                            {{ report.financial.trial_additive_cost_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        {{ report.dosing.total_additive|default:"0" }}
+                        L used
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Illustrative net effect
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.trial_net_eur != None %}
+
+                            €
+                            {{ report.financial.trial_net_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Scenario only —
+                        not proven saving
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ANNUALIZED SCENARIO
+                 ================================================= -->
+
+            <div
+                style="
+                    margin-top:18px;
+                    margin-bottom:8px;
+                    color:#9eb2c0;
+                    font-size:11px;
+                    font-weight:700;
+                    text-transform:uppercase;
+                    letter-spacing:1px;
+                "
+            >
+
+                Illustrative annualized scenario
+
+            </div>
+
+
+            <div class="grid">
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Annualized potential fuel saving
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.annual_fuel_saved_t != None %}
+
+                            {{ report.financial.annual_fuel_saved_t }}
+                            t
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Based on approximately
+
+                        {{ report.financial.annual_dosing_days }}
+
+                        dosing days/year
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Annualized potential fuel value
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.annual_fuel_saving_eur != None %}
+
+                            €
+                            {{ report.financial.annual_fuel_saving_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Requires fuel price
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Annualized additive cost
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.annual_additive_cost_eur != None %}
+
+                            €
+                            {{ report.financial.annual_additive_cost_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Based on observed dosing frequency
+
+                    </div>
+
+                </div>
+
+
+                <div class="card metric">
+
+                    <div class="label">
+
+                        Annualized potential net effect
+
+                    </div>
+
+
+                    <div class="value">
+
+                        {% if report.financial.annual_net_eur != None %}
+
+                            €
+                            {{ report.financial.annual_net_eur }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="sub">
+
+                        Illustrative only —
+                        not proven ROI
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="callout">
+
+                <strong>
+                    Important:
+                </strong>
+
+                The financial figures above are scenario
+                calculations based on the adjusted SFOC effect.
+
+                Because the adjusted effect has not been
+                demonstrated as a meaningful and statistically
+                robust fuel saving, these figures must not be
+                presented to management as guaranteed savings
+                or confirmed ROI.
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MATCHED OBSERVATIONS
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                Matched observations
+
+            </h3>
+
+
+            <div class="card scroll">
+
+
+                <table>
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Dosing date
+                            </th>
+
+                            <th>
+                                Baseline date
+                            </th>
+
+                            <th>
+                                Voyage
+                            </th>
+
+                            <th>
+                                Dosing SFOC
+                            </th>
+
+                            <th>
+                                Baseline SFOC
+                            </th>
+
+                            <th>
+                                Effect
+                            </th>
+
+                            <th>
+                                Load Δ
+                            </th>
+
+                            <th>
+                                Power Δ
+                            </th>
+
+                            <th>
+                                Quality
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    {% for row in report.match_rows %}
+
+
+                        <tr>
+
+
+                            <td>
+                                {{ row.dosing_date }}
+                            </td>
+
+
+                            <td>
+                                {{ row.baseline_date }}
+                            </td>
+
+
+                            <td>
+                                {{ row.voyage }}
+                            </td>
+
+
+                            <td>
+                                {{ row.dosing_sfoc }}
+                            </td>
+
+
+                            <td>
+                                {{ row.baseline_sfoc }}
+                            </td>
+
+
+                            <td
+                                class="
+                                    {% if row.sfoc_improvement > 0 %}
+                                        good
+                                    {% elif row.sfoc_improvement < 0 %}
+                                        bad
+                                    {% endif %}
+                                "
+                            >
+
+                                {{ row.sfoc_improvement }}%
+
+                            </td>
+
+
+                            <td>
+                                {{ row.load_difference }}
+                            </td>
+
+
+                            <td>
+                                {{ row.power_difference }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="pill">
+
+                                    {{ row.match_quality }}
+
+                                </span>
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% empty %}
+
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                class="muted"
+                            >
+
+                                No matched observations
+                                available.
+
+                            </td>
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DOSING TIMELINE
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h3 class="section-title">
+
+                Dosing and operational timeline
+
+            </h3>
+
+
+            <div class="card scroll">
+
+
+                <table>
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Additive (L)
+                            </th>
+
+                            <th>
+                                Operational remark
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    {% for row in report.timeline %}
+
+
+                        <tr>
+
+
+                            <td>
+                                {{ row.date }}
+                            </td>
+
+
+                            <td>
+                                {{ row.status }}
+                            </td>
+
+
+                            <td>
+                                {{ row.additive }}
+                            </td>
+
+
+                            <td
+                                style="
+                                    white-space:normal;
+                                    min-width:450px;
+                                "
+                            >
+
+                                {{ row.remarks }}
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% empty %}
+
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="muted"
+                            >
+
+                                No dosing timeline remarks
+                                available.
+
+                            </td>
+
+                        </tr>
+
+
+                    {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <div class="management-conclusion"></div>
+        <!-- =================================================
+             MANAGEMENT CONCLUSION
+             ================================================= -->
+
+        <section class="section">
+
+
+            <h2 class="section-title">
+
+                Management conclusion
+
+            </h2>
+
+
+            <div class="card">
+
+
+                <div class="callout">
+
+
+                    The current analysis shows a
+
+                    <strong>
+
+                        {{ report.raw.improvement|default:"—" }}%
+
+                    </strong>
+
+                    raw SFOC difference during dosing,
+
+                    but only
+
+                    <strong>
+
+                        {{ report.normalized.improvement|default:"—" }}%
+
+                    </strong>
+
+                    after operating-condition matching.
+
+
+                    With
+
+                    <strong>
+
+                        {{ report.normalized.matched }}
+
+                    </strong>
+
+                    matched observations and
+
+                    <strong>
+
+                        {{ report.normalized.rejected }}
+
+                    </strong>
+
+                    rejected observations,
+
+                    the present dataset does
+
+                    <strong>
+
+                        not demonstrate a meaningful
+                        fuel-saving benefit attributable
+                        to the additive
+
+                    </strong>.
+
+
+                    The appropriate current decision is therefore
+
+                    <strong>
+
+                        NO DEMONSTRATED FUEL-SAVING BENEFIT —
+                        MORE DATA REQUIRED
+
+                    </strong>.
+
+
+                    This does not prove that the additive has
+                    zero effect; it means that a meaningful
+                    effect has not been demonstrated with the
+                    evidence available to date.
+
+                </div>
+
+
+                <div class="decision-box">
+
+
+                    <strong>
+                        Recommended management action:
+                    </strong>
+
+
+                    The additive should not be continued on the
+                    basis of fuel savings alone at this stage.
+
+
+                    If there is a separate operational reason
+                    to continue the trial, continue it as a
+                    controlled data-collection exercise and
+                    collect additional dosing/non-dosing
+                    observations at comparable engine load,
+                    power, speed and voyage conditions.
+
+
+                    Once sufficient controlled observations are
+                    available, reassess the adjusted SFOC effect,
+                    statistical evidence and net financial case
+                    before making a permanent continue/stop
+                    decision.
+
+                </div>
+
+
+                <p class="footer-note">
+
+                    Recommended next step:
+
+                    if the trial continues, collect additional
+                    controlled dosing/non-dosing observations
+                    at comparable engine loads, power, speed
+                    and voyage conditions.
+
+                    Then reassess the adjusted SFOC effect,
+                    statistical evidence and net financial case
+                    before making a permanent continue/stop
+                    decision.
+
+                </p>
+
+
+                <a
+                    href="javascript:window.print()"
+                    class="print"
+                >
+
+                    Print / Save as PDF
+
+                </a>
+
+            </div>
+
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             METHOD NOTE
+             ================================================= -->
+
+        <p class="footer-note">
+
+            Method note:
+
+            this report uses the existing vessel analysis and
+            operating-condition matching engine.
+
+            Raw comparisons are descriptive; matched
+            comparisons are the primary effectiveness measure.
+
+            The indicative 95% range is a simple pair-level
+            estimate and is not a formal statistical
+            significance test.
+
+            Financial figures are illustrative scenarios and
+            must not be presented as guaranteed savings.
+
+        </p>
+
+
+    {% endif %}
+
+</div>
+
+
+{% if not error %}
+
+
+{{ report.comparison_chart|json_script:"comparison-data" }}
+
+{{ report.daily_chart|json_script:"daily-data" }}
+
+
+<script>
+
+
+/* =========================================================
+   DATA
+   ========================================================= */
+
+
+const comparison = JSON.parse(
+    document
+        .getElementById("comparison-data")
+        .textContent
+);
+
+
+const daily = JSON.parse(
+    document
+        .getElementById("daily-data")
+        .textContent
+);
+
+
+
+/* =========================================================
+   COMPARISON CHART
+   ========================================================= */
+
+
+new Chart(
+
+    document.getElementById(
+        "comparisonChart"
+    ),
+
+    {
+
+        type: "bar",
+
+        data: {
+
+            labels:
+                comparison.map(
+                    item => item.label
+                ),
+
+            datasets: [
+
+                {
+
+                    label:
+                        "SFOC (g/kWh)",
+
+                    data:
+                        comparison.map(
+                            item => item.sfoc
+                        ),
+
+                    borderWidth: 1,
+
+                    borderRadius: 7
+
+                }
+
+            ]
+
+        },
+
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+
+            plugins: {
+
+                legend: {
+
+                    display: false
+
+                }
+
+            },
+
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: false,
+
+                    title: {
+
+                        display: true,
+
+                        text:
+                            "SFOC (g/kWh)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================================================
+   DOSING PERIOD BACKGROUND PLUGIN
+   ========================================================= */
+
+
+const periodHighlightPlugin = {
+
+    id:
+        "periodHighlight",
+
+
+    beforeDraw(chart) {
+
+        const {
+            ctx,
+            chartArea
+        } = chart;
+
+
+        if (!chartArea) {
+
+            return;
+
+        }
+
+
+        const meta =
+            chart.getDatasetMeta(0);
+
+
+        if (
+            !meta ||
+            !meta.data ||
+            !meta.data.length
+        ) {
+
+            return;
+
+        }
+
+
+        ctx.save();
+
+
+        for (
+            let i = 0;
+            i < meta.data.length;
+            i++
+        ) {
+
+
+            const point =
+                meta.data[i];
+
+
+            const previous =
+                meta.data[i - 1];
+
+
+            const next =
+                meta.data[i + 1];
+
+
+            const status =
+                daily[i]?.dosing;
+
+
+            const left =
+                i === 0
+                    ? chartArea.left
+                    : (
+                        previous.x
+                        + point.x
+                    ) / 2;
+
+
+            const right =
+                i === meta.data.length - 1
+                    ? chartArea.right
+                    : (
+                        point.x
+                        + next.x
+                    ) / 2;
+
+
+            /*
+             * Green:
+             * additive dosing
+             *
+             * Grey:
+             * no dosing
+             */
+
+            ctx.fillStyle =
+                status === "Dosing"
+
+                    ? "rgba(34,197,94,0.10)"
+
+                    : "rgba(148,163,184,0.055)";
+
+
+            ctx.fillRect(
+
+                left,
+
+                chartArea.top,
+
+                right - left,
+
+                chartArea.bottom
+                - chartArea.top
+
+            );
+
+        }
+
+
+        ctx.restore();
+
+    }
+
+};
+
+
+Chart.register(
+    periodHighlightPlugin
+);
+
+
+
+/* =========================================================
+   DAILY SFOC TREND
+   ========================================================= */
+
+
+new Chart(
+
+    document.getElementById(
+        "trendChart"
+    ),
+
+    {
+
+        type: "line",
+
+
+        data: {
+
+            labels:
+                daily.map(
+                    item => item.date
+                ),
+
+
+            datasets: [
+
+                {
+
+                    label:
+                        "Daily SFOC",
+
+
+                    data:
+                        daily.map(
+                            item => item.sfoc
+                        ),
+
+
+                    tension:
+                        0.25,
+
+
+                    pointRadius:
+                        3,
+
+
+                    pointHoverRadius:
+                        5,
+
+
+                    borderWidth:
+                        2,
+
+
+                    /*
+                     * Colour line segments
+                     * based on dosing status.
+                     */
+
+                    segment: {
+
+                        borderColor:
+                            context => {
+
+                                const status =
+                                    daily[
+                                        context
+                                            .p0DataIndex
+                                    ]?.dosing;
+
+
+                                return (
+                                    status
+                                    === "Dosing"
+                                )
+
+                                    ? "#22c55e"
+
+                                    : "#8fa5b5";
+
+                            }
+
+                    },
+
+
+                    /*
+                     * Colour points
+                     */
+
+                    pointBackgroundColor:
+
+                        daily.map(
+                            item =>
+
+                                item.dosing
+                                === "Dosing"
+
+                                    ? "#22c55e"
+
+                                    : "#8fa5b5"
+                        ),
+
+
+                    pointBorderColor:
+
+                        daily.map(
+                            item =>
+
+                                item.dosing
+                                === "Dosing"
+
+                                    ? "#22c55e"
+
+                                    : "#8fa5b5"
+                        )
+
+                }
+
+            ]
+
+        },
+
+
+        options: {
+
+            responsive:
+                true,
+
+
+            maintainAspectRatio:
+                false,
+
+
+            interaction: {
+
+                mode:
+                    "index",
+
+                intersect:
+                    false
+
+            },
+
+
+            plugins: {
+
+                legend: {
+
+                    display:
+                        false
+
+                },
+
+
+                tooltip: {
+
+                    callbacks: {
+
+                        afterLabel:
+                            function(context) {
+
+                                const row =
+                                    daily[
+                                        context
+                                            .dataIndex
+                                    ];
+
+
+                                return row
+
+                                    ? (
+                                        "Status: "
+                                        + row.dosing
+                                    )
+
+                                    : "";
+
+                            }
+
+                    }
+
+                }
+
+            },
+
+
+            scales: {
+
+                y: {
+
+                    title: {
+
+                        display:
+                            true,
+
+                        text:
+                            "SFOC (g/kWh)"
+
+                    }
+
+                },
+
+
+                x: {
+
+                    ticks: {
+
+                        maxRotation:
+                            60,
+
+                        minRotation:
+                            45
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+</script>
+
+
+{% endif %}
+
+
+</body>
+
+</html>

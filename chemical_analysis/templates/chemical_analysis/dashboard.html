@@ -1615,6 +1615,20 @@
         Performance Analysis
     </a>
 
+    <a 
+        href="{% url 'chemical_analysis:power_sfoc' %}?vessel={{ vessel }}"
+        class="nav-link"
+    >
+        SFOC vs Power
+    </a>
+
+    <a
+        href="{% url 'chemical_analysis:effectiveness' %}?vessel={{ vessel }}"
+        class="nav-link"
+>
+        Effectiveness
+    </a>
+
     <a
         href="{% url 'chemical_analysis:history' %}?vessel={{ vessel }}"
         class="nav-link"

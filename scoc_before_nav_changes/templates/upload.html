@@ -1,0 +1,45 @@
+{% extends "scoc_monitoring/base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>SCoC Monitoring</h1>
+    <p>Import vessel performance data from the Excel noon report.</p>
+</div>
+
+<div class="card">
+    <h2>Upload Performance Excel</h2>
+
+    {% if error %}
+    <div class="alert alert-danger mb-3">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="margin-bottom:20px;">
+            <label for="vessel" style="display:block;font-weight:600;margin-bottom:8px;">Vessel</label>
+            <select id="vessel" name="vessel" required style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:white;">
+                <option value="">Select Vessel</option>
+                {% for vessel in vessels %}
+                    <option value="{{ vessel.id }}">{{ vessel.vessel_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label for="noon_report_message" style="display:block;font-weight:600;margin-bottom:8px;">Noon Report Message</label>
+            <textarea id="noon_report_message" name="noon_report_message" rows="14" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-family:monospace;font-size:13px;resize:vertical;" placeholder="Paste the noon report message here if required...\n\nExample:\n\nDATE: 27-Aug-2026\nFROM: Singapore\nTO: Rotterdam\nLOAD TYPE: LADEN\nVOYAGE: V123\nAVERAGE SPEED: 10.5\nME CONSUMPTION: 58.4\nDISTANCE SAILED: 252\nDISTANCE TO GO: 4850\nME RUNNING HOURS: 24\nHSFO ROB: 1250\nLSFO ROB: 80\nMGO ROB: 45\nME POWER: 9000\nRPM: 52.7\nENGINE LOAD: 39.6%\nSCoC: 1.076\nCYLINDER OIL CONSUMPTION: 250\nTARGET SPEED: 10.5\nTARGET CONSUMPTION: 58.0"></textarea>
+            <p style="color:#64748b;font-size:13px;line-height:1.6;margin-top:8px;">The Excel file is the primary source. The noon report message is supplementary and is used only to fill information missing from the Excel data for the same report date.</p>
+        </div>
+
+        <div class="upload-box">
+            <p>Select the vessel performance Excel file.</p>
+            <p style="color:#64748b;font-size:13px;line-height:1.6;">The importer can read, when available: Reported Time, Voyage / Leg, Load Condition, Departure, Destination, Speed, ME Consumption, ME Cons / 24 hrs, Distance, Distance To Go, Running Hours, HSFO ROB, LSFO ROB, MGO ROB, ME Power, RPM, Engine Load, SCoC, Cylinder Oil, and target values.</p>
+            <p style="color:#64748b;font-size:13px;line-height:1.6;">No fuel quantity, target, voyage, load condition, speed or consumption value is invented when it is unavailable in the source data.</p>
+            <input type="file" name="file" accept=".xlsx,.xls,.xlsm" required>
+            <br><br>
+            <button type="submit" class="button">Upload &amp; Import</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
